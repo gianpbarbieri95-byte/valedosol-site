@@ -1,0 +1,391 @@
+import type { Metadata } from "next";
+
+import { SITE, STORAGE_BUCKETS } from "@/lib/site";
+import {
+  PATH_PROFILES,
+  PROFILE_DEFINITIONS,
+  SHORTCUT_PROFILES,
+} from "@/lib/profiles";
+import { whatsappUrl } from "@/lib/format";
+import { getSettings } from "@/lib/queries/settings";
+import {
+  getCities,
+  getNeighborhoods,
+  getPropertyTypes,
+  getRegions,
+} from "@/lib/queries/taxonomies";
+import {
+  getPriceRange,
+  getPropertyCounts,
+  getRegionCovers,
+  getShowcaseProperties,
+  searchProperties,
+} from "@/lib/queries/properties";
+import { storageUrl } from "@/lib/supabase/public";
+import { buildPriceBands } from "@/lib/price-bands";
+
+import { PropertySearch } from "@/components/property/property-search";
+import { propertyCoverUrl } from "@/components/property/property-card";
+import { ButtonLink } from "@/components/ui/button";
+import { Reveal } from "@/components/ui/reveal";
+import { HeroFilm } from "@/components/brand-film";
+import { FeaturedProperties } from "@/components/home/featured-properties";
+import { SearchPaths } from "@/components/home/search-paths";
+import { HistorySection } from "@/components/home/history-section";
+import { AboutSection } from "@/components/home/about-section";
+import { LocalKnowledge } from "@/components/home/local-knowledge";
+import { CTASection } from "@/components/home/cta-section";
+import { Shortcuts } from "@/components/home/shortcuts";
+
+// Tudo o que aparece escrito no filme, na ordem, para quem usa leitor de tela.
+const FILM_TRANSCRIPT = [
+  "Arujá, SP. Desde 1975.",
+  "Mais de 50 anos de história em Arujá.",
+  "Estância São Domingos. Condomínio Arujá 5. Condomínio Arujá Hills. Condomínio Arujazinho III.",
+  "Centro, Arujá: Av. Antônio Afonso de Lima, 704.",
+  "Fundada em 1975 por Leonardo Barbieri. Hoje, a segunda geração: Maria e Franco Barbieri.",
+  "Desde 1975, fazendo parte da história de Arujá. Vale do Sol Imóveis, CRECI J-14.578.",
+];
+
+// Os arquivos do filme são os mesmos de sempre — nada aqui os altera.
+const FILM = {
+  src: "/video/sol-sobre-aruja-720.mp4",
+  fullSrc: "/video/sol-sobre-aruja.mp4",
+  poster: "/video/sol-sobre-aruja-poster.jpg",
+  transcript: FILM_TRANSCRIPT,
+  duration: 32,
+};
+
+// Conteúdo muda quando o corretor publica um imóvel; o revalidate cobre
+// o caso de a revalidação por caminho não ter sido disparada.
+export const revalidate = 300;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
+export default async function HomePage() {
+  const [
+    settings,
+    featured,
+    types,
+    cities,
+    neighborhoods,
+    regions,
+    priceRange,
+    counts,
+    regionCovers,
+    profileResults,
+    shortcutTotals,
+    rentTotal,
+  ] = await Promise.all([
+    getSettings(),
+    getShowcaseProperties(3),
+    getPropertyTypes(),
+    getCities(),
+    getNeighborhoods(),
+    getRegions(),
+    getPriceRange(),
+    getPropertyCounts(),
+    getRegionCovers(),
+    Promise.all(
+      PATH_PROFILES.map((profile) =>
+        searchProperties({ profile, pageSize: 60 }),
+      ),
+    ),
+    Promise.all(
+      SHORTCUT_PROFILES.map(
+        async (profile) =>
+          (await searchProperties({ profile, pageSize: 1 })).total,
+      ),
+    ),
+    searchProperties({ purpose: "locacao", pageSize: 1 }).then(
+      (result) => result.total,
+    ),
+  ]);
+
+  // A vitrine abre pelo imóvel de maior valor entre os três: é o que melhor
+  // representa o padrão do acervo. Preço sob consulta fica por último.
+  const showcase = [...featured].sort(
+    (a, b) => (b.price ?? 0) - (a.price ?? 0),
+  );
+
+  const regionTotals = await Promise.all(
+    regions.map(
+      async (region) =>
+        [
+          region.id,
+          (await searchProperties({ region: region.id, pageSize: 1 })).total,
+        ] as const,
+    ),
+  );
+  const countByRegion = new Map(regionTotals);
+
+  const { hero, about, contact } = settings;
+
+  // Foto de fundo só se a imobiliária cadastrar uma no painel; ela entra bem
+  // apagada, como textura atrás do verde. Sem ela, o fundo é o da marca.
+  const heroImage = storageUrl(STORAGE_BUCKETS.site, hero.image_path);
+
+  const locationOptions = [
+    ...neighborhoods.map((name) => ({ value: name, label: name })),
+    ...cities
+      .filter((city) => !neighborhoods.includes(city))
+      .map((city) => ({ value: city, label: city })),
+  ];
+
+  // Cada caminho de busca usa a foto de um imóvel dele que não esteja já na
+  // vitrine logo acima — a mesma foto duas vezes seguidas parece descuido.
+  const usedIds = new Set(featured.map((property) => property.id));
+  const paths = PATH_PROFILES.map((profile, index) => {
+    const result = profileResults[index];
+    const candidates = result.items.filter(
+      (item) => item.images?.length && item.status !== "vendido",
+    );
+    const pick =
+      candidates.find((item) => !usedIds.has(item.id)) ?? candidates[0];
+    // O mesmo imóvel não ilustra dois caminhos.
+    if (pick) usedIds.add(pick.id);
+    return {
+      profile,
+      count: result.total,
+      image: pick ? propertyCoverUrl(pick) : null,
+    };
+  });
+
+  // Regiões com foto e com mais imóveis primeiro; a ordem cadastrada desempata.
+  const places = regions
+    .map((region, index) => ({
+      region,
+      index,
+      count: countByRegion.get(region.id) ?? 0,
+      image:
+        storageUrl(STORAGE_BUCKETS.region, region.image_path) ??
+        storageUrl(STORAGE_BUCKETS.property, regionCovers.get(region.id)),
+    }))
+    .filter((place) => place.count > 0 || place.image)
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.image)) - Number(Boolean(a.image)) ||
+        b.count - a.count ||
+        a.index - b.index,
+    )
+    .map(({ region, count, image }) => ({
+      slug: region.slug,
+      name: region.name,
+      city: region.city,
+      count,
+      image,
+    }));
+
+  const yearsOfHistory = new Date().getFullYear() - SITE.foundedYear;
+  const office = [contact.address, contact.district, contact.city]
+    .filter(Boolean)
+    .join(" · ");
+
+  // Só entra aqui o que é verificável: a data de fundação, a contagem real
+  // de imóveis publicados e o registro no CRECI.
+  const trust = [
+    { value: `${yearsOfHistory} anos`, label: "de história" },
+    ...(counts.total > 0
+      ? [
+          {
+            value: String(counts.total),
+            label:
+              counts.total === 1
+                ? "imóvel selecionado"
+                : "imóveis selecionados",
+          },
+        ]
+      : []),
+    { value: SITE.creci.replace("CRECI ", ""), label: "CRECI" },
+  ];
+
+  // O título vem do painel; cada frase ganha a sua linha.
+  const headline = hero.title.split(/(?<=[.!?])\s+/).filter(Boolean);
+
+  return (
+    <>
+      {/* ------------------------------------------------------------ Abertura */}
+      {/*
+        O filme institucional é a primeira tela. Ele tem texto próprio na
+        faixa do meio, então a tipografia do site assenta no terço de baixo,
+        sobre um degradê — nada cobre o que o filme escreve. No celular o
+        filme entra inteiro (16:9) e o título vem logo abaixo. Os arquivos do
+        filme não são tocados; só a moldura mudou.
+      */}
+      <section
+        id="home-hero"
+        className="relative isolate bg-primary-deep pt-[4.5rem] text-white lg:flex lg:min-h-[max(calc(100svh-4.5rem),42rem)] lg:flex-col lg:pt-0"
+      >
+        <HeroFilm
+          film={FILM}
+          className="aspect-video lg:absolute lg:inset-0 lg:aspect-auto"
+          controlsClassName="right-3 top-[calc(4.5rem+56.25vw-3rem)] lg:inset-x-0 lg:bottom-[173px] lg:right-0 lg:top-auto"
+          overlay={
+            <>
+              {/* Topo: o cabeçalho continua legível até no quadro claro do fim */}
+              <div
+                aria-hidden
+                className="absolute inset-x-0 top-0 hidden h-48 bg-gradient-to-b from-black/45 to-transparent lg:block"
+              />
+              {/* Base: a área do título. No celular só funde o filme ao verde. */}
+              <div
+                aria-hidden
+                className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-primary-deep to-transparent lg:h-[62%] lg:from-primary-deep lg:via-primary-deep/80"
+              />
+            </>
+          }
+        >
+          <div className="container-site relative z-10 pb-10 pt-8 lg:mt-auto lg:pb-0 lg:pt-0">
+            <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12 lg:pb-16">
+              <div className="lg:col-span-7">
+                <h1
+                  className="rise-in text-balance font-display text-[clamp(2.5rem,1.4rem+3.4vw,5.25rem)] leading-[0.98] tracking-[-0.02em] text-white"
+                  style={{ animationDelay: "90ms" }}
+                >
+                  {headline.map((line, index) => (
+                    <span
+                      key={line}
+                      className={
+                        index > 0 ? "block italic text-white/80" : "block"
+                      }
+                    >
+                      {line}
+                    </span>
+                  ))}
+                </h1>
+              </div>
+
+              <div
+                className="rise-in lg:col-span-5 lg:pb-2"
+                style={{ animationDelay: "200ms" }}
+              >
+                <p className="max-w-md text-pretty text-[1.0625rem] leading-relaxed text-white/75">
+                  {hero.subtitle}
+                </p>
+                <div className="mt-7 grid grid-cols-2 gap-3 sm:flex">
+                  <ButtonLink
+                    href="/imoveis?finalidade=venda"
+                    variant="gold"
+                    size="lg"
+                  >
+                    Comprar
+                  </ButtonLink>
+                  <ButtonLink
+                    href="/imoveis?finalidade=locacao"
+                    variant="onDark"
+                    size="lg"
+                  >
+                    Alugar
+                  </ButtonLink>
+                </div>
+              </div>
+            </div>
+
+            {/* A busca assenta na borda entre a abertura e a página. Os
+              controles do filme (em HeroFilm) se alinham à linha dos botões
+              acima: 173px da base do hero, fixos porque a busca tem altura fixa. */}
+            <PropertySearch
+              className="rise-in relative z-10 mt-10 lg:mt-0 lg:translate-y-1/2"
+              types={types.map((type) => ({
+                value: type.slug,
+                label: type.name,
+              }))}
+              locations={locationOptions}
+              priceBands={buildPriceBands(priceRange)}
+            />
+          </div>
+        </HeroFilm>
+      </section>
+
+      {/* ------------------------------------------------ Faixa de credibilidade */}
+      {/* Só o verificável: a fundação, o acervo publicado e o CRECI. */}
+      <section
+        aria-label="A Vale do Sol em números"
+        className="border-b border-line"
+      >
+        <div className="container-site flex flex-col gap-8 py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:pb-12 lg:pt-[calc(2.75rem+3.5rem)]">
+          <dl className="grid grid-cols-3 lg:flex lg:gap-0">
+            {trust.map((item, index) => (
+              <div
+                key={item.label}
+                className={
+                  index > 0
+                    ? "border-l border-line pl-4 sm:pl-8 lg:pr-10"
+                    : "pr-4 sm:pr-8 lg:pr-10"
+                }
+              >
+                <dt className="sr-only">{item.label}</dt>
+                <dd className="font-display text-[1.75rem] leading-none text-ink tabular sm:text-[2rem]">
+                  {item.value}
+                </dd>
+                <p className="label-caps mt-2 text-[0.5625rem] leading-snug text-muted sm:text-[0.625rem]">
+                  {item.label}
+                </p>
+              </div>
+            ))}
+          </dl>
+
+          {/* Atalhos por tipo: um toque e a listagem já abre filtrada */}
+          <Shortcuts
+            items={[
+              ...SHORTCUT_PROFILES.map((profile, index) => ({
+                href: `/imoveis?perfil=${profile}`,
+                label: PROFILE_DEFINITIONS[profile].label,
+                count: shortcutTotals[index],
+              })),
+              {
+                href: "/imoveis?finalidade=locacao",
+                label: "Alugar",
+                count: rentTotal,
+              },
+            ]}
+          />
+        </div>
+      </section>
+
+      <FeaturedProperties properties={showcase} total={counts.total} />
+
+      <SearchPaths paths={paths} />
+
+      {places.length ? (
+        <section
+          aria-labelledby="regiao"
+          className="border-t border-line bg-surface section-xl"
+        >
+          <div className="container-site">
+            <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
+              <Reveal className="lg:col-span-6">
+                <p className="eyebrow">Arujá e região</p>
+                <h2 id="regiao" className="mt-6 text-balance text-display">
+                  Conheça Arujá pelo lugar certo.
+                </h2>
+              </Reveal>
+              <Reveal
+                className="self-end lg:col-span-5 lg:col-start-8"
+                delay={120}
+              >
+                <p className="text-pretty text-lg leading-relaxed text-ink-soft">
+                  Cada bairro e condomínio tem uma maneira própria de viver.
+                </p>
+              </Reveal>
+            </div>
+            <Reveal className="mt-14 md:mt-20" delay={80}>
+              <LocalKnowledge
+                places={places}
+                office={`Escritório no coração de Arujá: ${office}. ${SITE.creci}.`}
+              />
+            </Reveal>
+          </div>
+        </section>
+      ) : null}
+
+      <HistorySection />
+
+      <AboutSection intro={about.intro} />
+
+      <CTASection whatsapp={whatsappUrl(contact.whatsapp)} image={heroImage} />
+    </>
+  );
+}

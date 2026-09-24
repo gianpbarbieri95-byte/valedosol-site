@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Extração do site antigo — fotos originais e JSON de migração.
+# São ~60 MB de imagens que vivem no Supabase Storage depois da importação;
+# não têm por que entrar no repositório.
+/data/images/
+/data/image-failures.json
+
+# O .env.example é o arquivo versionado; .env.local nunca.
+!.env.example
+
+.vercel
+.env*

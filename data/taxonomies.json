@@ -1,0 +1,91 @@
+{
+  "cities": [
+    {
+      "slug": "aruja",
+      "label": "Arujá",
+      "count": 16
+    }
+  ],
+  "neighborhoods": [
+    {
+      "slug": "centro",
+      "label": "Centro",
+      "city_slug": "aruja",
+      "count": 1
+    },
+    {
+      "slug": "condominio-aruja-hills-iii",
+      "label": "Condomínio Arujá Hills III",
+      "city_slug": "aruja",
+      "count": 1
+    },
+    {
+      "slug": "bairro-jordanopolis",
+      "label": "Jordanópolis",
+      "city_slug": "aruja",
+      "count": 3
+    },
+    {
+      "slug": "nova-aruja",
+      "label": "Nova Arujá",
+      "city_slug": "aruja",
+      "count": 2
+    },
+    {
+      "slug": "condominio-arujazinho-iii",
+      "label": "Condomínio Arujazinho III",
+      "city_slug": "aruja",
+      "count": 3
+    },
+    {
+      "slug": "aruja-5",
+      "label": "Condomínio Arujá 5",
+      "city_slug": "aruja",
+      "count": 3
+    },
+    {
+      "slug": "hills-i",
+      "label": "Condomínio Arujá Hills I e II",
+      "city_slug": "aruja",
+      "count": 3
+    }
+  ],
+  "types": [
+    {
+      "slug": "casa-bairro",
+      "label": "Casa em Bairro",
+      "mapped_to": "casa-bairro",
+      "count": 5
+    },
+    {
+      "slug": "casa-condominios",
+      "label": "Casa em Condomínio",
+      "mapped_to": "casa-condominio",
+      "count": 10
+    },
+    {
+      "slug": "comercial",
+      "label": "Comercial",
+      "mapped_to": "comercial",
+      "count": 1
+    },
+    {
+      "slug": "imoveis-comerciais",
+      "label": "Imóveis Comerciais",
+      "mapped_to": "comercial",
+      "count": 1
+    }
+  ],
+  "situations": [
+    {
+      "slug": "disponivel",
+      "label": "Disponível",
+      "count": 37
+    },
+    {
+      "slug": "vendido",
+      "label": "Vendido",
+      "count": 1
+    }
+  ]
+}
