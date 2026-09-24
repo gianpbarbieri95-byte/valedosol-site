@@ -13,9 +13,12 @@ import type { PropertyCardData } from "@/types/database";
 export function FeaturedProperties({
   properties,
   total,
+  ledes,
 }: {
   properties: PropertyCardData[];
   total: number;
+  /** Linha de apresentação por id — só com o que foi cadastrado. */
+  ledes: Map<string, string | null>;
 }) {
   const [lead, ...rest] = properties;
   if (!lead) return null;
@@ -25,9 +28,9 @@ export function FeaturedProperties({
       <Reveal>
         <SectionHeading
           id="selecionados"
-          eyebrow="Seleção Vale do Sol"
-          title="Uma seleção para começar."
-          description="Alguns dos imóveis que fazem parte do nosso acervo em Arujá e região."
+          eyebrow="Imóveis em destaque"
+          title="Propriedades que merecem ser conhecidas."
+          description="Uma seleção do acervo da Vale do Sol em Arujá e região."
           action={
             <Link href="/imoveis" className="link-line text-ink">
               {total > 0 ? `Ver os ${total} imóveis` : "Ver todos os imóveis"}
@@ -43,6 +46,7 @@ export function FeaturedProperties({
         <PropertyCard
           property={lead}
           size="xl"
+          lede={ledes.get(lead.id)}
           imageClassName="aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9]"
           sizes="(min-width: 1440px) 1312px, 100vw"
         />
@@ -59,6 +63,7 @@ export function FeaturedProperties({
               <PropertyCard
                 property={property}
                 size="lg"
+                lede={ledes.get(property.id)}
                 imageClassName="aspect-[4/3]"
                 sizes={index === 0 ? "(min-width: 768px) 58vw, 100vw" : "(min-width: 768px) 42vw, 100vw"}
               />

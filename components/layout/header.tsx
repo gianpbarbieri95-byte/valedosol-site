@@ -12,14 +12,18 @@ import type { ContactSettings } from "@/types/database";
 import { CloseIcon, HeartIcon, MenuIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { ButtonLink } from "@/components/ui/button";
 
-/** Navegação do desktop: só o essencial, na ordem em que o visitante pensa. */
+/**
+ * Navegação do desktop: só o essencial, na ordem em que o visitante pensa —
+ * primeiro o que ele procura, depois quem somos, por fim o proprietário.
+ * "Falar conosco" é o único botão; o resto é texto.
+ */
 const NAV = [
   { href: "/imoveis", label: "Imóveis" },
   { href: "/imoveis?finalidade=venda", label: "Comprar" },
   { href: "/imoveis?finalidade=locacao", label: "Alugar" },
   { href: "/regioes", label: "Regiões" },
   { href: "/a-imobiliaria", label: "A Vale do Sol" },
-  { href: "/contato", label: "Contato" },
+  { href: "/venda-seu-imovel", label: "Venda seu imóvel" },
 ];
 
 /** O menu de tela cheia leva a todas as páginas do site. */
@@ -85,13 +89,15 @@ export function Header({ contact }: { contact: ContactSettings }) {
         data-header
         data-scrolled={scrolled ? "true" : "false"}
         className={cn(
-          "fixed inset-x-0 top-0 z-50",
+          "group/header fixed inset-x-0 top-0 z-50",
           "transition-[background-color,border-color,backdrop-filter] duration-700 ease-[var(--ease-premium)]",
           "border-b border-line bg-canvas/92 backdrop-blur-md",
           "hero:border-white/10 hero:bg-transparent hero:backdrop-blur-none"
         )}
       >
-        <div className="container-site flex h-[4.5rem] items-center justify-between gap-6 lg:h-[5.5rem]">
+        {/* Rolando a página, a barra encolhe um pouco e o logo acompanha:
+            continua presente sem pesar sobre o conteúdo. */}
+        <div className="container-site flex h-[4.5rem] items-center justify-between gap-6 transition-[height] duration-500 ease-[var(--ease-premium)] lg:h-[5.5rem] lg:group-data-[scrolled=true]/header:h-[4.5rem]">
           {/*
             O logo oficial entra como está: sem recorte, filtro ou recriação.
             Ele foi desenhado para fundo claro, então sobre a abertura escura
@@ -111,7 +117,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
               width={190}
               height={188}
               priority
-              className="h-11 w-auto lg:h-[3.25rem]"
+              className="h-11 w-auto transition-[height] duration-500 ease-[var(--ease-premium)] lg:h-[3.25rem] lg:group-data-[scrolled=true]/header:h-11"
             />
           </Link>
 
@@ -125,7 +131,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
                   aria-current={active ? "page" : undefined}
                   data-active={active ? "true" : undefined}
                   className={cn(
-                    "link-sweep px-3 pb-3 xl:px-3.5 pt-2.5 text-[0.8125rem] tracking-[0.02em] transition-colors duration-300",
+                    "link-sweep px-2.5 pb-3 xl:px-3.5 pt-2.5 text-[0.8125rem] tracking-[0.02em] transition-colors duration-300",
                     active ? "text-ink" : "text-ink-soft hover:text-ink",
                     "hero:text-white/80 hero:hover:text-white"
                   )}
@@ -161,7 +167,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
             </Link>
 
             <ButtonLink
-              href="/imoveis"
+              href="/contato"
               size="sm"
               variant="primary"
               className={cn(
@@ -169,7 +175,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
                 "hero:border-white/40 hero:bg-transparent hero:hover:border-white hero:hover:bg-white hero:hover:text-primary-deep"
               )}
             >
-              Encontrar imóvel
+              Falar conosco
             </ButtonLink>
 
             <button

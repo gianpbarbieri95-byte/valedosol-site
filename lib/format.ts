@@ -95,3 +95,41 @@ export function truncate(value: string | null | undefined, max: number): string 
   const cut = value.slice(0, max);
   return `${cut.slice(0, cut.lastIndexOf(" ")).trimEnd()}…`;
 }
+
+/**
+ * Uma linha de apresentação do imóvel, tirada só do que foi cadastrado:
+ * a primeira frase da descrição, quando ela diz algo além do título; se
+ * não houver, os primeiros itens de "Ambientes" (ex.: "Casa com 5 suítes ·
+ * Área de lazer com piscina"). Nada é redigido aqui — sem dado, sem linha.
+ */
+export function propertyLede(
+  property: { title: string; description?: string | null; highlights?: string[] | null },
+  max = 170
+): string | null {
+  const normalize = (value: string) =>
+    value.toLocaleLowerCase("pt-BR").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
+  const first = property.description?.split(/\n+/)[0]?.trim();
+  const sentence = first?.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? first;
+  if (
+    sentence &&
+    !sentence.endsWith(":") &&
+    sentence.length > 24 &&
+    !normalize(property.title).includes(normalize(sentence))
+  ) {
+    return truncate(sentence, max);
+  }
+
+  const items = (property.highlights ?? [])
+    .map((item) => item.trim().replace(/[\s;,.:]+$/, ""))
+    // Medidas soltas ("A/T = 2.000,00 m²") já aparecem na ficha.
+    .filter((item) => item.length > 3 && !/=|^a\/[tc]\b/i.test(item));
+  if (!items.length) return null;
+
+  let line = items[0];
+  for (const item of items.slice(1, 3)) {
+    if (`${line} · ${item}`.length > max) break;
+    line = `${line} · ${item}`;
+  }
+  return truncate(line, max);
+}

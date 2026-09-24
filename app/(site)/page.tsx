@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-import { SITE, STORAGE_BUCKETS } from "@/lib/site";
+import { PRIMARY_CITY, SITE, STORAGE_BUCKETS } from "@/lib/site";
 import {
   PATH_PROFILES,
   PROFILE_DEFINITIONS,
   SHORTCUT_PROFILES,
 } from "@/lib/profiles";
-import { whatsappUrl } from "@/lib/format";
+import { propertyLede, whatsappUrl } from "@/lib/format";
 import { getSettings } from "@/lib/queries/settings";
 import {
   getCities,
@@ -16,6 +16,7 @@ import {
 } from "@/lib/queries/taxonomies";
 import {
   getPriceRange,
+  getPropertyExtras,
   getPropertyCounts,
   getRegionCovers,
   getShowcaseProperties,
@@ -26,7 +27,6 @@ import { buildPriceBands } from "@/lib/price-bands";
 
 import { PropertySearch } from "@/components/property/property-search";
 import { propertyCoverUrl } from "@/components/property/property-card";
-import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { HeroFilm } from "@/components/brand-film";
 import { FeaturedProperties } from "@/components/home/featured-properties";
@@ -35,6 +35,7 @@ import { HistorySection } from "@/components/home/history-section";
 import { AboutSection } from "@/components/home/about-section";
 import { LocalKnowledge } from "@/components/home/local-knowledge";
 import { CTASection } from "@/components/home/cta-section";
+import { SellSection } from "@/components/home/sell-section";
 import { Shortcuts } from "@/components/home/shortcuts";
 
 // Tudo o que aparece escrito no filme, na ordem, para quem usa leitor de tela.
@@ -61,6 +62,9 @@ const FILM = {
 export const revalidate = 300;
 
 export const metadata: Metadata = {
+  // O título padrão (layout) já é "Vale do Sol Imóveis — Imóveis em Arujá desde 1975".
+  description:
+    "Imobiliária em Arujá desde 1975. Casas, terrenos, imóveis de alto padrão em condomínio, chácaras e imóveis comerciais à venda em Arujá e região. CRECI J-14.578.",
   alternates: { canonical: "/" },
 };
 
@@ -110,6 +114,14 @@ export default async function HomePage() {
     (a, b) => (b.price ?? 0) - (a.price ?? 0),
   );
 
+  const extras = await getPropertyExtras(showcase.map((property) => property.id));
+  const ledes = new Map(
+    showcase.map((property) => {
+      const extra = extras.get(property.id);
+      return [property.id, propertyLede({ title: property.title, ...extra })] as const;
+    }),
+  );
+
   const regionTotals = await Promise.all(
     regions.map(
       async (region) =>
@@ -121,7 +133,7 @@ export default async function HomePage() {
   );
   const countByRegion = new Map(regionTotals);
 
-  const { hero, about, contact } = settings;
+  const { hero, about, contact, social } = settings;
 
   // Foto de fundo só se a imobiliária cadastrar uma no painel; ela entra bem
   // apagada, como textura atrás do verde. Sem ela, o fundo é o da marca.
@@ -201,11 +213,55 @@ export default async function HomePage() {
     { value: SITE.creci.replace("CRECI ", ""), label: "CRECI" },
   ];
 
+  // Último parágrafo do fechamento institucional ("São décadas conhecendo
+  // Arujá..."); o primeiro repetiria "gerações" logo abaixo do título.
+  const closingLine =
+    about.closing
+      ?.split(/\n{2,}/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .at(-1) ||
+    about.intro ||
+    null;
+
   // O título vem do painel; cada frase ganha a sua linha.
   const headline = hero.title.split(/(?<=[.!?])\s+/).filter(Boolean);
 
+  // Dados estruturados da imobiliária: só o que está cadastrado no painel.
+  const organizationLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "@id": `${SITE.url}/#imobiliaria`,
+    name: SITE.name,
+    legalName: SITE.legalName,
+    url: SITE.url,
+    logo: `${SITE.url}/brand/logo.png`,
+    image: `${SITE.url}/video/sol-sobre-aruja-poster.jpg`,
+    description: `Imobiliária em ${PRIMARY_CITY} desde ${SITE.foundedYear}: casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região.`,
+    foundingDate: String(SITE.foundedYear),
+    founder: { "@type": "Person", name: "Leonardo Barbieri" },
+    telephone: contact.phone || undefined,
+    email: contact.email || undefined,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: contact.address,
+      addressLocality: contact.city,
+      addressRegion: contact.state,
+      postalCode: contact.zip,
+      addressCountry: "BR",
+    },
+    areaServed: { "@type": "City", name: PRIMARY_CITY },
+    identifier: SITE.creci,
+    sameAs: [social.facebook, social.instagram].filter(Boolean),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+      />
+
       {/* ------------------------------------------------------------ Abertura */}
       {/*
         O filme institucional é a primeira tela. Ele tem texto próprio na
@@ -221,7 +277,7 @@ export default async function HomePage() {
         <HeroFilm
           film={FILM}
           className="aspect-video lg:absolute lg:inset-0 lg:aspect-auto"
-          controlsClassName="right-3 top-[calc(4.5rem+56.25vw-3rem)] lg:inset-x-0 lg:bottom-[173px] lg:right-0 lg:top-auto"
+          controlsClassName="right-3 top-[calc(4.5rem+56.25vw-3rem)] lg:inset-x-0 lg:bottom-[156px] lg:right-0 lg:top-auto"
           overlay={
             <>
               {/* Topo: o cabeçalho continua legível até no quadro claro do fim */}
@@ -238,10 +294,17 @@ export default async function HomePage() {
           }
         >
           <div className="container-site relative z-10 pb-10 pt-8 lg:mt-auto lg:pb-0 lg:pt-0">
-            <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12 lg:pb-16">
-              <div className="lg:col-span-7">
+            <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-12 lg:pb-16">
+              <div className="lg:col-span-8">
+                <p
+                  className="rise-in label-caps text-[0.6875rem] text-gold-bright"
+                  style={{ animationDelay: "40ms" }}
+                >
+                  {PRIMARY_CITY} <span aria-hidden className="mx-2 text-white/40">·</span> Desde{" "}
+                  {SITE.foundedYear}
+                </p>
                 <h1
-                  className="rise-in text-balance font-display text-[clamp(2.5rem,1.4rem+3.4vw,5.25rem)] leading-[0.98] tracking-[-0.02em] text-white"
+                  className="rise-in mt-5 max-w-[22ch] text-balance font-display text-[clamp(2.4rem,1.3rem+3vw,4.5rem)] leading-[1.02] tracking-[-0.02em] text-white"
                   style={{ animationDelay: "90ms" }}
                 >
                   {headline.map((line, index) => (
@@ -258,34 +321,21 @@ export default async function HomePage() {
               </div>
 
               <div
-                className="rise-in lg:col-span-5 lg:pb-2"
+                className="rise-in lg:col-span-4 lg:pb-1"
                 style={{ animationDelay: "200ms" }}
               >
-                <p className="max-w-md text-pretty text-[1.0625rem] leading-relaxed text-white/75">
+                <p className="max-w-sm text-pretty text-[1.0625rem] leading-relaxed text-white/80 lg:text-lg">
                   {hero.subtitle}
                 </p>
-                <div className="mt-7 grid grid-cols-2 gap-3 sm:flex">
-                  <ButtonLink
-                    href="/imoveis?finalidade=venda"
-                    variant="gold"
-                    size="lg"
-                  >
-                    Comprar
-                  </ButtonLink>
-                  <ButtonLink
-                    href="/imoveis?finalidade=locacao"
-                    variant="onDark"
-                    size="lg"
-                  >
-                    Alugar
-                  </ButtonLink>
-                </div>
+                {/* Lugar reservado para os controles do filme (em HeroFilm),
+                  que ficam alinhados a esta linha: 156px da base do hero. */}
+                <div aria-hidden className="mt-7 hidden h-9 lg:block" />
               </div>
             </div>
 
             {/* A busca assenta na borda entre a abertura e a página. Os
-              controles do filme (em HeroFilm) se alinham à linha dos botões
-              acima: 173px da base do hero, fixos porque a busca tem altura fixa. */}
+              controles do filme (em HeroFilm) se alinham ao fim do texto acima:
+              156px da base do hero, fixos porque a busca tem altura fixa. */}
             <PropertySearch
               className="rise-in relative z-10 mt-10 lg:mt-0 lg:translate-y-1/2"
               types={types.map((type) => ({
@@ -345,7 +395,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <FeaturedProperties properties={showcase} total={counts.total} />
+      <FeaturedProperties
+        properties={showcase}
+        total={counts.total}
+        ledes={ledes}
+      />
 
       <SearchPaths paths={paths} />
 
@@ -357,17 +411,20 @@ export default async function HomePage() {
           <div className="container-site">
             <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
               <Reveal className="lg:col-span-6">
-                <p className="eyebrow">Arujá e região</p>
-                <h2 id="regiao" className="mt-6 text-balance text-display">
-                  Conheça Arujá pelo lugar certo.
+                <p className="eyebrow">Regiões de Arujá</p>
+                <h2 id="regiao" className="mt-6 text-balance text-hero">
+                  Conhecemos Arujá.
                 </h2>
               </Reveal>
               <Reveal
                 className="self-end lg:col-span-5 lg:col-start-8"
                 delay={120}
               >
-                <p className="text-pretty text-lg leading-relaxed text-ink-soft">
-                  Cada bairro e condomínio tem uma maneira própria de viver.
+                <p className="text-pretty font-display text-[clamp(1.5rem,1.2rem+1vw,2.1rem)] italic leading-snug text-primary">
+                  Conhecemos a região porque fazemos parte dela.
+                </p>
+                <p className="mt-4 text-pretty leading-relaxed text-ink-soft">
+                  Os bairros e condomínios onde a Vale do Sol tem imóveis hoje.
                 </p>
               </Reveal>
             </div>
@@ -383,9 +440,17 @@ export default async function HomePage() {
 
       <HistorySection />
 
-      <AboutSection intro={about.intro} />
+      <AboutSection closing={closingLine} />
 
-      <CTASection whatsapp={whatsappUrl(contact.whatsapp)} image={heroImage} />
+      <SellSection specialties={about.specialties ?? null} years={yearsOfHistory} />
+
+      <CTASection
+        whatsapp={whatsappUrl(
+          contact.whatsapp,
+          "Olá! Estou procurando um imóvel em Arujá e região e gostaria de ajuda da Vale do Sol.",
+        )}
+        image={heroImage}
+      />
     </>
   );
 }

@@ -51,6 +51,8 @@ export default async function PropertiesPage({
 }) {
   const filters = parseFilters(await searchParams);
   const activeCount = countActiveFilters(filters);
+  // "Alugar" sem nenhum outro filtro: a lista vazia não é culpa de filtro.
+  const onlyRent = filters.purpose === "locacao" && activeCount === 1;
 
   const [result, types, cities, neighborhoods] = await Promise.all([
     searchProperties(filters),
@@ -149,15 +151,25 @@ export default async function PropertiesPage({
             </>
           ) : (
             <EmptyState
-              title="Nenhum imóvel com esses filtros"
+              title={
+                onlyRent
+                  ? "No momento, nenhum imóvel para alugar publicado"
+                  : "Nenhum imóvel com esses filtros"
+              }
               description={
-                activeCount > 0
+                onlyRent
+                  ? "Conte o que você procura para alugar em Arujá e região e fale direto com a Vale do Sol."
+                  : activeCount > 0
                   ? "Tente ampliar a faixa de preço ou remover algum filtro. Se preferir, fale com a gente: nem tudo que temos está publicado."
                   : "Assim que os imóveis forem publicados no painel, eles aparecem aqui."
               }
               action={
                 <div className="flex flex-wrap justify-center gap-3">
-                  {activeCount > 0 ? <ButtonLink href="/imoveis" variant="outline">Limpar filtros</ButtonLink> : null}
+                  {activeCount > 0 ? (
+                    <ButtonLink href="/imoveis" variant="outline">
+                      {onlyRent ? "Ver imóveis à venda" : "Limpar filtros"}
+                    </ButtonLink>
+                  ) : null}
                   <ButtonLink href="/contato">Falar com a Vale do Sol</ButtonLink>
                 </div>
               }

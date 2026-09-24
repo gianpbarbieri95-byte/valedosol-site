@@ -53,7 +53,7 @@ export const PROFILE_DEFINITIONS: Record<Profile, ProfileDefinition> = {
   investir: {
     label: "Investir",
     heading: "Imóveis para investir",
-    description: "Terrenos, áreas e oportunidades.",
+    description: "Terrenos, áreas comerciais e oportunidades.",
     typeSlugs: ["terreno-bairro", "terreno-condominio", "terreno-comercial", "comercial"],
     titleWords: ["terreno", "comercial", "prédio"],
   },

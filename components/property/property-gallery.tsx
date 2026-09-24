@@ -10,6 +10,47 @@ export interface GalleryImage {
   alt: string;
 }
 
+export const GALLERY_OPEN_EVENT = "vds:gallery-open";
+
+/**
+ * Todas as fotos em grade, no fim do anúncio. Cada uma abre o visor da
+ * galeria principal naquela posição.
+ */
+export function PropertyPhotoGrid({ images, title }: { images: GalleryImage[]; title: string }) {
+  if (images.length < 2) return null;
+  return (
+    <ul className="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+      {images.map((image, i) => (
+        <li
+          key={image.url}
+          // A cada sete fotos, uma ocupa a largura toda: ritmo de revista, não de catálogo.
+          className={cn(i % 7 === 0 && "col-span-2 md:col-span-3")}
+        >
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent(GALLERY_OPEN_EVENT, { detail: i }))}
+            aria-label={`Ampliar foto ${i + 1} de ${images.length} — ${title}`}
+            className={cn(
+              "group relative block w-full overflow-hidden rounded-[var(--radius-xs)] bg-surface-alt",
+              i % 7 === 0 ? "aspect-[16/9] md:aspect-[21/9]" : "aspect-[4/3]"
+            )}
+          >
+            <Image
+              src={image.url}
+              alt={image.alt}
+              fill
+              quality={70}
+              loading="lazy"
+              sizes={i % 7 === 0 ? "(min-width: 1280px) 760px, 100vw" : "(min-width: 768px) 260px, 50vw"}
+              className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-premium)] group-hover:scale-[1.03]"
+            />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Galeria do imóvel.
  *
@@ -36,6 +77,17 @@ export function PropertyGallery({ images, title }: { images: GalleryImage[]; tit
     setIndex(at);
     setFullscreen(true);
   }, []);
+
+  // A seção "Galeria" mais abaixo na página abre o mesmo visor por evento,
+  // sem precisar subir o estado para a página (que é um Server Component).
+  useEffect(() => {
+    const onOpen = (event: Event) => {
+      const at = (event as CustomEvent<number>).detail;
+      if (Number.isInteger(at)) open(at);
+    };
+    window.addEventListener(GALLERY_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(GALLERY_OPEN_EVENT, onOpen);
+  }, [open]);
 
   useEffect(() => {
     if (!fullscreen) return;

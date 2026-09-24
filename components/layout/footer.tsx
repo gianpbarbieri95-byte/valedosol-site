@@ -17,11 +17,11 @@ const COLUMNS = [
     ],
   },
   {
-    title: "A empresa",
+    title: "Institucional",
     links: [
-      { href: "/a-imobiliaria", label: "A imobiliária" },
+      { href: "/a-imobiliaria", label: "A Vale do Sol" },
       { href: "/venda-seu-imovel", label: "Venda seu imóvel" },
-      { href: "/contato", label: "Contato" },
+      { href: "/contato", label: "Fale conosco" },
     ],
   },
 ];
@@ -29,10 +29,28 @@ const COLUMNS = [
 export function Footer({
   contact,
   social,
+  regions = [],
 }: {
   contact: ContactSettings;
   social: SocialSettings;
+  /** Regiões cadastradas no painel — só as que existem, na ordem de lá. */
+  regions?: { slug: string; name: string }[];
 }) {
+  const columns = regions.length
+    ? [
+        ...COLUMNS,
+        {
+          title: "Regiões",
+          links: [
+            ...regions.slice(0, 6).map((region) => ({
+              href: `/regioes/${region.slug}`,
+              label: region.name,
+            })),
+            ...(regions.length > 6 ? [{ href: "/regioes", label: "Todas as regiões" }] : []),
+          ],
+        },
+      ]
+    : COLUMNS;
   const tel = phoneHref(contact.phone);
   const telSecondary = phoneHref(contact.phone_secondary);
   const whatsapp = whatsappUrl(contact.whatsapp);
@@ -45,8 +63,8 @@ export function Footer({
       {/* Fio dourado do logo fechando o corpo da página */}
       <div aria-hidden className="h-px bg-gradient-to-r from-transparent via-gold/45 to-transparent" />
 
-      <div className="container-site grid gap-12 py-16 md:grid-cols-12 md:py-20">
-        <div className="md:col-span-5">
+      <div className="container-site grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-12 md:py-20">
+        <div className="col-span-2 md:col-span-12 lg:col-span-3">
           <Image
             src="/brand/logo.png"
             alt={SITE.name}
@@ -58,11 +76,17 @@ export function Footer({
             Desde {SITE.foundedYear}, a Vale do Sol ajuda famílias e empresas a encontrar imóveis em
             Arujá e região.
           </p>
-          <p className="mt-4 text-xs uppercase tracking-[0.14em] text-muted">{SITE.creci}</p>
+          <p className="mt-5 text-xs uppercase tracking-[0.14em] text-ink-soft">
+            {SITE.creci} <span aria-hidden className="mx-1.5 text-line-strong">·</span> Desde {SITE.foundedYear}
+          </p>
         </div>
 
-        {COLUMNS.map((column) => (
-          <nav key={column.title} aria-label={column.title} className="md:col-span-2">
+        {columns.map((column) => (
+          <nav
+            key={column.title}
+            aria-label={column.title}
+            className={column.title === "Regiões" ? "md:col-span-3 lg:col-span-2" : "md:col-span-2"}
+          >
             <h2 className="mb-5 text-[0.6875rem] font-sans font-medium uppercase tracking-[0.16em] text-ink">
               {column.title}
             </h2>
@@ -81,9 +105,9 @@ export function Footer({
           </nav>
         ))}
 
-        <div className="md:col-span-3">
+        <div className="col-span-2 md:col-span-5 lg:col-span-3">
           <h2 className="mb-5 text-[0.6875rem] font-sans font-medium uppercase tracking-[0.16em] text-ink">
-            Atendimento
+            Contato
           </h2>
           <ul className="space-y-3 text-sm text-ink-soft">
             {fullAddress ? (
@@ -111,7 +135,7 @@ export function Footer({
             {contact.email ? (
               <li className="flex gap-2.5">
                 <MailIcon className="mt-0.5 text-muted" />
-                <a className="break-all transition-colors hover:text-primary" href={`mailto:${contact.email}`}>
+                <a className="[overflow-wrap:anywhere] transition-colors hover:text-primary" href={`mailto:${contact.email}`}>
                   {contact.email}
                 </a>
               </li>
@@ -135,7 +159,11 @@ export function Footer({
           </ul>
 
           {social.facebook || social.instagram ? (
-            <div className="mt-6 flex gap-4 text-sm">
+            <div className="mt-8">
+              <h2 className="mb-3 text-[0.6875rem] font-sans font-medium uppercase tracking-[0.16em] text-ink">
+                Redes sociais
+              </h2>
+              <div className="flex gap-4 text-sm">
               {social.instagram ? (
                 <a
                   href={social.instagram}
@@ -156,6 +184,7 @@ export function Footer({
                   Facebook
                 </a>
               ) : null}
+              </div>
             </div>
           ) : null}
         </div>

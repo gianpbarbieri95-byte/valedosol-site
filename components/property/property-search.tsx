@@ -93,12 +93,14 @@ export function PropertySearch({
       aria-label="Buscar imóveis"
       className={cn("bg-surface text-ink shadow-float", className)}
     >
-      <div className="grid lg:grid-cols-[auto_1.15fr_1fr_1fr_auto]">
+      {/* No celular: local na largura toda, tipo e valor lado a lado — a
+          busca cabe na primeira tela sem virar um formulário comprido. */}
+      <div className="grid grid-cols-2 lg:grid-cols-[auto_1.15fr_1fr_1fr_auto]">
         {/* Finalidade como alternância, não como select: são só duas opções. */}
         <div
           role="radiogroup"
           aria-label="Finalidade"
-          className="flex items-stretch border-b border-line lg:flex-col lg:justify-center lg:border-b-0 lg:border-r lg:px-2"
+          className="col-span-2 flex items-stretch border-b border-line lg:col-span-1 lg:flex-col lg:justify-center lg:border-b-0 lg:border-r lg:px-2"
         >
           {[
             { value: "venda", label: "Comprar" },
@@ -124,10 +126,14 @@ export function PropertySearch({
           ))}
         </div>
 
-        {fields.map((field) => (
+        {fields.map((field, index) => (
           <div
             key={field.id}
-            className="border-b border-line px-6 py-4 transition-colors duration-300 focus-within:bg-surface-alt/60 focus-within:shadow-[inset_0_-2px_0_var(--color-primary)] hover:bg-surface-alt/40 lg:border-b-0 lg:border-r lg:py-5"
+            className={cn(
+              "min-w-0 border-b border-line px-5 py-3.5 sm:px-6 sm:py-4",
+              index === 0 ? "col-span-2 lg:col-span-1" : index === 1 ? "border-r lg:border-r" : "",
+              "transition-colors duration-300 focus-within:bg-surface-alt/60 focus-within:shadow-[inset_0_-2px_0_var(--color-primary)] hover:bg-surface-alt/40 lg:border-b-0 lg:border-r lg:px-6 lg:py-5"
+            )}
           >
             <label htmlFor={field.id} className="label-caps block text-[0.625rem] text-muted">
               {field.label}
@@ -147,7 +153,7 @@ export function PropertySearch({
           </div>
         ))}
 
-        <div className="p-3">
+        <div className="col-span-2 p-3 lg:col-span-1">
           <Button type="submit" size="lg" className="h-full min-h-14 w-full px-8">
             <SearchIcon />
             Encontrar imóvel

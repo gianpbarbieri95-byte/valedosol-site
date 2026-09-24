@@ -85,12 +85,13 @@ export default async function ContactPage() {
         <Breadcrumb items={[{ label: "Contato" }]} />
 
         <header className="mt-8 max-w-2xl">
-          <h1 className="text-balance text-[2.5rem] leading-[1.08] md:text-[3rem]">
+          <p className="eyebrow">Contato</p>
+          <h1 className="mt-4 text-balance text-display">
             Fale com a Vale do Sol
           </h1>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-ink-soft">
-            Estamos no Centro de Arujá desde {SITE.foundedYear}. Venha tomar um café, ligue ou mande
-            mensagem — o que for mais prático para você.
+            Estamos em Arujá desde {SITE.foundedYear}. Visite o escritório no Centro, ligue ou mande
+            mensagem — como for mais prático para você.
           </p>
         </header>
 

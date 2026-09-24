@@ -31,6 +31,7 @@ export function PropertyCard({
   imageClassName = "aspect-[4/3]",
   size = "md",
   sizes = "(min-width: 1280px) 420px, (min-width: 768px) 45vw, 100vw",
+  lede,
 }: {
   property: PropertyCardData;
   priority?: boolean;
@@ -38,7 +39,10 @@ export function PropertyCard({
   imageClassName?: string;
   size?: "md" | "lg" | "xl";
   sizes?: string;
+  /** Linha de apresentação (ver propertyLede) — só nas versões de vitrine. */
+  lede?: string | null;
 }) {
+  const showcase = size !== "md";
   const cover = propertyCoverUrl(property);
   const area = formatArea(property.area_total ?? property.area_built);
   const bedrooms = formatNumber(property.bedrooms);
@@ -131,6 +135,17 @@ export function PropertyCard({
               ))}
             </ul>
           ) : null}
+
+          {showcase && lede ? (
+            <p
+              className={cn(
+                "mt-4 max-w-xl text-pretty leading-relaxed text-ink-soft",
+                size === "xl" ? "text-[1.0625rem] md:text-lg" : "line-clamp-2 text-[0.9375rem]"
+              )}
+            >
+              {lede}
+            </p>
+          ) : null}
         </div>
 
         <div className={cn("mt-auto pt-5", size === "xl" && "md:col-span-5 md:pt-0")}>
@@ -146,12 +161,17 @@ export function PropertyCard({
                 onRequest: property.price_on_request,
               })}
             </p>
-            {/* Com mouse, o convite aparece no hover; no toque fica sempre visível. */}
+            {/* Na vitrine o convite fica sempre à vista. Nas listagens, com
+                mouse ele aparece no hover; no toque fica sempre visível. */}
             <span
               aria-hidden
-              className="link-line shrink-0 text-[0.625rem] text-ink transition-[opacity,transform] duration-500 ease-[var(--ease-premium)] [@media(hover:hover)]:-translate-x-1 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-x-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100"
+              className={cn(
+                "link-line shrink-0 text-[0.625rem] text-ink",
+                !showcase &&
+                  "transition-[opacity,transform] duration-500 ease-[var(--ease-premium)] [@media(hover:hover)]:-translate-x-1 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-x-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100"
+              )}
             >
-              Conhecer imóvel
+              {showcase ? "Explorar imóvel" : "Conhecer imóvel"}
               <ArrowRightIcon className="size-3.5" />
             </span>
           </div>

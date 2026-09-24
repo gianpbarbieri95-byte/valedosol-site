@@ -26,9 +26,9 @@ export function SearchPaths({ paths }: { paths: SearchPath[] }) {
       <Reveal>
         <SectionHeading
           id="caminhos"
-          eyebrow="Por onde começar"
-          title="Encontre pelo que você procura."
-          description="Três caminhos, com o que existe hoje no acervo."
+          eyebrow="Por estilo de vida"
+          title="Encontre pelo seu estilo de vida."
+          description="Morar, investir ou ter mais espaço: três caminhos pelo acervo de hoje."
         />
       </Reveal>
 

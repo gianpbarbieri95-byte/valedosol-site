@@ -45,12 +45,20 @@ export function LocalKnowledge({
                   onFocus={() => place.image && setActive(place.slug)}
                   className="group flex items-center gap-5 py-5 md:py-6"
                 >
-                  <span className="w-6 text-xs text-muted tabular">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="hidden w-6 text-xs text-muted tabular sm:block">{String(index + 1).padStart(2, "0")}</span>
+                  {/* No celular não há hover para conduzir a janela de foto:
+                      cada linha leva a sua miniatura. */}
+                  <span className="relative size-16 shrink-0 overflow-hidden rounded-[var(--radius-xs)] bg-surface-alt lg:hidden">
+                    {place.image ? (
+                      <Image src={place.image} alt="" fill quality={70} sizes="64px" className="object-cover" />
+                    ) : null}
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
-                        "block truncate font-display text-[1.65rem] leading-tight transition-colors duration-500 md:text-[2rem]",
-                        isActive ? "text-ink" : "text-ink/55 group-hover:text-ink"
+                        "block text-balance font-display text-[1.45rem] leading-tight transition-colors duration-500 md:truncate md:text-[2rem]",
+                        // Sem hover no toque: no celular todas as linhas ficam em tom cheio.
+                        isActive ? "text-ink" : "text-ink lg:text-ink/55 lg:group-hover:text-ink"
                       )}
                     >
                       {place.name}
@@ -91,10 +99,16 @@ export function LocalKnowledge({
               )}
             />
           ))}
-          <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#04140b]/70 to-transparent" />
-          <p className="absolute bottom-6 left-6 right-6 font-display text-2xl text-white">
-            {places.find((place) => place.slug === active)?.name}
-          </p>
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#04140b]/75 to-transparent" />
+          <div className="absolute inset-x-6 bottom-6 flex items-end justify-between gap-6 text-white">
+            <p className="font-display text-[2rem] leading-tight">
+              {places.find((place) => place.slug === active)?.name}
+            </p>
+            <Link href={`/regioes/${active}`} className="link-line shrink-0 text-[0.625rem] text-white">
+              Explorar região
+              <ArrowRightIcon className="size-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

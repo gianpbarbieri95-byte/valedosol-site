@@ -221,6 +221,31 @@ export async function getShowcaseProperties(limit = 6): Promise<PropertyCardData
   return presentable.slice(0, limit);
 }
 
+/**
+ * Descrição e ambientes de alguns imóveis, para a linha de apresentação da
+ * vitrine. Fica fora das colunas do card para não pesar as listagens.
+ */
+export async function getPropertyExtras(
+  ids: string[]
+): Promise<Map<string, { description: string | null; highlights: string[] | null }>> {
+  if (!ids.length || !isSupabaseConfigured()) return new Map();
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id, description, highlights")
+    .in("id", ids);
+  if (error) return new Map();
+  return new Map(
+    (data ?? []).map((row) => [
+      row.id as string,
+      {
+        description: (row.description as string | null) ?? null,
+        highlights: (row.highlights as string[] | null) ?? null,
+      },
+    ])
+  );
+}
+
 export async function getPropertyBySlug(slug: string): Promise<PropertyWithRelations | null> {
   if (!isSupabaseConfigured()) return null;
 

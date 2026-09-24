@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "outline" | "ghost" | "gold" | "danger" | "onDark";
+type Variant = "primary" | "outline" | "ghost" | "gold" | "brass" | "danger" | "onDark";
 type Size = "sm" | "md" | "lg";
 
 const base =
@@ -21,7 +21,9 @@ const variants: Record<Variant, string> = {
   outline:
     "border border-ink/25 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-white",
   ghost: "text-ink-soft hover:bg-surface-alt hover:text-ink",
-  gold: "bg-gold text-white hover:bg-[#a67a22]",
+  gold: "bg-gold text-white hover:bg-gold-hover",
+  // O dourado sobre o verde escuro: o tom claro do logo, com texto escuro.
+  brass: "bg-gold-bright text-primary-deep hover:bg-[#e2b654]",
   danger: "bg-danger text-white hover:brightness-95",
   // Sobre foto ou fundo escuro: vidro claro que não briga com a imagem.
   onDark: "border border-white/40 bg-transparent text-white hover:border-white hover:bg-white hover:text-primary-deep",

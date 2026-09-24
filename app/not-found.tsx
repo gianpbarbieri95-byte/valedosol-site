@@ -8,7 +8,7 @@ export default function RootNotFound() {
   return (
     <html lang="pt-BR">
       <body className="flex min-h-screen flex-col items-center justify-center bg-canvas px-6 text-center font-sans">
-        <p className="font-display text-6xl text-[#b8892b]">404</p>
+        <p className="font-display text-6xl text-gold">404</p>
         <h1 className="mt-6 font-display text-3xl text-[#141a16]">Página não encontrada</h1>
         <p className="mt-3 max-w-sm text-[#4b534d]">
           O endereço que você abriu não existe no site da Vale do Sol Imóveis.

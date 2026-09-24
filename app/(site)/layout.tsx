@@ -1,10 +1,11 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { getSettings } from "@/lib/queries/settings";
+import { getRegions } from "@/lib/queries/taxonomies";
 import { Analytics } from "@/components/analytics";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings();
+  const [settings, regions] = await Promise.all([getSettings(), getRegions().catch(() => [])]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -18,7 +19,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main id="conteudo" className="flex-1">
         {children}
       </main>
-      <Footer contact={settings.contact} social={settings.social} />
+      <Footer
+        contact={settings.contact}
+        social={settings.social}
+        regions={regions.map((region) => ({ slug: region.slug, name: region.name }))}
+      />
       <Analytics />
     </div>
   );

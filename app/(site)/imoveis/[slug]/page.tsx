@@ -14,19 +14,21 @@ import {
   formatLocation,
   formatNumber,
   formatPrice,
+  propertyLede,
   propertyWhatsAppMessage,
   truncate,
   whatsappUrl,
 } from "@/lib/format";
 
-import { PropertyGallery } from "@/components/property/property-gallery";
+import Link from "next/link";
+import { PropertyGallery, PropertyPhotoGrid } from "@/components/property/property-gallery";
 import { PropertyCard } from "@/components/property/property-card";
 import { PropertyInterestForm } from "@/components/forms/property-interest-form";
 import { FavoriteButton } from "@/components/property/favorite-button";
 import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadcrumb";
 import { Badge, SectionHeading, StatusBadge } from "@/components/ui/primitives";
 import { ButtonExternal, ButtonLink } from "@/components/ui/button";
-import { PinIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, PinIcon, WhatsAppIcon } from "@/components/ui/icons";
 
 export const revalidate = 300;
 // Um imóvel publicado depois do build é renderizado sob demanda e cacheado.
@@ -128,7 +130,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
   // Uma linha de abertura sob o nome: o começo da própria descrição, cortado
   // sem partir palavra. O texto completo continua em "Sobre este imóvel".
   const paragraphs = property.description?.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean) ?? [];
-  const lede = paragraphs[0] ? truncate(paragraphs[0], 190) : null;
+  const lede = propertyLede(property, 200);
   // Descrição longa abre só o começo; o resto fica a um clique.
   const [openParagraphs, moreParagraphs] =
     paragraphs.length > 3 ? [paragraphs.slice(0, 2), paragraphs.slice(2)] : [paragraphs, []];
@@ -145,6 +147,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     { label: "IPTU", value: property.iptu ? formatPrice(property.iptu) : null },
     { label: "Mobiliado", value: property.is_furnished ? "Sim" : null },
   ].filter((item) => item.value);
+
+  const sections = [
+    { id: "sobre", label: "Sobre", show: paragraphs.length > 0 },
+    { id: "caracteristicas", label: "Características", show: details.length > 0 },
+    { id: "ambientes", label: "Ambientes", show: Boolean(property.highlights?.length) },
+    { id: "localizacao", label: "Localização", show: Boolean(location) },
+    { id: "galeria", label: "Galeria", show: images.length > 1 },
+    { id: "interesse", label: "Contato", show: true },
+  ].filter((section) => section.show);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -197,20 +208,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
       <div id="property-page" className="container-site pb-[calc(7rem+env(safe-area-inset-bottom))] pt-6 md:pt-8 lg:pb-16">
         <Breadcrumb items={crumbs} />
 
-        {/* A galeria é a protagonista: abre a página, na largura inteira. */}
-        <div className="mt-6">
-          <PropertyGallery images={images} title={property.title} />
-        </div>
-
-        {/* Logo abaixo das fotos: o que é, onde fica e quanto custa. */}
-        <header className="mt-10 grid gap-8 border-b border-line pb-10 md:mt-14 lg:grid-cols-12 lg:items-end lg:gap-12">
+        {/* Como a abertura de uma matéria: onde fica, o nome, uma linha que
+            o apresenta e o valor. As fotos vêm logo em seguida. */}
+        <header className="mt-8 grid gap-6 md:mt-10 lg:grid-cols-12 lg:items-end lg:gap-12">
           <div className="min-w-0 lg:col-span-8">
             <div className="flex flex-wrap items-center gap-2.5">
+              <p className="label-caps text-[0.6875rem] text-gold">
+                {[place, property.property_type?.name].filter(Boolean).join(" · ")}
+              </p>
               {property.is_featured ? <Badge tone="gold">Destaque</Badge> : null}
               <StatusBadge status={property.status} />
-              <p className="label-caps text-[0.625rem] text-gold">
-                {[property.property_type?.name, place].filter(Boolean).join(" · ")}
-              </p>
             </div>
 
             <h1 className="mt-5 text-balance text-display">{property.title}</h1>
@@ -219,15 +226,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
               <p className="mt-5 max-w-2xl text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">{lede}</p>
             ) : null}
 
-            {location ? (
-              <p className="mt-5 flex items-center gap-2 text-sm text-muted">
-                <PinIcon className="text-gold" />
-                {property.address || location}
-              </p>
-            ) : null}
           </div>
 
-          <div className="lg:col-span-4 lg:text-right">
+          {/* No celular o valor já acompanha a leitura na barra fixa de baixo. */}
+          <div className="max-lg:hidden lg:col-span-4 lg:text-right">
             <p className="label-caps text-[0.625rem] text-muted">
               {property.purpose === "venda" ? "Valor de venda" : "Aluguel"}
             </p>
@@ -237,8 +239,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
           </div>
         </header>
 
+        {/* A galeria é a protagonista, na largura inteira. */}
+        <div className="mt-8 md:mt-10">
+          <PropertyGallery images={images} title={property.title} />
+        </div>
+
         {specs.length ? (
-          <dl className="grid grid-cols-2 border-b border-line sm:grid-cols-3 lg:flex lg:divide-x lg:divide-line">
+          <dl className="mt-6 grid grid-cols-2 border-b border-line sm:grid-cols-3 lg:mt-8 lg:flex lg:divide-x lg:divide-line lg:border-t">
             {specs.map((spec) => (
               <div key={spec.label} className="flex flex-col-reverse py-7 pr-6 lg:flex-1 lg:px-8 lg:first:pl-0">
                 <dt className="label-caps mt-2.5 text-[0.625rem] text-muted">{spec.label}</dt>
@@ -248,12 +255,31 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
           </dl>
         ) : null}
 
-        <div className="mt-14 grid gap-12 lg:mt-20 lg:grid-cols-12 lg:gap-16">
-          <div className="min-w-0 lg:col-span-7">
+        {/* Índice do anúncio: só as seções que este imóvel tem. */}
+        <nav aria-label="Seções do anúncio" className="mt-10 lg:mt-12">
+          <ul className="-mx-5 flex gap-7 overflow-x-auto px-5 scrollbar-none md:mx-0 md:px-0">
+            {sections.map((section) => (
+              <li key={section.id} className="shrink-0">
+                <a
+                  href={`#${section.id}`}
+                  className="label-caps inline-block py-2 text-[0.6875rem] text-ink-soft transition-colors duration-300 hover:text-ink"
+                >
+                  {section.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="mt-10 grid gap-12 lg:mt-14 lg:grid-cols-12 lg:gap-16">
+          <div className="min-w-0 space-y-20 lg:col-span-7">
             {paragraphs.length ? (
-              <section>
-                <p className="eyebrow">Descrição</p>
-                <h2 className="mt-4 text-title">Sobre este imóvel</h2>
+              <section id="sobre" aria-labelledby="sobre-titulo">
+                <p className="eyebrow">Sobre o imóvel</p>
+                <h2 id="sobre-titulo" className="mt-4 text-title">
+                  {property.property_type?.name ?? "O imóvel"}
+                  {place ? ` em ${place}` : ""}
+                </h2>
                 <div className="mt-6 max-w-[65ch] space-y-4 text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
                   {openParagraphs.map((paragraph, index) => (
                     <p key={index}>{paragraph}</p>
@@ -276,10 +302,27 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
               </section>
             ) : null}
 
+            {details.length ? (
+              <section id="caracteristicas" aria-labelledby="caracteristicas-titulo">
+                <p className="eyebrow">Características</p>
+                <h2 id="caracteristicas-titulo" className="mt-4 text-title">Ficha do imóvel</h2>
+                <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3">
+                  {details.map((item) => (
+                    <div key={item.label} className="flex min-w-0 flex-col-reverse border-t border-line pt-4">
+                      <dt className="label-caps mt-2 text-[0.5625rem] text-muted">{item.label}</dt>
+                      <dd className="font-display text-[1.4rem] leading-tight text-ink [overflow-wrap:anywhere]">
+                        {item.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ) : null}
+
             {property.highlights?.length ? (
-              <section className="mt-16">
+              <section id="ambientes" aria-labelledby="ambientes-titulo">
                 <p className="eyebrow">Ambientes</p>
-                <h2 className="mt-4 text-title">Composição</h2>
+                <h2 id="ambientes-titulo" className="mt-4 text-title">Composição</h2>
                 <ul className="mt-6 grid gap-x-10 sm:grid-cols-2">
                   {property.highlights.map((item, index) => (
                     <li
@@ -295,36 +338,62 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
               </section>
             ) : null}
 
-            {details.length ? (
-              <section className="mt-16">
-                <p className="eyebrow">Características</p>
-                <h2 className="mt-4 text-title">Ficha do imóvel</h2>
-                <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3">
-                  {details.map((item) => (
-                    <div key={item.label} className="flex min-w-0 flex-col-reverse border-t border-line pt-4">
-                      <dt className="label-caps mt-2 text-[0.5625rem] text-muted">{item.label}</dt>
-                      <dd className="font-display text-[1.4rem] leading-tight text-ink [overflow-wrap:anywhere]">
-                        {item.value}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
+            {location ? (
+              <section id="localizacao" aria-labelledby="localizacao-titulo">
+                <p className="eyebrow">Localização</p>
+                <h2 id="localizacao-titulo" className="mt-4 text-title">Onde fica</h2>
+                <p className="mt-3 flex items-start gap-2 text-[0.9375rem] text-ink-soft">
+                  <PinIcon className="mt-0.5 shrink-0 text-gold" />
+                  {property.address || location}
+                </p>
+                {property.latitude && property.longitude ? (
+                  <div className="mt-6 overflow-hidden rounded-[var(--radius-xs)] border border-line bg-surface-alt">
+                    <iframe
+                      title={`Mapa — ${property.title}`}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-[320px] w-full border-0 md:h-[380px]"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`}
+                    />
+                  </div>
+                ) : null}
+                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+                  {property.region ? (
+                    <Link href={`/regioes/${property.region.slug}`} className="link-line text-ink">
+                      Imóveis em {property.region.name}
+                      <ArrowRightIcon className="size-3.5" />
+                    </Link>
+                  ) : null}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      property.latitude && property.longitude
+                        ? `${property.latitude},${property.longitude}`
+                        : `${property.address || location}, SP`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link-line text-ink"
+                  >
+                    Abrir no Google Maps
+                    <ArrowRightIcon className="size-3.5" />
+                  </a>
+                </div>
               </section>
             ) : null}
 
-            {property.latitude && property.longitude ? (
-              <section className="mt-16">
-                <p className="eyebrow">Localização</p>
-                <h2 className="mt-4 text-title">Onde fica</h2>
-                <p className="mt-2 text-sm text-ink-soft">{property.address || location}</p>
-                <div className="mt-6 overflow-hidden rounded-[var(--radius-xs)] border border-line">
-                  <iframe
-                    title={`Mapa — ${property.title}`}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="h-[380px] w-full border-0"
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`}
-                  />
+            {images.length > 1 ? (
+              <section id="galeria" aria-labelledby="galeria-titulo">
+                <div className="flex items-end justify-between gap-6">
+                  <div>
+                    <p className="eyebrow">Galeria</p>
+                    <h2 id="galeria-titulo" className="mt-4 text-title">Todas as fotos</h2>
+                  </div>
+                  <p className="label-caps pb-1 text-[0.625rem] text-muted tabular">
+                    {images.length} fotos
+                  </p>
+                </div>
+                <div className="mt-8">
+                  <PropertyPhotoGrid images={images} title={property.title} />
                 </div>
               </section>
             ) : null}
@@ -332,7 +401,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
           {/* ------------------------------------------------------- Lateral */}
           <aside className="min-w-0 lg:col-span-5 xl:col-span-4 xl:col-start-9">
-            <div className="sticky top-28 border border-line bg-surface">
+            <div className="sticky top-24 border border-line bg-surface">
               <div className="border-b border-line p-7">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -349,7 +418,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                   <>
                     <ButtonExternal href={whatsapp} variant="gold" size="lg" className="mt-7 w-full">
                       <WhatsAppIcon />
-                      Quero conhecer este imóvel
+                      Falar sobre este imóvel
                     </ButtonExternal>
                     <p className="mt-3 text-center text-xs text-muted">
                       Conversa direta com a Vale do Sol, pelo WhatsApp.
@@ -359,7 +428,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
               </div>
 
               <div className="p-7" id="interesse">
-                <h2 className="text-2xl">Prefere que a gente entre em contato?</h2>
+                <p className="eyebrow">Contato</p>
+                <h2 className="mt-3 text-2xl">Prefere que a gente entre em contato?</h2>
                 <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted">
                   Deixe seu contato e a gente responde sobre o imóvel {property.code}.
                 </p>

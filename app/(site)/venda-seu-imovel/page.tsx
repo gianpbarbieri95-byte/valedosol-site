@@ -14,7 +14,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Venda seu imóvel",
   description:
-    "Envie os dados do seu imóvel em Arujá e região para a Vale do Sol Imóveis. Atuamos na cidade desde 1975.",
+    "Quer vender ou alugar seu imóvel em Arujá? Envie os dados para a Vale do Sol Imóveis, imobiliária que atua na cidade desde 1975.",
   alternates: { canonical: "/venda-seu-imovel" },
 };
 
@@ -32,9 +32,9 @@ export default async function SellPropertyPage() {
 
       <div className="mt-8 grid gap-12 lg:grid-cols-12 lg:gap-16">
         <header className="lg:col-span-5">
-          <p className="eyebrow">Anuncie com a gente</p>
-          <h1 className="mt-4 text-balance text-[2.5rem] leading-[1.08] md:text-[3rem]">
-            Seu imóvel merece ser apresentado da maneira certa.
+          <p className="eyebrow">Para proprietários</p>
+          <h1 className="mt-4 text-balance text-display">
+            Está pensando em vender seu imóvel?
           </h1>
           <p className="mt-6 text-pretty text-lg leading-relaxed text-ink-soft">
             Há {new Date().getFullYear() - SITE.foundedYear} anos a Vale do Sol acompanha o mercado de
@@ -52,8 +52,8 @@ export default async function SellPropertyPage() {
                 text: "Falamos com você para entender o imóvel, tirar dúvidas e combinar a visita.",
               },
               {
-                title: "O imóvel entra no site",
-                text: "Fotografado e descrito do jeito certo, publicado para quem procura em Arujá.",
+                title: "O imóvel é anunciado",
+                text: "Descrito com cuidado e publicado para quem procura em Arujá.",
               },
             ].map((step, index) => (
               <li key={step.title} className="flex gap-5">

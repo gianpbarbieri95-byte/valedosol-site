@@ -34,7 +34,8 @@
   --color-surface-alt: #eeeae3;
   --color-ink: #1a1d1b;
   --color-ink-soft: #4d524e;
-  --color-muted: #7d807b;
+  /* #686b66: o cinza mais claro que ainda passa 4,5:1 sobre o papel (AA) */
+  --color-muted: #686b66;
   --color-line: #e2ddd4;
   --color-line-strong: #c9c2b5;
 
@@ -43,7 +44,10 @@
   --color-primary-hover: #093718;
   --color-primary-deep: #072d17;
   --color-primary-soft: #e8efe9;
-  --color-gold: #b8892b;
+  /* Dourado de texto e botão: escurecido até 5:1 sobre o papel e sobre
+     branco (AA). O dourado claro fica para fundos escuros e detalhes. */
+  --color-gold: #86621a;
+  --color-gold-hover: #6f5114;
   --color-gold-bright: #d3a33f;
   --color-gold-soft: #f4ecd9;
 
@@ -118,9 +122,16 @@
     color: var(--color-ink);
   }
 
+  /* A Cormorant desenha algarismos de texto (o 7 e o 9 descem da linha):
+     bonitos no meio de uma frase, ruins em preço, área e ano. Títulos e
+     números usam os algarismos alinhados. */
+  h1, h2, h3, h4 {
+    font-variant-numeric: lining-nums;
+  }
+
   /* Números em fichas e tabelas alinham na vertical */
   dd, th, td, .tabular {
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: lining-nums tabular-nums;
   }
 
   /* Foco visível e consistente — requisito de acessibilidade */
@@ -334,6 +345,23 @@
 
   .reveal.timeline[data-visible="true"]::before { transform: none; }
 
+  /* Traço dourado da cronologia: acompanha a rolagem onde o navegador
+     tem scroll-driven animations; nos outros, aparece inteiro, parado. */
+  .timeline-progress { transform-origin: top; }
+
+  @supports (animation-timeline: view()) {
+    .timeline-progress {
+      animation: timeline-grow linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 65%;
+    }
+  }
+
+  @keyframes timeline-grow {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+  }
+
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
 
@@ -461,4 +489,5 @@
   }
 
   .ken-burns { animation: none; }
+  .timeline-progress { animation: none !important; transform: none; }
 }
