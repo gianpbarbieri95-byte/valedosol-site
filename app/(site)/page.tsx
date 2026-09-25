@@ -272,12 +272,12 @@ export default async function HomePage() {
       */}
       <section
         id="home-hero"
-        className="relative isolate bg-primary-deep pt-[4.5rem] text-white lg:flex lg:min-h-[max(calc(100svh-4.5rem),42rem)] lg:flex-col lg:pt-0"
+        className="relative isolate bg-primary-deep pt-20 text-white lg:flex lg:min-h-[max(calc(100svh-4.5rem),42rem)] lg:flex-col lg:pt-0"
       >
         <HeroFilm
           film={FILM}
           className="aspect-video lg:absolute lg:inset-0 lg:aspect-auto"
-          controlsClassName="right-3 top-[calc(4.5rem+56.25vw-3rem)] lg:inset-x-0 lg:bottom-[156px] lg:right-0 lg:top-auto"
+          controlsClassName="right-3 top-[calc(5rem+56.25vw-3rem)] lg:inset-x-0 lg:bottom-[156px] lg:right-0 lg:top-auto"
           overlay={
             <>
               {/* Topo: o cabeçalho continua legível até no quadro claro do fim */}

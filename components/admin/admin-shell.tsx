@@ -74,7 +74,7 @@ export function AdminShell({
       {/* Topo no celular */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-surface px-4 py-3 lg:hidden">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <Image src="/brand/logo.png" alt="" width={190} height={188} className="h-8 w-auto" />
+          <Image src="/brand/logo.png" alt="" width={250} height={249} className="h-8 w-auto" />
           <span className="text-sm font-medium">Painel</span>
         </Link>
         <button
@@ -100,7 +100,7 @@ export function AdminShell({
         <aside className="hidden w-64 shrink-0 border-r border-line bg-surface lg:flex lg:min-h-screen lg:flex-col">
           <div className="border-b border-line px-5 py-5">
             <Link href="/" className="flex items-center gap-2.5">
-              <Image src="/brand/logo.png" alt="" width={190} height={188} className="h-10 w-auto" />
+              <Image src="/brand/logo.png" alt="" width={250} height={249} className="h-10 w-auto" />
               <span className="text-[0.8125rem] leading-tight text-ink-soft">
                 Vale do Sol
                 <br />

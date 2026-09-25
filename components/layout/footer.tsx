@@ -68,8 +68,9 @@ export function Footer({
           <Image
             src="/brand/logo.png"
             alt={SITE.name}
-            width={190}
-            height={188}
+            width={250}
+            height={249}
+            unoptimized
             className="h-20 w-auto"
           />
           <p className="mt-5 max-w-sm text-pretty text-sm leading-relaxed text-ink-soft">

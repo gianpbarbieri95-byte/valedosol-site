@@ -23,7 +23,7 @@ export default async function LoginPage({
     <main className="flex min-h-screen items-center justify-center bg-canvas px-5 py-12">
       <div className="w-full max-w-sm">
         <Link href="/" className="flex justify-center">
-          <Image src="/brand/logo.png" alt={SITE.name} width={190} height={188} className="h-20 w-auto" priority />
+          <Image src="/brand/logo.png" alt={SITE.name} width={250} height={249} className="h-20 w-auto" priority />
         </Link>
 
         <div className="mt-8 rounded-[var(--radius-md)] border border-line bg-surface p-7 shadow-subtle">
