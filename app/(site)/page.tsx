@@ -50,8 +50,8 @@ const FILM_TRANSCRIPT = [
 
 // Os arquivos do filme são os mesmos de sempre — nada aqui os altera.
 const FILM = {
-  src: "/video/sol-sobre-aruja-720.mp4",
-  fullSrc: "/video/sol-sobre-aruja.mp4",
+  src: "/video/sol-sobre-aruja-720.mp4?v=2",
+  fullSrc: "/video/sol-sobre-aruja.mp4?v=2",
   poster: "/video/sol-sobre-aruja-poster.jpg",
   transcript: FILM_TRANSCRIPT,
   duration: 32,
