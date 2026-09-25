@@ -97,7 +97,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
       >
         {/* Rolando a página, a barra encolhe um pouco e o logo acompanha:
             continua presente sem pesar sobre o conteúdo. */}
-        <div className="container-site flex h-20 items-center justify-between gap-6 transition-[height] duration-500 ease-[var(--ease-premium)] lg:h-[6.5rem] lg:group-data-[scrolled=true]/header:h-20">
+        <div className="container-site flex h-20 items-center justify-between gap-6 transition-[height] duration-500 ease-[var(--ease-premium)] lg:h-[7rem] lg:group-data-[scrolled=true]/header:h-20">
           {/*
             O logo oficial entra como está: sem recorte, filtro ou recriação.
             Ele foi desenhado para fundo claro, então sobre a abertura escura
@@ -119,7 +119,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
               priority
               // Servido como está: a recompressão do otimizador borrava o texto fino.
               unoptimized
-              className="h-14 w-auto transition-[height] duration-500 ease-[var(--ease-premium)] lg:h-[4.75rem] lg:group-data-[scrolled=true]/header:h-14"
+              className="h-16 w-auto transition-[height] duration-500 ease-[var(--ease-premium)] lg:h-[5.5rem] lg:group-data-[scrolled=true]/header:h-16"
             />
           </Link>
 
@@ -206,14 +206,14 @@ export function Header({ contact }: { contact: ContactSettings }) {
           aria-label="Menu"
           className="fade-in fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-primary-deep text-white"
         >
-          <div className="container-site flex h-20 shrink-0 items-center justify-between lg:h-[6.5rem]">
+          <div className="container-site flex h-20 shrink-0 items-center justify-between lg:h-[7rem]">
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
               className="rounded-[var(--radius-xs)] bg-canvas px-2.5 py-1.5"
               aria-label={`${SITE.name} — início`}
             >
-              <Image src="/brand/logo.png" alt={SITE.name} width={250} height={249} unoptimized className="h-14 w-auto" />
+              <Image src="/brand/logo.png" alt={SITE.name} width={250} height={249} unoptimized className="h-16 w-auto" />
             </Link>
             <button
               type="button"
@@ -309,7 +309,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
         O cabeçalho é fixo, então precisa de um espaço equivalente no fluxo.
         Na home esse espaço não existe: a abertura passa por baixo de propósito.
       */}
-      <div aria-hidden className="h-20 on-home:hidden lg:h-[6.5rem]" />
+      <div aria-hidden className="h-20 on-home:hidden lg:h-[7rem]" />
     </>
   );
 }
