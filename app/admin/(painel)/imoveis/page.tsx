@@ -56,13 +56,13 @@ export default async function AdminPropertiesPage({
 
       <form
         method="get"
-        className="mt-6 flex flex-wrap items-end gap-3 rounded-[var(--radius-md)] border border-line bg-surface p-4"
+        className="mt-6 grid grid-cols-2 items-end gap-3 rounded-[var(--radius-md)] border border-line bg-surface p-4 md:flex md:flex-wrap"
       >
-        <div className="min-w-56 flex-1">
+        <div className="col-span-2 md:min-w-56 md:flex-1">
           <label htmlFor="busca" className="mb-1.5 block text-[0.8125rem] font-medium text-ink-soft">
             Buscar
           </label>
-          <Input id="busca" name="busca" defaultValue={search ?? ""} placeholder="Título, código ou bairro" />
+          <Input id="busca" name="busca" type="search" enterKeyHint="search" defaultValue={search ?? ""} placeholder="Título, código ou bairro" />
         </div>
 
         <div>
@@ -101,7 +101,7 @@ export default async function AdminPropertiesPage({
         </button>
 
         {search || state || status ? (
-          <Link href="/admin/imoveis" className="h-11 px-3 text-sm leading-[2.75rem] text-ink-soft hover:text-ink">
+          <Link href="/admin/imoveis" className="h-11 px-3 text-center text-sm leading-[2.75rem] text-ink-soft hover:text-ink">
             Limpar
           </Link>
         ) : null}
@@ -120,7 +120,65 @@ export default async function AdminPropertiesPage({
         />
       ) : (
         <>
-          <div className="mt-6 overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface">
+          {/* Celular: um cartão por imóvel, com os botões grandes o bastante para o dedo. */}
+          <ul className="mt-5 space-y-3 md:hidden">
+            {result.items.map((property) => {
+              const cover = storageUrl(STORAGE_BUCKETS.property, property.images?.[0]?.storage_path);
+              const published = property.publication_state === "published";
+
+              return (
+                <li key={property.id} className="overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface">
+                  <Link href={`/admin/imoveis/${property.id}`} className="flex gap-3 p-3 active:bg-canvas">
+                    <div className="relative size-20 shrink-0 overflow-hidden rounded-[var(--radius-xs)] bg-surface-alt">
+                      {cover ? <Image src={cover} alt="" fill sizes="80px" className="object-cover" /> : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-[0.9375rem] font-medium leading-snug text-ink">{property.title}</p>
+                      <p className="mt-1 truncate text-xs text-muted">
+                        {property.code}
+                        {property.neighborhood ? ` · ${property.neighborhood}` : ""}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <Badge tone={published ? "primary" : property.publication_state === "draft" ? "gold" : "muted"}>
+                          {STATE_LABEL[property.publication_state]}
+                        </Badge>
+                        <span className="text-[0.8125rem] text-ink-soft">
+                          {formatPrice(property.price, {
+                            purpose: property.purpose,
+                            onRequest: property.price_on_request,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="grid grid-cols-2 border-t border-line text-[0.8125rem]">
+                    <form action={setPublicationState} className="border-r border-line">
+                      <input type="hidden" name="id" value={property.id} />
+                      <input type="hidden" name="state" value={published ? "draft" : "published"} />
+                      <button
+                        type="submit"
+                        className={cn(
+                          "h-11 w-full transition-colors",
+                          published ? "text-ink-soft active:bg-surface-alt" : "font-medium text-primary active:bg-primary-soft"
+                        )}
+                      >
+                        {published ? "Despublicar" : "Publicar"}
+                      </button>
+                    </form>
+                    <Link
+                      href={`/admin/imoveis/${property.id}`}
+                      className="grid h-11 place-items-center text-ink-soft active:bg-surface-alt"
+                    >
+                      Editar e fotos
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-6 hidden overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface md:block">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">Imóveis cadastrados</caption>
               <thead className="border-b border-line bg-canvas text-xs uppercase tracking-[0.08em] text-muted">

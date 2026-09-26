@@ -37,9 +37,9 @@ function Landscape({ className }: { className?: string }) {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; erro?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, erro } = await searchParams;
   const configured = isSupabaseConfigured();
 
   return (
@@ -120,6 +120,19 @@ export default async function LoginPage({
             Use o e-mail e a senha cadastrados para a equipe.
           </p>
 
+          {erro === "link" ? (
+            <p
+              role="alert"
+              className="mt-6 rounded-[var(--radius-sm)] border border-gold/30 bg-gold-soft px-4 py-3 text-sm leading-relaxed text-[#7a5a10]"
+            >
+              O link para criar a senha nova venceu, já foi usado ou foi aberto em outro navegador.{" "}
+              <Link href="/admin/esqueci-senha" className="font-medium underline underline-offset-4">
+                Peça um link novo
+              </Link>{" "}
+              e abra-o neste mesmo aparelho.
+            </p>
+          ) : null}
+
           {configured ? (
             <div className="mt-8">
               <LoginForm next={next} />
@@ -133,8 +146,8 @@ export default async function LoginPage({
 
           <div className="mt-10 border-t border-line pt-6 text-sm leading-relaxed text-muted">
             <p>
-              <span className="font-medium text-ink-soft">Esqueceu a senha?</span> Peça ao
-              administrador do painel para redefinir o seu acesso.
+              <span className="font-medium text-ink-soft">Primeiro acesso ou sem conta?</span> Peça ao
+              administrador do painel para cadastrar o seu e-mail.
             </p>
           </div>
 

@@ -25,6 +25,30 @@ const optionalInt = optionalNumber.pipe(
     .nullable()
 );
 
+/**
+ * Coordenada: aqui o ponto é separador decimal (é assim que o Google Maps
+ * copia, "-23.4080117"), não de milhar — por isso não passa pelo
+ * optionalNumber, que tiraria o ponto. E pode ser negativa: em Arujá as
+ * duas são.
+ */
+const optionalCoordinate = (limit: number, label: string) =>
+  z
+    .union([z.string(), z.number(), z.null(), z.undefined()])
+    .optional()
+    .transform((value) => {
+      if (value === null || value === undefined) return null;
+      const raw = String(value).trim();
+      if (raw === "") return null;
+      return Number(raw.replace(",", "."));
+    })
+    .pipe(
+      z
+        .number({ error: `${label} inválida. Use o formato -23.4080117` })
+        .min(-limit, `${label} fora do intervalo`)
+        .max(limit, `${label} fora do intervalo`)
+        .nullable()
+    );
+
 const optionalText = z
   .union([z.string(), z.null(), z.undefined()])
   .optional()
@@ -67,8 +91,8 @@ export const propertySchema = z.object({
   address: optionalText,
   zip_code: optionalText,
   region_id: optionalText.pipe(z.string().uuid("Selecione uma região válida").nullable()),
-  latitude: optionalNumber.pipe(z.number().min(-90).max(90).nullable()),
-  longitude: optionalNumber.pipe(z.number().min(-180).max(180).nullable()),
+  latitude: optionalCoordinate(90, "Latitude"),
+  longitude: optionalCoordinate(180, "Longitude"),
 
   area_total: optionalNumber,
   area_built: optionalNumber,

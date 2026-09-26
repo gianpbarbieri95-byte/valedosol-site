@@ -45,9 +45,12 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAdminArea = pathname.startsWith("/admin");
-  const isLoginPage = pathname === "/admin/login";
+  // Telas de quem ainda não entrou: login, senha esquecida e o retorno do
+  // link enviado por e-mail.
+  const isLoginPage = pathname === "/admin/login" || pathname === "/admin/esqueci-senha";
+  const isPublicPage = isLoginPage || pathname === "/admin/auth/confirmar";
 
-  if (isAdminArea && !isLoginPage && !user) {
+  if (isAdminArea && !isPublicPage && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
     loginUrl.search = `?next=${encodeURIComponent(pathname)}`;

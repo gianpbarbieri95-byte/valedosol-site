@@ -57,7 +57,7 @@ export function AdminShell({
           onClick={() => setMenuOpen(false)}
           aria-current={isActive(item.href) ? "page" : undefined}
           className={cn(
-            "block rounded-[var(--radius-sm)] px-3 py-2.5 text-sm transition-colors",
+            "block rounded-[var(--radius-sm)] px-3 py-3 text-[0.9375rem] transition-colors lg:py-2.5 lg:text-sm",
             isActive(item.href)
               ? "bg-primary-soft font-medium text-primary"
               : "text-ink-soft hover:bg-surface-alt hover:text-ink"
@@ -77,21 +77,50 @@ export function AdminShell({
           <Image src="/brand/logo.png" alt="" width={250} height={249} className="h-8 w-auto" />
           <span className="text-sm font-medium">Painel</span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-expanded={menuOpen}
-          aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-          className="grid size-10 place-items-center rounded-[var(--radius-sm)] hover:bg-surface-alt"
-        >
-          {menuOpen ? <CloseIcon className="size-6" /> : <MenuIcon className="size-6" />}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {/* Cadastrar é o que mais se faz no celular: fica sempre a um toque. */}
+          {pathname !== "/admin/imoveis/novo" ? (
+            <Link
+              href="/admin/imoveis/novo"
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex h-10 items-center rounded-[var(--radius-sm)] bg-primary px-3.5 text-[0.8125rem] font-medium text-white transition-colors hover:bg-primary-hover"
+            >
+              + Novo imóvel
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            className="grid size-10 place-items-center rounded-[var(--radius-sm)] hover:bg-surface-alt"
+          >
+            {menuOpen ? <CloseIcon className="size-6" /> : <MenuIcon className="size-6" />}
+          </button>
+        </div>
       </header>
 
       {menuOpen ? (
-        <div className="border-b border-line bg-surface p-4 lg:hidden">
+        <div className="sticky top-[4.0625rem] z-[35] max-h-[calc(100dvh-4.0625rem)] overflow-y-auto border-b border-line bg-surface p-4 shadow-lg lg:hidden">
           {nav}
-          <SignOutButton className="mt-4 w-full" />
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="truncate text-sm font-medium text-ink">{name}</p>
+            <p className="truncate text-xs text-muted">
+              {email} ·{" "}
+              <Link href="/admin/nova-senha" onClick={() => setMenuOpen(false)} className="text-primary">
+                trocar senha
+              </Link>
+            </p>
+            <div className="mt-3 flex gap-2">
+              <SignOutButton className="h-11 w-full" />
+              <Link
+                href="/"
+                className="inline-flex h-11 flex-1 items-center justify-center rounded-[var(--radius-sm)] border border-line text-[0.8125rem] text-ink-soft"
+              >
+                Ver o site
+              </Link>
+            </div>
+          </div>
         </div>
       ) : null}
 
@@ -118,16 +147,19 @@ export function AdminShell({
               {role === "admin" ? "Administrador" : "Editor"}
             </p>
             <SignOutButton className="mt-3 w-full" />
-            <Link
-              href="/"
-              className="mt-2 block text-center text-xs text-muted transition-colors hover:text-ink-soft"
-            >
-              Ver o site
-            </Link>
+            <div className="mt-2 flex justify-center gap-3 text-xs text-muted">
+              <Link href="/admin/nova-senha" className="transition-colors hover:text-ink-soft">
+                Trocar senha
+              </Link>
+              <span aria-hidden>·</span>
+              <Link href="/" className="transition-colors hover:text-ink-soft">
+                Ver o site
+              </Link>
+            </div>
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-5 py-8 lg:px-10 lg:py-10">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-5 sm:py-8 lg:px-10 lg:py-10">{children}</main>
       </div>
     </div>
   );
@@ -135,7 +167,7 @@ export function AdminShell({
 
 function SignOutButton({ className }: { className?: string }) {
   return (
-    <form action={signOut}>
+    <form action={signOut} className="flex-1">
       <button
         type="submit"
         className={cn(
