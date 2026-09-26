@@ -1,4 +1,5 @@
 import type { PropertyPurpose } from "@/types/database";
+import { formatDescription, formatListItem } from "@/lib/description";
 
 const brl = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -109,7 +110,8 @@ export function propertyLede(
   const normalize = (value: string) =>
     value.toLocaleLowerCase("pt-BR").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 
-  const first = property.description?.split(/\n+/)[0]?.trim();
+  const opening = formatDescription(property.description)[0];
+  const first = opening?.type === "paragraph" ? opening.text : undefined;
   const sentence = first?.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? first;
   if (
     sentence &&
@@ -121,7 +123,7 @@ export function propertyLede(
   }
 
   const items = (property.highlights ?? [])
-    .map((item) => item.trim().replace(/[\s;,.:]+$/, ""))
+    .map(formatListItem)
     // Medidas soltas ("A/T = 2.000,00 m²") já aparecem na ficha.
     .filter((item) => item.length > 3 && !/=|^a\/[tc]\b/i.test(item));
   if (!items.length) return null;

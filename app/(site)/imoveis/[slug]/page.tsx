@@ -19,10 +19,12 @@ import {
   truncate,
   whatsappUrl,
 } from "@/lib/format";
+import { descriptionPlainText, formatDescription, formatListItem } from "@/lib/description";
 
 import Link from "next/link";
 import { PropertyGallery, PropertyPhotoGrid } from "@/components/property/property-gallery";
 import { PropertyCard } from "@/components/property/property-card";
+import { DescriptionBlocks } from "@/components/property/description-blocks";
 import { PropertyInterestForm } from "@/components/forms/property-interest-form";
 import { FavoriteButton } from "@/components/property/favorite-button";
 import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadcrumb";
@@ -56,7 +58,7 @@ export async function generateMetadata({
   const description =
     property.seo_description ||
     truncate(
-      property.description ||
+      descriptionPlainText(property.description) ||
         `${property.property_type?.name ?? "Imóvel"} ${location ? `em ${location}` : ""} · ${formatPrice(
           property.price,
           { purpose: property.purpose, onRequest: property.price_on_request }
@@ -129,7 +131,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
   // Uma linha de abertura sob o nome: o começo da própria descrição, cortado
   // sem partir palavra. O texto completo continua em "Sobre este imóvel".
-  const paragraphs = property.description?.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean) ?? [];
+  // Descrição padronizada (lib/description.ts): parágrafos e listas no mesmo
+  // formato em todos os imóveis, digitados agora ou vindos do WordPress.
+  const paragraphs = formatDescription(property.description);
   const lede = propertyLede(property, 200);
   // Descrição longa abre só o começo; o resto fica a um clique.
   const [openParagraphs, moreParagraphs] =
@@ -161,7 +165,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     "@context": "https://schema.org",
     "@type": "Residence",
     name: property.title,
-    description: property.description || undefined,
+    description: descriptionPlainText(property.description) || undefined,
     url: `${SITE.url}/imoveis/${property.slug}`,
     identifier: property.code,
     image: images.slice(0, 6).map((image) => image.url),
@@ -280,11 +284,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                   {property.property_type?.name ?? "O imóvel"}
                   {place ? ` em ${place}` : ""}
                 </h2>
-                <div className="mt-6 max-w-[65ch] space-y-4 text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
-                  {openParagraphs.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
+                <DescriptionBlocks blocks={openParagraphs} className="mt-6 max-w-[65ch]" />
                 {moreParagraphs.length ? (
                   // <details> nativo: funciona sem JavaScript e o texto segue indexável.
                   <details className="group mt-4 max-w-[65ch]">
@@ -292,11 +292,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                       <span className="group-open:hidden">Ler a descrição completa</span>
                       <span className="hidden group-open:inline">Mostrar menos</span>
                     </summary>
-                    <div className="mt-6 space-y-4 text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
-                      {moreParagraphs.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                    </div>
+                    <DescriptionBlocks blocks={moreParagraphs} className="mt-6" />
                   </details>
                 ) : null}
               </section>
@@ -330,8 +326,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                       className="flex gap-3 break-words border-b border-line py-3.5 text-[0.9375rem] leading-relaxed text-ink-soft [overflow-wrap:anywhere]"
                     >
                       <span aria-hidden className="mt-3 h-px w-3 shrink-0 bg-gold" />
-                      {/* Os textos vieram do WordPress como frases de lista, com ";" no fim. */}
-                      {item.trim().replace(/[\s;,.]+$/, "")}
+                      {formatListItem(item)}
                     </li>
                   ))}
                 </ul>

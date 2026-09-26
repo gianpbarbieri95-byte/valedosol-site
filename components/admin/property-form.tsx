@@ -4,6 +4,8 @@ import { useActionState, useState } from "react";
 import { saveProperty } from "@/actions/admin/properties";
 import { IDLE_STATE } from "@/lib/validations/lead";
 import { slugify } from "@/lib/format";
+import { formatDescription } from "@/lib/description";
+import { DescriptionBlocks } from "@/components/property/description-blocks";
 import { codePrefix, nextPropertyCode } from "@/lib/property-code";
 import { PROPERTY_STATUSES, PUBLICATION_STATES, STATUS_LABEL } from "@/lib/site";
 import { Field, Input, Select, Textarea } from "@/components/ui/primitives";
@@ -45,6 +47,8 @@ export function PropertyForm({
   const [priceOnRequest, setPriceOnRequest] = useState(property?.price_on_request ?? false);
   const [purpose, setPurpose] = useState<"venda" | "locacao">(property?.purpose ?? "venda");
   const [typeId, setTypeId] = useState(property?.property_type_id ?? "");
+  const [description, setDescription] = useState(property?.description ?? "");
+  const descriptionBlocks = formatDescription(description);
 
   // Prévia do código que o sistema vai gerar ao salvar um imóvel novo.
   const typeSlug = types.find((type) => type.id === typeId)?.slug ?? null;
@@ -282,9 +286,26 @@ export function PropertyForm({
         </Section>
 
         <Section title="Texto do anúncio">
-          <Field label="Descrição" htmlFor="p-descricao" hint="Separe parágrafos com uma linha em branco.">
-            <Textarea id="p-descricao" name="description" rows={7} defaultValue={property?.description ?? ""} />
+          <Field
+            label="Descrição"
+            htmlFor="p-descricao"
+            hint="Separe parágrafos com uma linha em branco; linhas com “-” viram lista. O site padroniza maiúsculas, espaços e pontuação sozinho."
+          >
+            <Textarea
+              id="p-descricao"
+              name="description"
+              rows={7}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
           </Field>
+
+          {descriptionBlocks.length ? (
+            <div className="rounded-[var(--radius-sm)] border border-line bg-canvas px-5 py-4">
+              <p className="label-caps text-[0.625rem] text-muted">Como vai aparecer no site</p>
+              <DescriptionBlocks blocks={descriptionBlocks} className="mt-3 text-[0.9375rem]" />
+            </div>
+          ) : null}
 
           <Field
             label="Composição dos ambientes"
