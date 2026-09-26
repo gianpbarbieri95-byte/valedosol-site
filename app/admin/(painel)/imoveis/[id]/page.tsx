@@ -74,7 +74,7 @@ export default async function EditPropertyPage({
           role="status"
           className="mt-6 rounded-[var(--radius-sm)] border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary"
         >
-          Imóvel cadastrado. Agora envie as fotos e escolha a capa — depois é só publicar.
+          Imóvel cadastrado. Agora envie as fotos e escolha a capa. Se ele ainda estiver como rascunho, mude a publicação para “Publicado” e salve.
         </p>
       ) : null}
 

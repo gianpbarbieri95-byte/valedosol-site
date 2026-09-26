@@ -25,7 +25,7 @@ export default async function NewPropertyPage() {
 
       <h1 className="mt-4 text-3xl">Novo imóvel</h1>
       <p className="mt-1.5 text-sm text-ink-soft">
-        Cadastre os dados agora; as fotos entram na próxima tela.
+        Preencha os dados principais; as fotos entram logo em seguida, na próxima tela.
       </p>
 
       <div className="mt-8">

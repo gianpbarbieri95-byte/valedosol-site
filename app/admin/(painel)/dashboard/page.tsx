@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{ erro?: string; senha?: string }>;
 }) {
-  const [session, stats, { erro }] = await Promise.all([
+  const [session, stats, { erro, senha }] = await Promise.all([
     requireStaff(),
     getDashboardStats(),
     searchParams,
@@ -37,6 +37,15 @@ export default async function DashboardPage({
           className="mb-6 rounded-[var(--radius-sm)] border border-gold/30 bg-gold-soft px-4 py-3 text-sm text-[#7a5a10]"
         >
           Essa área é exclusiva de administradores. Fale com quem administra o painel se precisar de acesso.
+        </p>
+      ) : null}
+
+      {senha === "alterada" ? (
+        <p
+          role="status"
+          className="mb-6 rounded-[var(--radius-sm)] border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary"
+        >
+          Senha nova salva. Use-a na próxima vez que entrar.
         </p>
       ) : null}
 

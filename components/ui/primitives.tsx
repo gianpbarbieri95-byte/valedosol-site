@@ -113,8 +113,10 @@ export function Label({ className, children, ...props }: ComponentProps<"label">
   );
 }
 
+/* 16px no celular: abaixo disso o Safari do iPhone dá zoom na tela ao tocar
+   no campo. Do sm para cima volta ao 14px do desenho. */
 const fieldBase =
-  "w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3.5 text-sm text-ink " +
+  "w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3.5 text-base text-ink sm:text-sm " +
   "placeholder:text-muted transition-colors duration-150 " +
   "hover:border-line-strong focus:border-primary focus:outline-none " +
   "disabled:cursor-not-allowed disabled:bg-surface-alt";

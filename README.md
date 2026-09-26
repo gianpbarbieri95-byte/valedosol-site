@@ -67,6 +67,25 @@ Para promover alguém depois:
 update public.profiles set role = 'admin' where email = 'pessoa@exemplo.com';
 ```
 
+### Esqueci minha senha
+
+`/admin/esqueci-senha` envia um link pelo Supabase; o link volta em
+`/admin/auth/confirmar`, que abre a sessão e leva a `/admin/nova-senha`. Quem
+já está logado troca a senha pelo mesmo endereço ("Trocar senha" no menu).
+Para o link funcionar, duas configurações no Supabase:
+
+1. **Authentication › URL Configuration › Redirect URLs**: incluir
+   `https://SEU-DOMINIO/admin/auth/confirmar` (um por domínio em uso — o da
+   Vercel durante a aprovação e o oficial depois). Sem isso o Supabase manda a
+   pessoa para a Site URL e o link não abre a tela de senha nova.
+2. **Authentication › Emails › SMTP Settings**: o envio padrão do Supabase só
+   entrega para membros da organização e tem limite de poucos e-mails por hora.
+   Para a equipe receber, configure um SMTP próprio (Resend, Gmail/Workspace…).
+
+O link precisa ser aberto no mesmo navegador em que foi pedido (fluxo PKCE).
+Se vencer ou for aberto em outro aparelho, o login mostra um aviso para pedir
+outro.
+
 ---
 
 ## Papéis
@@ -202,6 +221,9 @@ app/
   (site)/          páginas públicas (Home, imóveis, regiões, institucional)
   admin/
     login/         entrada
+    esqueci-senha/ pedido do link de senha nova
+    auth/confirmar retorno do link do e-mail (vira sessão)
+    nova-senha/    criar ou trocar a senha
     (painel)/      área autenticada, com barra lateral
 actions/           server actions (formulários, CRUD, autenticação)
 components/
