@@ -32,6 +32,7 @@ import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadc
 import { Badge, SectionHeading, StatusBadge } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
 import { ArrowRightIcon, PinIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { jsonLdScript } from "@/lib/utils";
 
 export const revalidate = 300;
 // Um imóvel publicado depois do build é renderizado sob demanda e cacheado.
@@ -205,7 +206,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([jsonLd, breadcrumbJsonLd(crumbs, SITE.url)]),
+          __html: jsonLdScript([jsonLd, breadcrumbJsonLd(crumbs, SITE.url)]),
         }}
       />
 

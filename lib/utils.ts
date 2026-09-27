@@ -27,3 +27,23 @@ export function buildQuery(params: Record<string, string | number | boolean | un
   const query = search.toString();
   return query ? `?${query}` : "";
 }
+
+/**
+ * JSON para <script type="application/ld+json">. JSON.stringify não escapa
+ * "<": um título de imóvel com "</script>" fecharia a tag e o resto viraria
+ * HTML da página. Com \u003c o JSON continua idêntico para quem o lê.
+ */
+export function jsonLdScript(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+}
+
+/** Só links http(s) viram href — "javascript:" e afins ficam de fora. */
+export function safeExternalUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}

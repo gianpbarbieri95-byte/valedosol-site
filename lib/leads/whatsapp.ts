@@ -40,6 +40,9 @@ export async function recordWhatsAppLead(input: Record<string, string>, headers:
     .from("properties")
     .select("id, code, title")
     .eq("id", parsed.data.property_id)
+    // Só imóvel que o visitante consegue ver (mesma regra da RLS pública).
+    .eq("publication_state", "published")
+    .neq("status", "inativo")
     .maybeSingle();
   if (propertyError) {
     console.error("[whatsapp] falha ao ler o imóvel:", propertyError.message);

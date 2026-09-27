@@ -30,18 +30,25 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   });
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
-  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", QUALITY));
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
 }
 
-export async function compressImage(file: File): Promise<File> {
+export interface CompressOptions {
+  maxSide?: number;
+  quality?: number;
+  keepBelowBytes?: number;
+}
+
+export async function compressImage(file: File, options: CompressOptions = {}): Promise<File> {
+  const { maxSide = MAX_SIDE, quality = QUALITY, keepBelowBytes = KEEP_BELOW_BYTES } = options;
   const image = await loadImage(file);
   const longest = Math.max(image.naturalWidth, image.naturalHeight);
   const alreadyWebReady = ["image/jpeg", "image/webp"].includes(file.type);
 
-  if (alreadyWebReady && longest <= MAX_SIDE && file.size <= KEEP_BELOW_BYTES) return file;
+  if (alreadyWebReady && longest <= maxSide && file.size <= keepBelowBytes) return file;
 
-  const scale = Math.min(1, MAX_SIDE / longest);
+  const scale = Math.min(1, maxSide / longest);
   const width = Math.round(image.naturalWidth * scale);
   const height = Math.round(image.naturalHeight * scale);
 
@@ -57,13 +64,13 @@ export async function compressImage(file: File): Promise<File> {
   context.imageSmoothingQuality = "high";
   context.drawImage(image, 0, 0, width, height);
 
-  const blob = await canvasToBlob(canvas);
+  const blob = await canvasToBlob(canvas, quality);
   // Libera a memória do canvas já: no celular, 20 fotos seguidas pesam.
   canvas.width = 0;
   canvas.height = 0;
 
   // Saiu maior e não precisou diminuir (ou já era JPEG/WEBP): fica o original.
-  if (!blob || (blob.size >= file.size && (alreadyWebReady || longest <= MAX_SIDE))) return file;
+  if (!blob || (blob.size >= file.size && (alreadyWebReady || longest <= maxSide))) return file;
 
   const name = `${file.name.replace(/\.[^.]+$/, "") || "foto"}.jpg`;
   return new File([blob], name, { type: "image/jpeg", lastModified: file.lastModified });

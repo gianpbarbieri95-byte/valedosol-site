@@ -48,6 +48,3 @@ next-env.d.ts
 
 # O .env.example é o arquivo versionado; .env.local nunca.
 !.env.example
-
-.vercel
-.env*

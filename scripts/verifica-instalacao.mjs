@@ -107,4 +107,29 @@ if (e5) {
   await admin.from("clients").delete().eq("id", cliente.id);
 }
 
+// 6. Cadastro público do Supabase Auth: tem que estar desligado. A anon key
+// está no JavaScript do site; com o cadastro aberto, qualquer um cria conta.
+const settingsRes = await fetch(`${URL_BASE}/auth/v1/settings`, { headers: { apikey: get("NEXT_PUBLIC_SUPABASE_ANON_KEY") } });
+const authSettings = settingsRes.ok ? await settingsRes.json() : {};
+marca(
+  authSettings.disable_signup === true,
+  `cadastro público (Authentication › Sign In / Providers › Allow new users to sign up): ${authSettings.disable_signup ? "desligado" : "LIGADO — desligue"}`
+);
+
+// 7. Conta nova sem convite não vira equipe (migration 0006)
+const intruso = `teste-rls-${Date.now()}@example.com`;
+const { data: criado, error: e7 } = await admin.auth.admin.createUser({ email: intruso, password: crypto.randomUUID(), email_confirm: true });
+if (e7) {
+  console.log("  conta de teste não criada:", e7.message);
+} else {
+  const { data: perfil } = await admin.from("profiles").select("role").eq("id", criado.user.id).maybeSingle();
+  marca(!perfil, `conta confirmada sem convite: perfil ${perfil ? `"${perfil.role}" CRIADO — aplique a 0006` : "não criado"}`);
+  await admin.from("profiles").delete().eq("id", criado.user.id);
+  await admin.auth.admin.deleteUser(criado.user.id);
+}
+
+// 8. Buckets de imagem não são listáveis pelo anônimo (migration 0006)
+const { data: listados } = await anon.storage.from("property-images").list("", { limit: 5 });
+marca((listados ?? []).length === 0, `listagem do bucket property-images pelo anônimo: ${listados?.length ?? 0} itens — esperado 0`);
+
 console.log(falhas === 0 ? "\nIsolamento confirmado: nenhuma falha." : `\n${falhas} FALHA(S) DE SEGURANÇA.`);

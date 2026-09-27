@@ -11,15 +11,17 @@ export function SubmitButton({
   children,
   className,
   size = "lg",
+  disabled = false,
 }: {
   children: React.ReactNode;
   className?: string;
   size?: "sm" | "md" | "lg";
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" size={size} disabled={pending} className={className} aria-busy={pending}>
+    <Button type="submit" size={size} disabled={pending || disabled} className={className} aria-busy={pending}>
       {pending ? "Enviando…" : children}
     </Button>
   );

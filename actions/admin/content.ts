@@ -8,6 +8,8 @@ import { requireAdmin, requireStaff } from "@/lib/auth";
 import { propertyTypeSchema, regionSchema } from "@/lib/validations/property";
 import { fieldErrors, type FormState } from "@/lib/validations/lead";
 import { STORAGE_BUCKETS } from "@/lib/site";
+import { GA_ID_PATTERN } from "@/lib/queries/settings";
+import { safeExternalUrl } from "@/lib/utils";
 
 function formToObject(formData: FormData): Record<string, string> {
   const result: Record<string, string> = {};
@@ -153,6 +155,20 @@ export async function saveSettings(_previous: FormState, formData: FormData): Pr
 
   if (Object.keys(grouped).length === 0) {
     return { status: "error", message: "Nada para salvar." };
+  }
+
+  // Estes valores vão para href e para dentro de <script> no site público.
+  for (const field of ["facebook", "instagram"] as const) {
+    const value = grouped.social?.[field];
+    if (value && !safeExternalUrl(value)) {
+      return { status: "error", message: `O link do ${field === "facebook" ? "Facebook" : "Instagram"} precisa começar com https://.` };
+    }
+  }
+  if (grouped.analytics?.ga_measurement_id) {
+    grouped.analytics.ga_measurement_id = grouped.analytics.ga_measurement_id.toUpperCase();
+    if (!GA_ID_PATTERN.test(grouped.analytics.ga_measurement_id)) {
+      return { status: "error", message: "ID do Google Analytics inválido. Use o formato G-XXXXXXXXXX." };
+    }
   }
 
   const supabase = await createClient();

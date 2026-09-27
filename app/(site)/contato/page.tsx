@@ -7,6 +7,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ContactForm } from "@/components/forms/contact-form";
 import { ButtonExternal } from "@/components/ui/button";
 import { ClockIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { jsonLdScript } from "@/lib/utils";
 
 export const revalidate = 3600;
 
@@ -79,7 +80,7 @@ export default async function ContactPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
 
       <div className="container-site py-10 md:py-14">
         <Breadcrumb items={[{ label: "Contato" }]} />

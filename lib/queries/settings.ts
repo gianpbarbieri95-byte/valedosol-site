@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createPublicClient, isSupabaseConfigured } from "@/lib/supabase/public";
+import { safeExternalUrl } from "@/lib/utils";
 import type { SiteSettingsMap } from "@/types/database";
 
 /**
@@ -99,13 +100,38 @@ export const getSettings = cache(async (): Promise<SiteSettingsMap> => {
         settings[key] = { ...settings[key], ...row.value } as never;
       }
     }
-    return settings;
+    return sanitizeSettings(settings);
   } catch {
     // Configuração é conteúdo de apoio: se o banco falhar, o site continua
     // no ar com os dados oficiais conhecidos em vez de mostrar erro.
     return DEFAULT_SETTINGS;
   }
 });
+
+/** ID do Google Analytics / Tag Manager: G-XXXX, GT-XXXX, AW-XXXX, UA-XXXX-X. */
+export const GA_ID_PATTERN = /^(G|GT|AW|DC)-[A-Z0-9]{4,20}$|^UA-\d{4,12}-\d{1,4}$/;
+
+/**
+ * Os valores abaixo vão para dentro de <script> e de href no site público.
+ * O formulário já recusa valor fora do formato (actions/admin/content.ts);
+ * aqui a regra se repete na leitura, para que um valor gravado por outro
+ * caminho nunca vire script ou link "javascript:".
+ */
+function sanitizeSettings(settings: SiteSettingsMap): SiteSettingsMap {
+  const gaId = settings.analytics.ga_measurement_id?.trim().toUpperCase() ?? "";
+  return {
+    ...settings,
+    social: {
+      ...settings.social,
+      facebook: safeExternalUrl(settings.social.facebook) ?? "",
+      instagram: safeExternalUrl(settings.social.instagram) ?? "",
+    },
+    analytics: {
+      ...settings.analytics,
+      ga_measurement_id: GA_ID_PATTERN.test(gaId) ? gaId : "",
+    },
+  };
+}
 
 export async function getSetting<K extends keyof SiteSettingsMap>(key: K): Promise<SiteSettingsMap[K]> {
   const settings = await getSettings();

@@ -13,6 +13,7 @@ import { PropertyCard } from "@/components/property/property-card";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
+import { jsonLdScript } from "@/lib/utils";
 
 export const revalidate = 600;
 export const dynamicParams = true;
@@ -70,7 +71,7 @@ export default async function RegionPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(crumbs, SITE.url)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd(crumbs, SITE.url)) }}
       />
 
       <section className="relative isolate overflow-hidden bg-primary">

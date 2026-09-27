@@ -47,6 +47,7 @@ As migrations ficam em `supabase/migrations/` e devem ser aplicadas **em ordem**
 | `0003_storage.sql` | buckets e políticas de arquivo |
 | `0004_seed.sql` | tipos de imóvel e dados de contato reais |
 | `0005_crm_portais.sql` | CRM (clientes, negócios, atividades, proprietários) e portais |
+| `0006_seguranca_equipe.sql` | só convidado vira equipe; buckets não listáveis; `search_path` fixo |
 
 Aplique pelo SQL Editor do Supabase (cole o conteúdo de cada arquivo, na ordem)
 ou pela CLI:
@@ -59,17 +60,40 @@ supabase db push
 As migrations são aditivas: usam `create table if not exists`, `on conflict do
 nothing` e não apagam nada.
 
-### O primeiro usuário vira administrador
+### Quem entra no painel
 
-Crie o usuário em Supabase › Authentication › Users. O trigger
-`handle_new_user` dá papel `admin` ao primeiro perfil criado e `editor` aos
-seguintes. Depois é só entrar em `https://admin.valedosolimoveis.com.br/`.
+O primeiro usuário criado no projeto vira `admin` (instalação). Depois disso,
+**só vira equipe quem foi convidado** (`0006_seguranca_equipe.sql`): o
+perfil nasce apenas se o e-mail estiver em `public.staff_invites` e depois
+que o e-mail estiver confirmado. Conta sem perfil não entra no painel e não
+enxerga nada pela RLS.
+
+Para colocar alguém na equipe:
+
+```sql
+-- 1. No SQL Editor do Supabase (papel: 'editor' ou 'admin')
+insert into public.staff_invites (email, role) values ('pessoa@exemplo.com', 'editor');
+```
+
+2. Supabase › Authentication › Users › **Add user** › *Create new user* (com
+   "Auto Confirm User" marcado) ou *Send invitation*. O perfil é criado na
+   hora da confirmação e o convite é consumido.
 
 Para promover alguém depois:
 
 ```sql
 update public.profiles set role = 'admin' where email = 'pessoa@exemplo.com';
 ```
+
+Para tirar alguém da equipe, apague o usuário em Authentication › Users (o
+perfil vai junto).
+
+> **Cadastro público desligado.** Em Authentication › Sign In / Providers,
+> deixe **"Allow new users to sign up" desligado**. A anon key está no
+> JavaScript do site; com o cadastro ligado, qualquer pessoa cria conta pela
+> API. A `0006` já impede que essa conta vire equipe, mas não há motivo para
+> aceitar cadastros. `node scripts/verifica-instalacao.mjs` confere as duas
+> coisas.
 
 ### Esqueci minha senha
 
@@ -112,6 +136,14 @@ outro.
 O bloqueio acontece em três camadas: `proxy.ts` barra o painel sem sessão,
 cada página chama `requireStaff()` ou `requireAdmin()`, e a RLS decide no banco.
 Nenhuma delas confia no frontend.
+
+Cabeçalhos de segurança (em `next.config.ts`, todas as respostas):
+Content-Security-Policy (scripts só do próprio site e do Google Analytics,
+conexões só com o Supabase e o Analytics, mapa só do OpenStreetMap, nada de
+iframe do site em outro lugar), HSTS, `X-Frame-Options: DENY`,
+`X-Content-Type-Options`, `Referrer-Policy` e `Permissions-Policy`. Se um dia
+entrar um serviço de terceiro novo (chat, pixel, outro mapa), o domínio dele
+precisa ser acrescentado na CSP, senão o navegador bloqueia.
 
 ---
 
@@ -402,9 +434,57 @@ scripts/           extração e importação do site antigo
 
 ## Deploy
 
-Vercel, com as quatro variáveis de ambiente configuradas no projeto.
-`NEXT_PUBLIC_SITE_URL` deve apontar para o domínio final — é ele que assina
-canonical, sitemap e Open Graph.
+Vercel, com as quatro variáveis de ambiente configuradas no projeto
+(modelo em `.env.example`). `NEXT_PUBLIC_SITE_URL` deve apontar para o
+domínio final — é ele que assina canonical, sitemap, Open Graph e os links
+dos XMLs dos portais.
 
 Páginas públicas usam ISR (`revalidate`), e o painel dispara `revalidatePath`
 ao salvar: publicar um imóvel atualiza o site sem rebuild manual.
+
+### Checklist para colocar no ar
+
+Supabase (projeto de produção):
+
+1. Rodar `supabase/migrations/0006_seguranca_equipe.sql` no SQL Editor.
+2. Authentication › Sign In / Providers › **Allow new users to sign up: desligado**.
+3. Conferir quem já tem acesso e apagar qualquer conta que não seja da equipe:
+   ```sql
+   select p.email, p.role, u.created_at, u.last_sign_in_at
+   from public.profiles p join auth.users u on u.id = p.id order by u.created_at;
+   ```
+4. Authentication › URL Configuration: **Site URL**
+   `https://admin.valedosolimoveis.com.br` e, em **Redirect URLs**, só
+   `https://admin.valedosolimoveis.com.br/auth/confirmar` (e o de
+   `admin.localhost` para desenvolvimento). Nada de curinga `**`.
+5. Authentication › Emails › SMTP próprio (sem ele, o "esqueci minha senha"
+   não chega para a equipe).
+6. Com o `.env.local` apontando para produção:
+   `node scripts/verifica-instalacao.mjs` — tem que terminar em
+   "Isolamento confirmado".
+
+Vercel (projeto `valedosol-imoveis`):
+
+1. Settings › Domains: acrescentar `valedosolimoveis.com.br` (Production) e
+   `www.valedosolimoveis.com.br` com **redirect 308 para
+   `valedosolimoveis.com.br`**. `admin.valedosolimoveis.com.br` já está lá.
+2. Settings › Environment Variables (Production):
+   - `NEXT_PUBLIC_SITE_URL` = `https://valedosolimoveis.com.br`
+   - **apagar `NEXT_PUBLIC_NOINDEX`** (senão o site continua pedindo para o
+     Google não indexar)
+   - `SUPABASE_SERVICE_ROLE_KEY` marcada como *Sensitive* (já está).
+3. Fazer um novo deploy depois de mexer nas variáveis — `NEXT_PUBLIC_*` é
+   gravada no build.
+
+DNS (onde o domínio está registrado, registro.br ou hospedagem):
+
+1. `valedosolimoveis.com.br` → registro **A** com o valor que a Vercel
+   mostrar em Settings › Domains.
+2. `www` → **CNAME** com o valor que a Vercel mostrar (normalmente
+   `cname.vercel-dns.com`).
+3. `admin` → **CNAME** `cname.vercel-dns.com` (já verificado na Vercel).
+4. Não mexer nos registros **MX**/TXT de e-mail.
+
+Depois de virar o DNS: abrir `https://valedosolimoveis.com.br/robots.txt`
+(tem que mostrar `Allow: /` e o sitemap), enviar o sitemap no Search Console
+e testar um link antigo do WordPress (`/sobre` → `/a-imobiliaria`).

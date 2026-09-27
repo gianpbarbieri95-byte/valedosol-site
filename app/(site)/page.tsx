@@ -37,6 +37,7 @@ import { LocalKnowledge } from "@/components/home/local-knowledge";
 import { CTASection } from "@/components/home/cta-section";
 import { SellSection } from "@/components/home/sell-section";
 import { Shortcuts } from "@/components/home/shortcuts";
+import { jsonLdScript } from "@/lib/utils";
 
 // Tudo o que aparece escrito no filme, na ordem, para quem usa leitor de tela.
 const FILM_TRANSCRIPT = [
@@ -259,7 +260,7 @@ export default async function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationLd) }}
       />
 
       {/* ------------------------------------------------------------ Abertura */}
