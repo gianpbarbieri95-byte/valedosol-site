@@ -64,8 +64,7 @@ insert into public.site_settings (key, value, is_public) values
   ('about', jsonb_build_object(
       'tagline', 'Desde 1975, construindo relações, negócios e histórias no mercado imobiliário.',
       'intro', 'Fundada em 1975, na cidade de Arujá, São Paulo, a Vale do Sol Empreendimentos Imobiliários nasceu da experiência de seu fundador, Leonardo Barbieri, italiano e veterano no mercado de vendas.',
-      -- E'...' permite 
-: os parágrafos são separados por linha em branco.
+      -- E'...' permite quebras de linha: os parágrafos são separados por linha em branco.
       'history', E'Ao longo de mais de cinco décadas, a empresa acompanhou o crescimento e a transformação de Arujá e região, construindo sua trajetória com base em conhecimento do mercado, relacionamento próximo com seus clientes e experiência em diferentes segmentos imobiliários.
 
 Hoje, a Vale do Sol é conduzida pela segunda geração da família, Maria Barbieri, advogada, e Francisco Barbieri, o Franco, engenheiro mecânico especializado em corretagem de imóveis.

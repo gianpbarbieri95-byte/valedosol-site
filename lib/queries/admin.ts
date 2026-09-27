@@ -2,7 +2,11 @@ import "server-only";
 import { highestBySeries } from "@/lib/property-code";
 
 import { createClient } from "@/lib/supabase/server";
+import { STALE_PROPERTY_DAYS } from "@/lib/crm";
 import type { Lead, Property, PropertyImage, PropertyStatus } from "@/types/database";
+
+/** Situações em que o imóvel ainda está no mercado. */
+const ACTIVE_STATUSES: PropertyStatus[] = ["disponivel", "reservado"];
 
 /**
  * Consultas do painel.
@@ -62,6 +66,10 @@ export async function listAdminProperties(options: {
   search?: string;
   state?: string;
   status?: string;
+  /** Só os sem atualização há STALE_PROPERTY_DAYS e ainda à venda/locação. */
+  stale?: boolean;
+  /** Só os que não têm nenhuma foto. */
+  noPhoto?: boolean;
   page?: number;
   pageSize?: number;
 }) {
@@ -82,6 +90,12 @@ export async function listAdminProperties(options: {
   }
   if (options.state) query = query.eq("publication_state", options.state);
   if (options.status) query = query.eq("status", options.status);
+  if (options.stale) {
+    const limit = new Date(Date.now() - STALE_PROPERTY_DAYS * 86_400_000).toISOString();
+    query = query.lt("updated_at", limit).in("status", ACTIVE_STATUSES);
+  }
+  // Anti-join do PostgREST: imóvel cujo embed de fotos veio vazio.
+  if (options.noPhoto) query = query.is("images", null);
 
   const { data, error, count } = await query
     .order("updated_at", { ascending: false })
@@ -188,4 +202,94 @@ export async function getAllSettings() {
 
   if (error) throw new Error(`Falha ao carregar configurações: ${error.message}`);
   return data ?? [];
+}
+
+/* ---------------------------------------------------------------- início */
+
+export interface PropertyHealthRow {
+  id: string;
+  code: string;
+  title: string;
+  status: PropertyStatus;
+  publication_state: string;
+  purpose: string;
+  price: number | null;
+  price_on_request: boolean;
+  bedrooms: number | null;
+  created_at: string;
+  updated_at: string;
+  property_type: { name: string } | null;
+  photoCount: number;
+}
+
+export interface PropertyHealth {
+  total: number;
+  published: number;
+  withoutPhoto: PropertyHealthRow[];
+  stale: PropertyHealthRow[];
+  recent: PropertyHealthRow[];
+}
+
+/**
+ * Saúde do acervo para o início: sem foto, desatualizados e recém-cadastrados.
+ * O acervo de uma imobiliária cabe numa consulta — a conta é feita aqui.
+ */
+export async function getPropertyHealth(): Promise<PropertyHealth> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select(
+      "id, code, title, status, publication_state, purpose, price, price_on_request, bedrooms, created_at, updated_at, property_type:property_types(name), images:property_images(id)"
+    )
+    .order("updated_at", { ascending: true });
+  if (error) throw new Error(`Falha ao ler o acervo: ${error.message}`);
+
+  const rows: PropertyHealthRow[] = ((data ?? []) as unknown as (Omit<PropertyHealthRow, "photoCount"> & { images: { id: string }[] })[]).map(
+    ({ images, ...row }) => ({ ...row, photoCount: images?.length ?? 0 })
+  );
+
+  const now = Date.now();
+  const staleLimit = now - STALE_PROPERTY_DAYS * 86_400_000;
+  const active = rows.filter((row) => ACTIVE_STATUSES.includes(row.status));
+
+  return {
+    total: rows.length,
+    published: rows.filter((row) => row.publication_state === "published").length,
+    withoutPhoto: rows.filter((row) => row.photoCount === 0),
+    stale: active.filter((row) => new Date(row.updated_at).getTime() < staleLimit),
+    recent: rows
+      .filter((row) => new Date(row.created_at).getTime() >= now - 30 * 86_400_000)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at)),
+  };
+}
+
+export async function listNewLeads(limit = 5) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("id, name, phone, source, created_at, property_code")
+    .eq("status", "novo")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`Falha ao listar contatos: ${error.message}`);
+  return data ?? [];
+}
+
+/** Opções de imóvel para vincular a um negócio ou atividade. */
+export async function listPropertyOptions() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id, code, title, purpose, price")
+    .order("code")
+    .limit(2000);
+  if (error) throw new Error(`Falha ao listar imóveis: ${error.message}`);
+  return data ?? [];
+}
+
+export async function countNewLeads(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase.from("leads").select("id", { count: "exact", head: true }).eq("status", "novo");
+  if (error) throw new Error(`Falha ao contar contatos: ${error.message}`);
+  return count ?? 0;
 }

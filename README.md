@@ -46,6 +46,7 @@ As migrations ficam em `supabase/migrations/` e devem ser aplicadas **em ordem**
 | `0002_rls.sql` | Row Level Security de todas as tabelas |
 | `0003_storage.sql` | buckets e políticas de arquivo |
 | `0004_seed.sql` | tipos de imóvel e dados de contato reais |
+| `0005_crm_portais.sql` | CRM (clientes, negócios, atividades, proprietários) e portais |
 
 Aplique pelo SQL Editor do Supabase (cole o conteúdo de cada arquivo, na ordem)
 ou pela CLI:
@@ -102,6 +103,10 @@ outro.
 | Contatos (ler, responder, anotar) | sim | sim |
 | Excluir contato | sim | não |
 | Regiões e tipos de imóvel | sim | sim (sem excluir) |
+| Clientes, negócios e atividades | sim | sim |
+| Excluir cliente ou negócio | sim | não |
+| Escolher imóveis para os portais | sim | sim |
+| Ligar portal, trocar link do XML, mapear tipos | sim | **não** |
 | Configurações do site | sim | **não** |
 
 O bloqueio acontece em três camadas: `proxy.ts` barra o painel sem sessão,
@@ -129,11 +134,16 @@ No painel, os endereços não têm o prefixo `/admin`:
 |---|---|
 | `/` | login (ou início, para quem já entrou) |
 | `/login`, `/esqueci-senha`, `/nova-senha` | acesso e senha |
-| `/dashboard` | início |
-| `/imoveis`, `/imoveis/novo`, `/imoveis/<id>` | imóveis |
-| `/leads` | contatos |
+| `/dashboard` | início: números do acervo e do CRM, agenda do dia |
+| `/negocios`, `/negocios/novo`, `/negocios/<id>` | funil de negócios (kanban) |
+| `/atividades`, `/atividades/<id>` | agenda da semana e pendências |
+| `/clientes`, `/clientes/novo`, `/clientes/<id>` | clientes (compradores, locatários, proprietários) |
+| `/leads` | contatos que chegaram pelo site |
+| `/imoveis`, `/imoveis/novo`, `/imoveis/<id>` | imóveis (cadastro em etapas) |
 | `/regioes`, `/tipos-imovel` | regiões e tipos de imóvel |
+| `/portais` | XML para ZAP Imóveis, Viva Real, OLX e Chaves na Mão |
 | `/configuracoes` | configurações do site (só admin) |
+| `/xml/<portal>/<token>.xml` | o arquivo que o portal lê (sem login, protegido pelo token) |
 
 Como funciona (arquivos):
 
@@ -180,6 +190,66 @@ O site público continua em <http://localhost:3000>.
 Enquanto o subdomínio não estiver apontado, o painel fica inacessível em
 produção (o `/admin` do domínio público não existe mais). Faça os passos acima
 **antes** de publicar esta versão em produção.
+
+---
+
+## CRM e portais
+
+Instalação: rode `supabase/migrations/0005_crm_portais.sql` no SQL Editor do
+Supabase (ou `supabase db push`). Ela **só cria** tabelas, funções e policies
+novas — nenhuma tabela existente é alterada. Enquanto ela não for aplicada, o
+painel continua funcionando e as telas novas mostram "Instalação pendente".
+Depois de aplicar, `node scripts/verifica-instalacao.mjs` também confere que
+nada do CRM é visível sem login.
+
+### Como o painel se organiza
+
+- **Início** — cartões com clientes, negócios abertos, imóveis publicados,
+  contatos novos, imóveis sem foto e desatualizados (sem alteração há mais de
+  30 dias, ainda à venda ou locação); agenda de hoje com atrasadas; funil.
+- **Contatos do site → negócio** — em `/leads`, "Transformar em negócio" cria
+  o cliente (ou reaproveita quem já tem o mesmo telefone/e-mail) e abre o
+  negócio na coluna "Qualificando". Contato já convertido abre o negócio
+  existente, sem duplicar.
+- **Funil** — colunas Qualificando, Conhecendo, Agendando e Negociando.
+  Arraste o cartão (computador) ou use "Mover para" (celular e teclado).
+  Na ficha do negócio: marcar como ganho/perdido, reabrir, agendar o próximo
+  passo.
+- **Atividades** — semana de domingo a sábado no fuso de Arujá
+  (America/Sao_Paulo), independente do fuso do servidor; lista de pendentes e
+  atrasadas; concluir com um clique.
+- **Cadastro de imóvel** — em etapas, com menu lateral que acompanha a
+  rolagem: fotos, negociação e tipo, valores, localização, composição e
+  medidas, descrição, proprietários, publicação e portais, SEO.
+
+### Portais (XML)
+
+| Portal | Formato | Especificação |
+|---|---|---|
+| ZAP Imóveis, Viva Real, OLX | VRSync (Grupo OLX) | developers.grupozap.com/feeds/vrsync |
+| Chaves na Mão | formato próprio, raiz `<Document>`, 53 tags por imóvel | tecnologiacnm.github.io/cnm-xml-documentation |
+
+1. Em `/portais`, um administrador liga o portal e confere o **tipo de imóvel
+   no portal** de cada categoria (há uma correspondência padrão; categoria sem
+   correspondência não é enviada).
+2. A equipe marca os imóveis (em `/portais` ou na etapa "Publicação e portais"
+   do cadastro).
+3. O link do XML é cadastrado uma vez na conta do portal. Os portais leem o
+   arquivo sozinhos (o Grupo OLX periodicamente; o Chaves na Mão uma vez por
+   dia).
+
+Só entram no XML imóveis **publicados, disponíveis, com preço, descrição,
+bairro, cidade, foto e tipo com correspondência** — a tela mostra, imóvel por
+imóvel, o que falta. No Chaves na Mão só vão fotos JPG/JPEG/WEBP (até 30),
+como o portal exige. Endereço completo não é publicado: os portais mostram
+bairro e cidade (`displayAddress="Neighborhood"` / `esconder_endereco_imovel`).
+
+O link tem um token secreto (`portal_settings.feed_token`), lido só no
+servidor. "Gerar link novo" invalida o anterior. Portal desligado ou token
+errado respondem 404. O XML é lido com a service role, depois de conferir o
+token, e fica 10 minutos em cache na borda da Vercel.
+
+O Imovelweb usa outro formato (OpenNavent), que não está implementado.
 
 ---
 
@@ -302,7 +372,8 @@ app/
     esqueci-senha/ pedido do link de senha nova
     auth/confirmar retorno do link do e-mail (vira sessão)
     nova-senha/    criar ou trocar a senha
-    (painel)/      área autenticada, com barra lateral
+    xml/           XML dos portais (sem login, protegido por token)
+    (painel)/      área autenticada, com menu no topo
 actions/           server actions (formulários, CRUD, autenticação)
 components/
   ui/              botões, campos, selos, paginação, ícones
@@ -311,8 +382,11 @@ components/
   admin/           telas do painel
 lib/
   supabase/        env (neutro), public (leitura), server (sessão), admin (service role)
-  queries/         leitura de dados
+  queries/         leitura de dados (crm.ts: CRM e portais)
+  portals/         vocabulário dos portais e geradores de XML (VRSync, Chaves na Mão)
   validations/     schemas zod
+  crm.ts           estágios do funil, tipos de cliente e de atividade
+  datetime.ts      datas no fuso de Arujá (agenda)
 hooks/             favoritos e estado do navegador
 supabase/migrations/
 scripts/           extração e importação do site antigo

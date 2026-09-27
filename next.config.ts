@@ -5,11 +5,13 @@ import type { NextConfig } from "next";
  * projeto, então é derivado da própria variável de ambiente — assim ninguém
  * precisa lembrar de editar dois lugares ao trocar de projeto.
  */
-const supabaseHost = (() => {
+const supabaseOrigin = (() => {
   try {
-    return process.env.NEXT_PUBLIC_SUPABASE_URL
-      ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
-      : null;
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    // O protocolo também vem da variável: https no Supabase de produção,
+    // http no Supabase local da CLI (http://127.0.0.1:54321).
+    return { hostname: url.hostname, protocol: url.protocol === "http:" ? ("http" as const) : ("https" as const) };
   } catch {
     return null;
   }
@@ -17,11 +19,11 @@ const supabaseHost = (() => {
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: supabaseHost
+    remotePatterns: supabaseOrigin
       ? [
           {
-            protocol: "https",
-            hostname: supabaseHost,
+            protocol: supabaseOrigin.protocol,
+            hostname: supabaseOrigin.hostname,
             pathname: "/storage/v1/object/public/**",
           },
         ]

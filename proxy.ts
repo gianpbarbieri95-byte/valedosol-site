@@ -82,9 +82,10 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Telas de quem ainda não entrou: login, senha esquecida e o retorno do
-  // link enviado por e-mail.
+  // link enviado por e-mail. Os XMLs dos portais também não têm sessão —
+  // quem os protege é o token secreto na URL (ver app/admin/xml).
   const isLoginPage = pathname === ADMIN_LOGIN || pathname === "/esqueci-senha";
-  const isPublicPage = isLoginPage || pathname === "/auth/confirmar";
+  const isPublicPage = isLoginPage || pathname === "/auth/confirmar" || pathname.startsWith("/xml/");
 
   // A raiz do subdomínio é a porta de entrada: login para quem não entrou,
   // início do painel para quem já entrou.

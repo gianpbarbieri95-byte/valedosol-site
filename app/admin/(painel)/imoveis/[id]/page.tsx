@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/format";
 import { SITE } from "@/lib/site";
 
 import { PropertyForm } from "@/components/admin/property-form";
+import { getPropertyCrmData } from "@/lib/queries/property-crm";
 import { PropertyImages } from "@/components/admin/property-images";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 
@@ -18,10 +19,10 @@ export default async function EditPropertyPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ criado?: string }>;
+  searchParams: Promise<{ criado?: string; aviso?: string }>;
 }) {
   await requireStaff();
-  const [{ id }, { criado }, session] = await Promise.all([params, searchParams, getAdminSession()]);
+  const [{ id }, { criado, aviso }, session] = await Promise.all([params, searchParams, getAdminSession()]);
 
   const [property, types, regions] = await Promise.all([
     getAdminProperty(id),
@@ -30,6 +31,7 @@ export default async function EditPropertyPage({
   ]);
 
   if (!property) notFound();
+  const crm = await getPropertyCrmData(property, types);
 
   return (
     <div>
@@ -70,6 +72,12 @@ export default async function EditPropertyPage({
         ) : null}
       </header>
 
+      {aviso ? (
+        <p role="alert" className="mt-6 rounded-[var(--radius-sm)] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+          O imóvel foi cadastrado, mas {aviso === "portais" ? "os portais" : "os proprietários"} não foram gravados. Confira a etapa e salve de novo.
+        </p>
+      ) : null}
+
       {criado ? (
         <p
           role="status"
@@ -79,14 +87,19 @@ export default async function EditPropertyPage({
         </p>
       ) : null}
 
-      <div className="mt-8 space-y-5">
-        <PropertyImages
-          propertyId={property.id}
-          propertyCode={property.code}
-          images={property.images ?? []}
+      <div className="mt-8">
+        <PropertyForm
+          property={property}
+          types={types}
+          regions={regions}
+          crm={crm}
+          beforeSteps={[{ id: "fotos", label: "Fotos" }]}
+          before={
+            <div id="fotos" className="scroll-mt-24">
+              <PropertyImages propertyId={property.id} propertyCode={property.code} images={property.images ?? []} />
+            </div>
+          }
         />
-
-        <PropertyForm property={property} types={types} regions={regions} />
       </div>
     </div>
   );
