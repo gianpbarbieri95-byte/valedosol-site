@@ -85,4 +85,26 @@ const res = await fetch(publico);
 marca(!res.ok, `bucket lead-uploads pela URL pública: HTTP ${res.status} — esperado erro`);
 await admin.storage.from("lead-uploads").remove(["teste-rls.txt"]);
 
+// 5. CRM e portais (migration 0005): nada disso é visível ao anônimo
+const { data: cliente, error: e5 } = await admin
+  .from("clients")
+  .insert({ name: "TESTE RLS", phone: "11900000000" })
+  .select("id")
+  .single();
+
+if (e5) {
+  console.log("  CRM não verificado (migration 0005 aplicada?):", e5.message);
+} else {
+  const { data: vistoCli } = await anon.from("clients").select("id").eq("id", cliente.id);
+  marca((vistoCli ?? []).length === 0, `cliente do CRM: anônimo enxerga ${vistoCli?.length ?? 0} — esperado 0`);
+
+  const { error: eIns } = await anon.from("clients").insert({ name: "Invasor", phone: "11911111111" });
+  marca(Boolean(eIns), `anônimo tentou cadastrar cliente: ${eIns ? "recusado" : "ACEITO"}`);
+
+  const { data: tokens } = await anon.from("portal_settings").select("feed_token");
+  marca((tokens ?? []).length === 0, `token dos XMLs dos portais: anônimo enxerga ${tokens?.length ?? 0} — esperado 0`);
+
+  await admin.from("clients").delete().eq("id", cliente.id);
+}
+
 console.log(falhas === 0 ? "\nIsolamento confirmado: nenhuma falha." : `\n${falhas} FALHA(S) DE SEGURANÇA.`);

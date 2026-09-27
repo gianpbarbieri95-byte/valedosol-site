@@ -10,6 +10,7 @@ import { propertySchema, coordinatesAreConsistent } from "@/lib/validations/prop
 import { fieldErrors, type FormState } from "@/lib/validations/lead";
 import { STORAGE_BUCKETS } from "@/lib/site";
 import { codePrefix, highestBySeries, nextPropertyCode } from "@/lib/property-code";
+import { PORTAL_IDS } from "@/lib/portals/definitions";
 
 /**
  * CRUD de imóveis.
@@ -83,10 +84,15 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
     if (error) return { status: "error", message: friendlyError(error.message) };
     if (!data) return { status: "error", message: "Imóvel não encontrado ou sem permissão para editar." };
 
+    const crmProblem = await syncCrmFields(supabase, id, formData);
+
     revalidateProperty(data.slug);
     revalidatePath("/admin/imoveis");
     revalidatePath(`/admin/imoveis/${id}`);
 
+    if (crmProblem) {
+      return { status: "error", message: `Imóvel salvo, mas não foi possível atualizar ${crmProblem}. Confira e salve de novo.` };
+    }
     return { status: "success", message: "Imóvel salvo." };
   }
 
@@ -122,9 +128,61 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
 
   if (error || !data) return { status: "error", message: friendlyError(error?.message ?? "sem resposta") };
 
+  const crmProblem = await syncCrmFields(supabase, data.id, formData);
+
   revalidateProperty(data.slug);
   revalidatePath("/admin/imoveis");
-  redirect(`/imoveis/${data.id}?criado=1`);
+  redirect(`/imoveis/${data.id}?criado=1${crmProblem ? `&aviso=${crmProblem}` : ""}`);
+}
+
+/**
+ * Proprietários e portais do imóvel (etapas que só existem com o CRM
+ * instalado — o formulário manda crm_fields=1). Falha aqui não desfaz o
+ * imóvel salvo: devolve um aviso para a pessoa conferir essas etapas.
+ */
+async function syncCrmFields(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  propertyId: string,
+  formData: FormData
+): Promise<string | null> {
+  if (formData.get("crm_fields") !== "1") return null;
+
+  const uuid = z.string().uuid();
+  const ownerIds = [...new Set(formData.getAll("owner_ids").filter((value) => uuid.safeParse(value).success) as string[])];
+
+  const { data: currentOwners, error: ownersError } = await supabase
+    .from("property_owners")
+    .select("client_id")
+    .eq("property_id", propertyId);
+  if (ownersError) return "proprietários";
+
+  const current = new Set((currentOwners ?? []).map((row) => row.client_id as string));
+  const toRemove = [...current].filter((id) => !ownerIds.includes(id));
+  const toAdd = ownerIds.filter((id) => !current.has(id));
+
+  if (toRemove.length) {
+    const { error } = await supabase.from("property_owners").delete().eq("property_id", propertyId).in("client_id", toRemove);
+    if (error) return "proprietários";
+  }
+  if (toAdd.length) {
+    const { error } = await supabase
+      .from("property_owners")
+      .insert(toAdd.map((client_id) => ({ property_id: propertyId, client_id })));
+    if (error) return "proprietários";
+  }
+
+  for (const portal of PORTAL_IDS) {
+    const listed = formData.get(`portal_${portal}`) === "on";
+    const highlight = formData.get(`portal_${portal}_highlight`) === "on";
+    const { error } = listed
+      ? await supabase
+          .from("portal_listings")
+          .upsert({ property_id: propertyId, portal, highlight }, { onConflict: "property_id,portal" })
+      : await supabase.from("portal_listings").delete().eq("property_id", propertyId).eq("portal", portal);
+    if (error) return "portais";
+  }
+
+  return null;
 }
 
 /** Traduz erro do Postgres em frase que o corretor entende. */

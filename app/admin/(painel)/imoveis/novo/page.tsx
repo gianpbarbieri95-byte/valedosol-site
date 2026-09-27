@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { getCodeSeries, listAdminPropertyTypes, listAdminRegions } from "@/lib/queries/admin";
 import { PropertyForm } from "@/components/admin/property-form";
+import { getPropertyCrmData } from "@/lib/queries/property-crm";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export default async function NewPropertyPage() {
     listAdminRegions(),
     getCodeSeries(),
   ]);
+  const crm = await getPropertyCrmData(null, types);
 
   return (
     <div>
@@ -29,7 +31,7 @@ export default async function NewPropertyPage() {
       </p>
 
       <div className="mt-8">
-        <PropertyForm types={types} regions={regions} codeSeries={codeSeries} />
+        <PropertyForm types={types} regions={regions} codeSeries={codeSeries} crm={crm} />
       </div>
     </div>
   );

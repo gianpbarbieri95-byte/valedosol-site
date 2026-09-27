@@ -236,3 +236,99 @@ export interface SiteSettingsMap {
   seo: SeoSettings;
   analytics: AnalyticsSettings;
 }
+
+/* -------------------------------------------------------------------------
+   CRM e portais (supabase/migrations/0005_crm_portais.sql)
+   ------------------------------------------------------------------------- */
+
+export type ClientKind = "comprador" | "locatario" | "proprietario" | "investidor";
+export type DealStage = "qualificando" | "conhecendo" | "agendando" | "negociando" | "ganho" | "perdido";
+export type DealTemperature = "fria" | "morna" | "quente";
+export type ActivityKind = "ligacao" | "whatsapp" | "email" | "visita" | "reuniao" | "tarefa";
+export type PortalId = "vrsync" | "chavesnamao";
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  phone_secondary: string | null;
+  document: string | null;
+  kinds: ClientKind[];
+  source: string | null;
+  notes: string | null;
+  lead_id: string | null;
+  assigned_to: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Deal {
+  id: string;
+  title: string;
+  client_id: string;
+  property_id: string | null;
+  lead_id: string | null;
+  purpose: PropertyPurpose;
+  stage: DealStage;
+  position: number;
+  value: number | null;
+  temperature: DealTemperature | null;
+  lost_reason: string | null;
+  notes: string | null;
+  assigned_to: string | null;
+  created_by: string | null;
+  closed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Activity {
+  id: string;
+  title: string;
+  kind: ActivityKind;
+  starts_at: string;
+  ends_at: string | null;
+  all_day: boolean;
+  done: boolean;
+  done_at: string | null;
+  client_id: string | null;
+  deal_id: string | null;
+  property_id: string | null;
+  notes: string | null;
+  assigned_to: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PropertyOwner {
+  property_id: string;
+  client_id: string;
+  created_at: string;
+}
+
+export interface PortalListing {
+  property_id: string;
+  portal: PortalId;
+  highlight: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PortalSettings {
+  portal: PortalId;
+  enabled: boolean;
+  feed_token: string;
+  /** property_types.id → tipo no portal. */
+  type_map: Record<string, string>;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+}

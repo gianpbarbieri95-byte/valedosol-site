@@ -11,6 +11,8 @@ import { Pagination } from "@/components/ui/pagination";
 import { WhatsAppIcon, MailIcon, PhoneIcon } from "@/components/ui/icons";
 import { updateLeadStatus, saveLeadNotes, deleteLead } from "@/actions/admin/leads";
 import { LeadNotes } from "@/components/admin/lead-notes";
+import { convertLeadToDeal } from "@/actions/admin/crm";
+import { isCrmInstalled } from "@/lib/queries/crm";
 
 export const dynamic = "force-dynamic";
 
@@ -40,16 +42,26 @@ export default async function AdminLeadsPage({
   const source = firstParam(params.origem);
   const page = Number(firstParam(params.pagina) ?? 1) || 1;
 
-  const result = await listLeads({ status, source, page });
+  const [result, crmInstalled] = await Promise.all([listLeads({ status, source, page }), isCrmInstalled()]);
+  const convertError = firstParam(params.erro);
 
   return (
     <div>
       <header>
-        <h1 className="text-3xl">Contatos</h1>
+        <h1 className="text-3xl">Contatos do site</h1>
         <p className="mt-1.5 text-sm text-ink-soft">
           {result.total} {result.total === 1 ? "contato recebido" : "contatos recebidos"} pelo site
+          {crmInstalled ? " · transforme em negócio para acompanhar no funil" : ""}
         </p>
       </header>
+
+      {convertError ? (
+        <p role="alert" className="mt-6 rounded-[var(--radius-sm)] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+          {convertError === "crm"
+            ? "O CRM ainda não foi instalado no banco (migration 0005)."
+            : "Não foi possível transformar o contato em negócio. Tente de novo."}
+        </p>
+      ) : null}
 
       <nav aria-label="Filtrar por situação" className="mt-6 flex flex-wrap gap-1.5">
         {[{ value: "", label: "Todos" }, ...LEAD_STATUSES.map((value) => ({ value, label: LEAD_STATUS_LABEL[value] }))].map(
@@ -200,6 +212,19 @@ export default async function AdminLeadsPage({
                       {lead.attachments.length === 1 ? "arquivo enviado" : "arquivos enviados"} —
                       disponíveis no Storage do Supabase, em <code className="text-xs">lead-uploads</code>.
                     </p>
+                  ) : null}
+
+                  {crmInstalled ? (
+                    <form action={convertLeadToDeal} className="mt-4">
+                      <input type="hidden" name="id" value={lead.id} />
+                      <button
+                        type="submit"
+                        className="inline-flex h-10 items-center rounded-[var(--radius-sm)] bg-primary px-4 text-[0.8125rem] font-medium text-white transition-colors hover:bg-primary-hover"
+                      >
+                        Transformar em negócio
+                      </button>
+                      <span className="ml-3 text-xs text-muted">Cria o cliente (ou usa o já cadastrado) e abre no funil.</span>
+                    </form>
                   ) : null}
 
                   <LeadNotes id={lead.id} notes={lead.notes} action={saveLeadNotes} />

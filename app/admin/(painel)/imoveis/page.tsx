@@ -5,6 +5,7 @@ import { requireStaff } from "@/lib/auth";
 import { listAdminProperties } from "@/lib/queries/admin";
 import { storageUrl } from "@/lib/supabase/public";
 import { PROPERTY_STATUSES, SITE, STATUS_LABEL, STORAGE_BUCKETS } from "@/lib/site";
+import { STALE_PROPERTY_DAYS } from "@/lib/crm";
 import { formatDate, formatPrice } from "@/lib/format";
 import { buildQuery, cn, firstParam } from "@/lib/utils";
 
@@ -32,9 +33,12 @@ export default async function AdminPropertiesPage({
   const search = firstParam(params.busca);
   const state = firstParam(params.estado);
   const status = firstParam(params.status);
+  const stale = firstParam(params.desatualizados) === "1";
+  const noPhoto = firstParam(params.semfoto) === "1";
   const page = Number(firstParam(params.pagina) ?? 1) || 1;
 
-  const result = await listAdminProperties({ search, state, status, page });
+  const result = await listAdminProperties({ search, state, status, stale, noPhoto, page });
+  const filtered = Boolean(search || state || status || stale || noPhoto);
 
   return (
     <div>
@@ -51,6 +55,15 @@ export default async function AdminPropertiesPage({
       {firstParam(params.excluido) ? (
         <p role="status" className="mt-6 rounded-[var(--radius-sm)] border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary">
           Imóvel excluído.
+        </p>
+      ) : null}
+
+      {stale || noPhoto ? (
+        <p className="mt-6 flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface px-4 py-3 text-sm text-ink-soft">
+          Mostrando só os imóveis {stale ? `à venda ou locação sem atualização há mais de ${STALE_PROPERTY_DAYS} dias` : "sem nenhuma foto"}.
+          <Link href="/imoveis" className="font-medium text-primary hover:underline">
+            Ver todos
+          </Link>
         </p>
       ) : null}
 
@@ -100,7 +113,10 @@ export default async function AdminPropertiesPage({
           Filtrar
         </button>
 
-        {search || state || status ? (
+        {stale ? <input type="hidden" name="desatualizados" value="1" /> : null}
+        {noPhoto ? <input type="hidden" name="semfoto" value="1" /> : null}
+
+        {filtered ? (
           <Link href="/imoveis" className="h-11 px-3 text-center text-sm leading-[2.75rem] text-ink-soft hover:text-ink">
             Limpar
           </Link>
@@ -110,9 +126,9 @@ export default async function AdminPropertiesPage({
       {result.items.length === 0 ? (
         <EmptyState
           className="mt-8"
-          title={search || state || status ? "Nenhum imóvel com esses filtros" : "Nenhum imóvel cadastrado"}
+          title={filtered ? "Nenhum imóvel com esses filtros" : "Nenhum imóvel cadastrado"}
           description={
-            search || state || status
+            filtered
               ? "Tente outra busca ou limpe os filtros."
               : "Cadastre o primeiro imóvel para ele aparecer no site."
           }
@@ -302,7 +318,7 @@ export default async function AdminPropertiesPage({
             page={result.page}
             pageCount={result.pageCount}
             buildHref={(target) =>
-              `/imoveis${buildQuery({ busca: search, estado: state, status, pagina: target > 1 ? target : undefined })}`
+              `/imoveis${buildQuery({ busca: search, estado: state, status, desatualizados: stale ? 1 : undefined, semfoto: noPhoto ? 1 : undefined, pagina: target > 1 ? target : undefined })}`
             }
           />
         </>
