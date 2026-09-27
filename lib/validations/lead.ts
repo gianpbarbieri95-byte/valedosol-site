@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhone } from "./phone";
 
 /**
  * Validação dos formulários públicos.
@@ -17,10 +18,7 @@ const phone = z
   .string()
   .trim()
   .min(1, "Informe um telefone")
-  .refine((value) => {
-    const digits = value.replace(/\D/g, "");
-    return digits.length >= 10 && digits.length <= 13;
-  }, "Telefone inválido. Use DDD + número.");
+  .refine(isValidPhone, "Telefone inválido. Use DDD + número.");
 
 const email = z
   .string()
@@ -45,6 +43,15 @@ export const propertyInterestSchema = z.object({
   message,
   property_id: z.string().uuid().optional(),
   property_code: z.string().trim().max(30).optional(),
+  page_url: z.string().trim().max(500).optional(),
+  website: honeypot,
+});
+
+/** Quem clicou em "falar pelo WhatsApp" na página de um imóvel. */
+export const whatsappLeadSchema = z.object({
+  name,
+  phone,
+  property_id: z.string().uuid(),
   page_url: z.string().trim().max(500).optional(),
   website: honeypot,
 });
@@ -74,6 +81,7 @@ export const sellPropertySchema = z.object({
 });
 
 export type PropertyInterestInput = z.infer<typeof propertyInterestSchema>;
+export type WhatsAppLeadInput = z.infer<typeof whatsappLeadSchema>;
 export type ContactInput = z.infer<typeof contactSchema>;
 export type SellPropertyInput = z.infer<typeof sellPropertySchema>;
 

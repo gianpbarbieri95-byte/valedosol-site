@@ -27,9 +27,10 @@ import { PropertyCard } from "@/components/property/property-card";
 import { DescriptionBlocks } from "@/components/property/description-blocks";
 import { PropertyInterestForm } from "@/components/forms/property-interest-form";
 import { FavoriteButton } from "@/components/property/favorite-button";
+import { WhatsAppLeadButton } from "@/components/property/whatsapp-lead-button";
 import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadcrumb";
 import { Badge, SectionHeading, StatusBadge } from "@/components/ui/primitives";
-import { ButtonExternal, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { ArrowRightIcon, PinIcon, WhatsAppIcon } from "@/components/ui/icons";
 
 export const revalidate = 300;
@@ -411,10 +412,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
                 {whatsapp ? (
                   <>
-                    <ButtonExternal href={whatsapp} variant="gold" size="lg" className="mt-7 w-full">
+                    <WhatsAppLeadButton
+                      number={settings.contact.whatsapp}
+                      propertyId={property.id}
+                      propertyCode={property.code}
+                      propertyTitle={property.title}
+                      size="lg"
+                      className="mt-7 w-full"
+                    >
                       <WhatsAppIcon />
                       Falar sobre este imóvel
-                    </ButtonExternal>
+                    </WhatsAppLeadButton>
                     <p className="mt-3 text-center text-xs text-muted">
                       Conversa direta com a Vale do Sol, pelo WhatsApp.
                     </p>
@@ -465,10 +473,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
             <p className="mt-1 truncate font-display text-xl leading-tight text-primary tabular">{price}</p>
           </div>
           {whatsapp ? (
-            <ButtonExternal href={whatsapp} variant="gold" className="shrink-0 px-4">
+            <WhatsAppLeadButton
+              number={settings.contact.whatsapp}
+              propertyId={property.id}
+              propertyCode={property.code}
+              propertyTitle={property.title}
+              className="shrink-0 px-4"
+            >
               <WhatsAppIcon />
               Tenho interesse
-            </ButtonExternal>
+            </WhatsAppLeadButton>
           ) : (
             <ButtonLink href="#interesse" className="shrink-0">
               Tenho interesse

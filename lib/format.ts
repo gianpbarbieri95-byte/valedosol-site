@@ -69,10 +69,16 @@ export function whatsappUrl(number: string | null | undefined, message?: string)
   return `https://wa.me/${withCountry}${query}`;
 }
 
-/** Mensagem padrão de interesse, com o código do imóvel. */
-export function propertyWhatsAppMessage(input: { code?: string | null; title?: string | null }): string {
+/** Mensagem padrão de interesse, com o código do imóvel (e o nome, se já souber). */
+export function propertyWhatsAppMessage(input: {
+  code?: string | null;
+  title?: string | null;
+  name?: string | null;
+}): string {
   const reference = [input.code, input.title].filter(Boolean).join(" — ");
-  return `Olá, vi o imóvel ${reference || "anunciado"} no site da Vale do Sol Imóveis e gostaria de saber mais.`;
+  const name = input.name?.trim();
+  const greeting = name ? `Olá, sou ${name}. Vi` : "Olá, vi";
+  return `${greeting} o imóvel ${reference || "anunciado"} no site da Vale do Sol Imóveis e gostaria de saber mais.`;
 }
 
 /** "Arujá / Centro" — usado em cards e breadcrumbs. */

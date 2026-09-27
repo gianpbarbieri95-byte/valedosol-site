@@ -211,6 +211,12 @@ nada do CRM é visível sem login.
   o cliente (ou reaproveita quem já tem o mesmo telefone/e-mail) e abre o
   negócio na coluna "Qualificando". Contato já convertido abre o negócio
   existente, sem duplicar.
+- **WhatsApp da página do imóvel** — antes de abrir a conversa, o site pede
+  nome e telefone; a pessoa entra em `/leads` como "WhatsApp do imóvel" e o
+  WhatsApp abre já com o nome dela na mensagem. O envio vai para
+  `/api/contato-whatsapp` (service role só no servidor, limite por IP,
+  campo-armadilha); a mesma pessoa no mesmo imóvel em 12 horas não duplica.
+  Sem JavaScript, o botão continua sendo o link direto do WhatsApp.
 - **Funil** — colunas Qualificando, Conhecendo, Agendando e Negociando.
   Arraste o cartão (computador) ou use "Mover para" (celular e teclado).
   Na ficha do negócio: marcar como ganho/perdido, reabrir, agendar o próximo
