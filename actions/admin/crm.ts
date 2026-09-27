@@ -327,7 +327,7 @@ export async function convertLeadToDeal(formData: FormData): Promise<void> {
         email: lead.email,
         phone: lead.phone,
         kinds: [kind],
-        source: "Site",
+        source: lead.source === "site_whatsapp" ? "WhatsApp (site)" : "Site",
         lead_id: lead.id,
         assigned_to: session.userId,
         created_by: session.userId,

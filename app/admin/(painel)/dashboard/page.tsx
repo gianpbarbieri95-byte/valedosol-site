@@ -32,6 +32,7 @@ export const dynamic = "force-dynamic";
 
 const LEAD_SOURCE_LABEL: Record<string, string> = {
   site_imovel: "Interesse em imóvel",
+  site_whatsapp: "WhatsApp do imóvel",
   site_contato: "Fale conosco",
   site_venda_imovel: "Quer vender",
 };
