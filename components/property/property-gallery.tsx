@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, ExpandIcon } from "@/components/ui/icons";
+import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, ExpandIcon, PlayIcon } from "@/components/ui/icons";
 
 export interface GalleryImage {
   url: string;
@@ -63,7 +63,26 @@ function pad(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-export function PropertyGallery({ images, title }: { images: GalleryImage[]; title: string }) {
+/** Atalho para a seção de vídeo da página (#video), quando o imóvel tem vídeo. */
+function VideoLink({ count, className }: { count: number; className?: string }) {
+  if (!count) return null;
+  return (
+    <a href="#video" className={cn("inline-flex items-center gap-1.5 font-medium text-primary", className)}>
+      <PlayIcon className="size-4" />
+      {count > 1 ? `Assistir aos ${count} vídeos` : "Assistir ao vídeo"}
+    </a>
+  );
+}
+
+export function PropertyGallery({
+  images,
+  title,
+  videoCount = 0,
+}: {
+  images: GalleryImage[];
+  title: string;
+  videoCount?: number;
+}) {
   const [index, setIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
@@ -119,7 +138,10 @@ export function PropertyGallery({ images, title }: { images: GalleryImage[]; tit
   if (!total) {
     return (
       <div className="flex aspect-[16/10] items-center justify-center rounded-[var(--radius-md)] border border-dashed border-line-strong bg-surface-alt">
-        <span className="text-xs uppercase tracking-[0.14em] text-muted">Fotos em breve</span>
+        <div className="flex flex-col items-center gap-3">
+          <span className="text-xs uppercase tracking-[0.14em] text-muted">Fotos em breve</span>
+          <VideoLink count={videoCount} className="text-sm" />
+        </div>
       </div>
     );
   }
@@ -171,8 +193,9 @@ export function PropertyGallery({ images, title }: { images: GalleryImage[]; tit
 
       {/* Contagem real de fotos e acesso ao visor completo */}
       <div className="mt-3 hidden items-center justify-between md:flex">
-        <p className="text-[0.8125rem] text-muted">
+        <p className="flex items-center gap-6 text-[0.8125rem] text-muted">
           {total === 1 ? "1 foto" : `${total} fotos`} deste imóvel
+          <VideoLink count={videoCount} className="link-line" />
         </p>
         <button
           type="button"
@@ -216,9 +239,12 @@ export function PropertyGallery({ images, title }: { images: GalleryImage[]; tit
         </div>
 
         <div className="mt-3 flex items-center justify-between">
-          <p className="text-xs text-muted tabular" aria-label={`Foto ${index + 1} de ${total}`}>
-            {pad(index + 1)} / {pad(total)}
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-muted tabular" aria-label={`Foto ${index + 1} de ${total}`}>
+              {pad(index + 1)} / {pad(total)}
+            </p>
+            <VideoLink count={videoCount} className="text-xs" />
+          </div>
           <button
             type="button"
             onClick={() => open(index)}

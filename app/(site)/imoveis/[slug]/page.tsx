@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import {
   getPropertyBySlug,
+  getPropertyVideos,
   getPublishedPropertyRefs,
   getRelatedProperties,
 } from "@/lib/queries/properties";
@@ -24,6 +25,7 @@ import { descriptionPlainText, formatDescription, formatListItem } from "@/lib/d
 import Link from "next/link";
 import { PropertyGallery, PropertyPhotoGrid } from "@/components/property/property-gallery";
 import { PropertyCard } from "@/components/property/property-card";
+import { PropertyVideoList } from "@/components/property/property-videos";
 import { DescriptionBlocks } from "@/components/property/description-blocks";
 import { PropertyInterestForm } from "@/components/forms/property-interest-form";
 import { FavoriteButton } from "@/components/property/favorite-button";
@@ -96,7 +98,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
   if (!property) notFound();
 
-  const related = await getRelatedProperties(property, 3);
+  const [related, videos] = await Promise.all([getRelatedProperties(property, 3), getPropertyVideos(property.id)]);
 
   const images = (property.images ?? []).map((image, index) => ({
     url: storageUrl(STORAGE_BUCKETS.property, image.storage_path) ?? "",
@@ -155,6 +157,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
   ].filter((item) => item.value);
 
   const sections = [
+    { id: "video", label: videos.length > 1 ? "Vídeos" : "Vídeo", show: videos.length > 0 },
     { id: "sobre", label: "Sobre", show: paragraphs.length > 0 },
     { id: "caracteristicas", label: "Características", show: details.length > 0 },
     { id: "ambientes", label: "Ambientes", show: Boolean(property.highlights?.length) },
@@ -201,12 +204,32 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
       : {}),
   };
 
+  // Google só aceita VideoObject com miniatura: vídeo sem capa fica de fora.
+  const videoJsonLd = videos.flatMap((video, index) => {
+    const contentUrl = storageUrl(STORAGE_BUCKETS.video, video.storage_path);
+    const thumbnailUrl = storageUrl(STORAGE_BUCKETS.video, video.poster_path);
+    if (!contentUrl || !thumbnailUrl) return [];
+    const seconds = video.duration_seconds ? Math.round(video.duration_seconds) : null;
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        name: videos.length > 1 ? `${property.title} — vídeo ${index + 1}` : property.title,
+        description: descriptionPlainText(property.description)?.slice(0, 300) || `Vídeo do imóvel ${property.code}`,
+        thumbnailUrl,
+        contentUrl,
+        uploadDate: video.created_at,
+        ...(seconds ? { duration: `PT${Math.floor(seconds / 60)}M${seconds % 60}S` } : {}),
+      },
+    ];
+  });
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: jsonLdScript([jsonLd, breadcrumbJsonLd(crumbs, SITE.url)]),
+          __html: jsonLdScript([jsonLd, breadcrumbJsonLd(crumbs, SITE.url), ...videoJsonLd]),
         }}
       />
 
@@ -247,7 +270,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
         {/* A galeria é a protagonista, na largura inteira. */}
         <div className="mt-8 md:mt-10">
-          <PropertyGallery images={images} title={property.title} />
+          <PropertyGallery images={images} title={property.title} videoCount={videos.length} />
         </div>
 
         {specs.length ? (
@@ -279,6 +302,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
         <div className="mt-10 grid gap-12 lg:mt-14 lg:grid-cols-12 lg:gap-16">
           <div className="min-w-0 space-y-20 lg:col-span-7">
+            {videos.length ? (
+              <section id="video" aria-labelledby="video-titulo" className="scroll-mt-24">
+                <p className="eyebrow">{videos.length > 1 ? "Vídeos" : "Vídeo"}</p>
+                <h2 id="video-titulo" className="mt-4 text-title">Conheça por dentro</h2>
+                <div className="mt-8">
+                  <PropertyVideoList videos={videos} title={property.title} />
+                </div>
+              </section>
+            ) : null}
+
             {paragraphs.length ? (
               <section id="sobre" aria-labelledby="sobre-titulo">
                 <p className="eyebrow">Sobre o imóvel</p>

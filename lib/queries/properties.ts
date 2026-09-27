@@ -6,6 +6,7 @@ import type {
   PropertyCardData,
   PropertyPurpose,
   PropertyStatus,
+  PropertyVideo,
   PropertyWithRelations,
 } from "@/types/database";
 
@@ -268,6 +269,27 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyWithRelat
   );
 
   return property;
+}
+
+/**
+ * Vídeos de um imóvel publicado (a RLS já esconde os de rascunho). Consulta à
+ * parte, e não junto do imóvel, para que a página continue no ar se a tabela
+ * ainda não existir ou falhar: vídeo é complemento, não pode derrubar o anúncio.
+ */
+export async function getPropertyVideos(propertyId: string): Promise<PropertyVideo[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const { data, error } = await createPublicClient()
+    .from("property_videos")
+    .select("*")
+    .eq("property_id", propertyId)
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.warn("[videos] não carregados:", error.code ?? "", error.message);
+    return [];
+  }
+  return (data ?? []) as PropertyVideo[];
 }
 
 /** Imóveis parecidos: mesma cidade, mesma finalidade, exceto ele mesmo. */

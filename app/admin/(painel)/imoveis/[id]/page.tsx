@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getAdminSession, requireStaff } from "@/lib/auth";
-import { getAdminProperty, listAdminPropertyTypes, listAdminRegions } from "@/lib/queries/admin";
+import { getAdminProperty, getAdminPropertyVideos, listAdminPropertyTypes, listAdminRegions } from "@/lib/queries/admin";
 import { deleteProperty } from "@/actions/admin/properties";
 import { formatDateTime } from "@/lib/format";
 import { SITE } from "@/lib/site";
@@ -10,6 +10,7 @@ import { SITE } from "@/lib/site";
 import { PropertyForm } from "@/components/admin/property-form";
 import { getPropertyCrmData } from "@/lib/queries/property-crm";
 import { PropertyImages } from "@/components/admin/property-images";
+import { PropertyVideos } from "@/components/admin/property-videos";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +25,11 @@ export default async function EditPropertyPage({
   await requireStaff();
   const [{ id }, { criado, aviso }, session] = await Promise.all([params, searchParams, getAdminSession()]);
 
-  const [property, types, regions] = await Promise.all([
+  const [property, types, regions, video] = await Promise.all([
     getAdminProperty(id),
     listAdminPropertyTypes(),
     listAdminRegions(),
+    getAdminPropertyVideos(id),
   ]);
 
   if (!property) notFound();
@@ -83,7 +85,7 @@ export default async function EditPropertyPage({
           role="status"
           className="mt-6 rounded-[var(--radius-sm)] border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary"
         >
-          Imóvel cadastrado. Agora envie as fotos e escolha a capa. Se ele ainda estiver como rascunho, mude a publicação para “Publicado” e salve.
+          Imóvel cadastrado. Agora envie as fotos (e os vídeos, se houver) e escolha a capa. Se ele ainda estiver como rascunho, mude a publicação para “Publicado” e salve.
         </p>
       ) : null}
 
@@ -93,10 +95,23 @@ export default async function EditPropertyPage({
           types={types}
           regions={regions}
           crm={crm}
-          beforeSteps={[{ id: "fotos", label: "Fotos" }]}
+          beforeSteps={[
+            { id: "fotos", label: "Fotos" },
+            { id: "videos", label: "Vídeos" },
+          ]}
           before={
-            <div id="fotos" className="scroll-mt-24">
-              <PropertyImages propertyId={property.id} propertyCode={property.code} images={property.images ?? []} />
+            <div className="space-y-5">
+              <div id="fotos" className="scroll-mt-24">
+                <PropertyImages propertyId={property.id} propertyCode={property.code} images={property.images ?? []} />
+              </div>
+              <div id="videos" className="scroll-mt-24">
+                <PropertyVideos
+                  propertyId={property.id}
+                  propertyCode={property.code}
+                  videos={video.videos}
+                  installed={video.installed}
+                />
+              </div>
             </div>
           }
         />

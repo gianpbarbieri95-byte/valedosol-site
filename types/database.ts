@@ -56,6 +56,20 @@ export interface PropertyImage {
   created_at: string;
 }
 
+export interface PropertyVideo {
+  id: string;
+  property_id: string;
+  storage_path: string;
+  poster_path: string | null;
+  mime_type: string | null;
+  size_bytes: number | null;
+  duration_seconds: number | null;
+  width: number | null;
+  height: number | null;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface Property {
   id: string;
   title: string;

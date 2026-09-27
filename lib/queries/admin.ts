@@ -3,7 +3,8 @@ import { highestBySeries } from "@/lib/property-code";
 
 import { createClient } from "@/lib/supabase/server";
 import { STALE_PROPERTY_DAYS } from "@/lib/crm";
-import type { Lead, Property, PropertyImage, PropertyStatus } from "@/types/database";
+import type { Lead, Property, PropertyImage, PropertyStatus, PropertyVideo } from "@/types/database";
+import { isMissingTable } from "@/lib/queries/crm";
 
 /** Situações em que o imóvel ainda está no mercado. */
 const ACTIVE_STATUSES: PropertyStatus[] = ["disponivel", "reservado"];
@@ -132,6 +133,23 @@ export async function getAdminProperty(id: string) {
   );
 
   return property;
+}
+
+/**
+ * Vídeos do imóvel no painel. `installed: false` quando a migration 0007
+ * ainda não foi aplicada — a tela mostra o aviso em vez de quebrar.
+ */
+export async function getAdminPropertyVideos(propertyId: string): Promise<{ installed: boolean; videos: PropertyVideo[] }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("property_videos")
+    .select("*")
+    .eq("property_id", propertyId)
+    .order("sort_order", { ascending: true });
+
+  if (error && isMissingTable(error)) return { installed: false, videos: [] };
+  if (error) throw new Error(`Falha ao carregar os vídeos: ${error.message}`);
+  return { installed: true, videos: (data ?? []) as PropertyVideo[] };
 }
 
 export interface AdminLeadRow extends Lead {

@@ -247,6 +247,17 @@ export async function deleteProperty(formData: FormData): Promise<void> {
     await supabase.storage.from(STORAGE_BUCKETS.property).remove(images.map((image) => image.storage_path));
   }
 
+  // Vídeos e capas (tabela da 0007; sem ela a consulta só volta vazia).
+  const { data: videos } = await supabase
+    .from("property_videos")
+    .select("storage_path, poster_path")
+    .eq("property_id", id.data);
+
+  if (videos?.length) {
+    const paths = videos.flatMap((video) => [video.storage_path, video.poster_path]).filter((path): path is string => Boolean(path));
+    await supabase.storage.from(STORAGE_BUCKETS.video).remove(paths);
+  }
+
   const { data } = await supabase.from("properties").delete().eq("id", id.data).select("slug").maybeSingle();
 
   revalidateProperty(data?.slug);

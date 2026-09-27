@@ -118,7 +118,10 @@ marca(
 
 // 7. Conta nova sem convite não vira equipe (migration 0006)
 const intruso = `teste-rls-${Date.now()}@example.com`;
-const { data: criado, error: e7 } = await admin.auth.admin.createUser({ email: intruso, password: crypto.randomUUID(), email_confirm: true });
+const { count: perfis } = await admin.from("profiles").select("id", { count: "exact", head: true });
+const { data: criado, error: e7 } = perfis
+  ? await admin.auth.admin.createUser({ email: intruso, password: crypto.randomUUID(), email_confirm: true })
+  : { data: null, error: { message: "nenhum perfil ainda — o primeiro usuário vira admin (instalação); crie-o e rode de novo" } };
 if (e7) {
   console.log("  conta de teste não criada:", e7.message);
 } else {

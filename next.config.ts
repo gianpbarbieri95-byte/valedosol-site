@@ -11,15 +11,16 @@ const supabaseOrigin = (() => {
     const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);
     // O protocolo também vem da variável: https no Supabase de produção,
     // http no Supabase local da CLI (http://127.0.0.1:54321).
-    return { hostname: url.hostname, protocol: url.protocol === "http:" ? ("http" as const) : ("https" as const) };
+    // host = hostname + porta (a CSP precisa da porta: http://127.0.0.1:54321).
+    return { hostname: url.hostname, host: url.host, protocol: url.protocol === "http:" ? ("http" as const) : ("https" as const) };
   } catch {
     return null;
   }
 })();
 
 const isDev = process.env.NODE_ENV !== "production";
-const supabaseHttp = supabaseOrigin ? `${supabaseOrigin.protocol}://${supabaseOrigin.hostname}` : "";
-const supabaseWs = supabaseOrigin ? `${supabaseOrigin.protocol === "http" ? "ws" : "wss"}://${supabaseOrigin.hostname}` : "";
+const supabaseHttp = supabaseOrigin ? `${supabaseOrigin.protocol}://${supabaseOrigin.host}` : "";
+const supabaseWs = supabaseOrigin ? `${supabaseOrigin.protocol === "http" ? "ws" : "wss"}://${supabaseOrigin.host}` : "";
 const googleAnalytics = "https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com";
 
 /**
@@ -28,7 +29,7 @@ const googleAnalytics = "https://www.googletagmanager.com https://*.google-analy
  * necessário para os scripts inline do Next; o ganho aqui é fechar o resto —
  * de onde vêm scripts, para onde o navegador pode enviar dados, quem pode
  * pôr o site num iframe, <object>, <base> e o destino dos formulários.
- * Porta de entrada de terceiros: Supabase (fotos, upload do painel), Google
+ * Porta de entrada de terceiros: Supabase (fotos, vídeos, upload do painel), Google
  * Analytics (só se configurado) e o mapa do OpenStreetMap.
  */
 const directive = (...parts: string[]) => parts.filter(Boolean).join(" ");
@@ -39,7 +40,8 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   directive("img-src 'self' data: blob:", supabaseHttp, googleAnalytics),
   "font-src 'self' data:",
-  "media-src 'self'",
+  // blob: é a prévia do vídeo no painel antes do envio (lib/video.ts).
+  directive("media-src 'self' blob:", supabaseHttp),
   directive("connect-src 'self'", supabaseHttp, supabaseWs, googleAnalytics),
   "frame-src https://www.openstreetmap.org",
   "worker-src 'self' blob:",

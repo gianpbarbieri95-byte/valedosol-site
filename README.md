@@ -48,6 +48,7 @@ As migrations ficam em `supabase/migrations/` e devem ser aplicadas **em ordem**
 | `0004_seed.sql` | tipos de imóvel e dados de contato reais |
 | `0005_crm_portais.sql` | CRM (clientes, negócios, atividades, proprietários) e portais |
 | `0006_seguranca_equipe.sql` | só convidado vira equipe; buckets não listáveis; `search_path` fixo |
+| `0007_videos.sql` | vídeos do imóvel (tabela `property_videos` e bucket `property-videos`) |
 
 Aplique pelo SQL Editor do Supabase (cole o conteúdo de cada arquivo, na ordem)
 ou pela CLI:
@@ -260,6 +261,34 @@ nada do CRM é visível sem login.
   rolagem: fotos, negociação e tipo, valores, localização, composição e
   medidas, descrição, proprietários, publicação e portais, SEO.
 
+### Vídeos do imóvel
+
+Na tela do imóvel, etapa **Vídeos**: no celular, "Gravar vídeo" abre a câmera
+já em modo vídeo e "Escolher da galeria" pega o que já foi gravado (pode
+escolher vários). No computador, "Escolher vídeos".
+
+- O vídeo sobe como foi gravado (MP4, MOV ou WEBM), sem conversão no aparelho,
+  direto do navegador para o Supabase Storage, em pedaços de 6 MB (protocolo
+  TUS, `lib/resumable-upload.ts`): se o 4G cair no meio, o envio continua de
+  onde parou. A tela fica acesa enquanto envia e avisa se alguém tentar sair.
+- O aparelho tira um quadro do vídeo para servir de capa e lê a proporção:
+  vídeo em pé aparece em pé, sem tarjas enormes no computador.
+- Na página do imóvel, a seção "Vídeo" vem antes da descrição, com atalho
+  "Assistir ao vídeo" junto da galeria. O vídeo só começa a baixar quando a
+  pessoa aperta play (economiza tráfego do Storage).
+- **iPhone:** o formato padrão (HEVC/H.265) toca em iPhone e Mac, mas não em
+  parte dos Android e Windows. O painel avisa quando detecta HEVC. Para
+  gravar compatível: Ajustes › Câmera › Formatos › **Mais Compatível**.
+- **Tamanho:** cada arquivo pode ter até 500 MB pelo bucket, mas vale o
+  limite global do projeto em Supabase › Storage › Settings ("Upload file
+  size limit"). No plano gratuito ele é 50 MB (~30 s em 1080p); no Pro dá
+  para subir. Vídeo acima do limite recebe um aviso explicando isso.
+- **Tráfego:** vídeo consome a franquia de saída do Supabase (egress). Um
+  tour de 1 a 2 minutos em 1080p é o ponto de equilíbrio.
+
+Os portais (XML) não recebem esses vídeos: o formato deles só aceita link do
+YouTube.
+
 ### Portais (XML)
 
 | Portal | Formato | Especificação |
@@ -446,7 +475,8 @@ ao salvar: publicar um imóvel atualiza o site sem rebuild manual.
 
 Supabase (projeto de produção):
 
-1. Rodar `supabase/migrations/0006_seguranca_equipe.sql` no SQL Editor.
+1. Rodar `supabase/migrations/0006_seguranca_equipe.sql` e
+   `0007_videos.sql` no SQL Editor (ou colar `setup-completo.sql`).
 2. Authentication › Sign In / Providers › **Allow new users to sign up: desligado**.
 3. Conferir quem já tem acesso e apagar qualquer conta que não seja da equipe:
    ```sql
@@ -457,9 +487,11 @@ Supabase (projeto de produção):
    `https://admin.valedosolimoveis.com.br` e, em **Redirect URLs**, só
    `https://admin.valedosolimoveis.com.br/auth/confirmar` (e o de
    `admin.localhost` para desenvolvimento). Nada de curinga `**`.
-5. Authentication › Emails › SMTP próprio (sem ele, o "esqueci minha senha"
+5. Storage › Settings › "Upload file size limit": o tamanho máximo de cada
+   vídeo (ver "Vídeos do imóvel").
+6. Authentication › Emails › SMTP próprio (sem ele, o "esqueci minha senha"
    não chega para a equipe).
-6. Com o `.env.local` apontando para produção:
+7. Com o `.env.local` apontando para produção:
    `node scripts/verifica-instalacao.mjs` — tem que terminar em
    "Isolamento confirmado".
 

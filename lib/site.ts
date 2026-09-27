@@ -83,4 +83,5 @@ export const STORAGE_BUCKETS = {
   property: "property-images",
   site: "site-images",
   region: "region-images",
+  video: "property-videos",
 } as const;
