@@ -108,7 +108,7 @@ export function LoginForm({ next }: { next?: string }) {
             Senha
           </label>
           <Link
-            href="/admin/esqueci-senha"
+            href="/esqueci-senha"
             className="-my-2 py-2 text-[0.8125rem] text-primary underline-offset-4 hover:underline"
           >
             Esqueci minha senha

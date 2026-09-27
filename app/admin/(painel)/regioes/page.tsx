@@ -6,7 +6,7 @@ import { RegionManager } from "@/components/admin/region-manager";
 export const dynamic = "force-dynamic";
 
 export default async function AdminRegionsPage() {
-  await requireStaff("/admin/regioes");
+  await requireStaff("/regioes");
   const [regions, cities, session] = await Promise.all([
     listAdminRegions(),
     getCities(),

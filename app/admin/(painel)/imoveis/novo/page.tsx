@@ -6,7 +6,7 @@ import { PropertyForm } from "@/components/admin/property-form";
 export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
-  await requireStaff("/admin/imoveis/novo");
+  await requireStaff("/imoveis/novo");
   const [types, regions, codeSeries] = await Promise.all([
     listAdminPropertyTypes(),
     listAdminRegions(),
@@ -16,7 +16,7 @@ export default async function NewPropertyPage() {
   return (
     <div>
       <nav aria-label="Você está em" className="text-[0.8125rem] text-muted">
-        <Link href="/admin/imoveis" className="hover:text-ink">
+        <Link href="/imoveis" className="hover:text-ink">
           Imóveis
         </Link>
         <span aria-hidden> / </span>

@@ -10,9 +10,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // Área administrativa e lista pessoal de favoritos não têm por que
-        // ser rastreadas. A proteção de verdade é a autenticação, não isto.
-        disallow: ["/admin", "/admin/", "/favoritos"],
+        // A lista pessoal de favoritos não tem por que ser rastreada. O painel
+        // não aparece aqui: ele mora em outro host (admin.*), que tem o
+        // próprio robots.txt bloqueando tudo, e /admin responde 404 neste.
+        disallow: ["/favoritos"],
       },
     ],
     sitemap: `${SITE.url}/sitemap.xml`,

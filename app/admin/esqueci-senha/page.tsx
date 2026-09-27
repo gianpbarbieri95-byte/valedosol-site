@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
     <AuthCard
       title="Esqueci minha senha"
       description="Informe o e-mail que você usa para entrar. Enviamos um link para você criar uma senha nova."
-      back={{ href: "/admin/login", label: "Voltar ao login" }}
+      back={{ href: "/login", label: "Voltar ao login" }}
     >
       <ResetRequestForm />
     </AuthCard>

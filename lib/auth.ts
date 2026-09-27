@@ -9,7 +9,7 @@ import type { Profile, UserRole } from "@/types/database";
 /**
  * Sessão administrativa.
  *
- * O proxy (proxy.ts) já barra /admin sem sessão, mas ele é só a primeira
+ * O proxy (proxy.ts) já barra o painel sem sessão, mas ele é só a primeira
  * camada. Toda página e toda ação administrativa chamam uma destas funções,
  * e a RLS confere de novo no banco. Três camadas, porque uma só não basta.
  */
@@ -43,16 +43,16 @@ export const getAdminSession = cache(async (): Promise<AdminSession | null> => {
 });
 
 /** Exige sessão de equipe (admin ou editor). Redireciona para o login. */
-export async function requireStaff(nextPath = "/admin/dashboard"): Promise<AdminSession> {
+export async function requireStaff(nextPath = "/dashboard"): Promise<AdminSession> {
   const session = await getAdminSession();
-  if (!session) redirect(`/admin/login?next=${encodeURIComponent(nextPath)}`);
+  if (!session) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   return session;
 }
 
 /** Exige papel de administrador. Editor recebe 'sem permissão'. */
-export async function requireAdmin(nextPath = "/admin/dashboard"): Promise<AdminSession> {
+export async function requireAdmin(nextPath = "/dashboard"): Promise<AdminSession> {
   const session = await requireStaff(nextPath);
-  if (session.profile.role !== "admin") redirect("/admin/dashboard?erro=sem-permissao");
+  if (session.profile.role !== "admin") redirect("/dashboard?erro=sem-permissao");
   return session;
 }
 

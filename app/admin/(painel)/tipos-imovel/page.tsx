@@ -5,7 +5,7 @@ import { TypeManager } from "@/components/admin/type-manager";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPropertyTypesPage() {
-  await requireStaff("/admin/tipos-imovel");
+  await requireStaff("/tipos-imovel");
   const [types, session] = await Promise.all([listAdminPropertyTypes(), getAdminSession()]);
 
   return (

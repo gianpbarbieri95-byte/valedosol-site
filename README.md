@@ -18,6 +18,9 @@ O site sobe em <http://localhost:3000>. Sem `.env.local` preenchido ele ainda ab
 as páginas renderizam com os textos institucionais padrão e as listagens
 aparecem vazias, sinalizando "configuração pendente" em vez de quebrar.
 
+O painel administrativo abre em <http://admin.localhost:3000> (mesmo
+`npm run dev`, veja [Painel administrativo](#painel-administrativo)).
+
 ### Variáveis de ambiente
 
 | Variável | Onde encontrar | Exposta ao navegador |
@@ -59,7 +62,7 @@ nothing` e não apagam nada.
 
 Crie o usuário em Supabase › Authentication › Users. O trigger
 `handle_new_user` dá papel `admin` ao primeiro perfil criado e `editor` aos
-seguintes. Depois é só entrar em `/admin/login`.
+seguintes. Depois é só entrar em `https://admin.valedosolimoveis.com.br/`.
 
 Para promover alguém depois:
 
@@ -69,15 +72,17 @@ update public.profiles set role = 'admin' where email = 'pessoa@exemplo.com';
 
 ### Esqueci minha senha
 
-`/admin/esqueci-senha` envia um link pelo Supabase; o link volta em
-`/admin/auth/confirmar`, que abre a sessão e leva a `/admin/nova-senha`. Quem
+`/esqueci-senha` (no painel) envia um link pelo Supabase; o link volta em
+`/auth/confirmar`, que abre a sessão e leva a `/nova-senha`. Quem
 já está logado troca a senha pelo mesmo endereço ("Trocar senha" no menu).
 Para o link funcionar, duas configurações no Supabase:
 
 1. **Authentication › URL Configuration › Redirect URLs**: incluir
-   `https://SEU-DOMINIO/admin/auth/confirmar` (um por domínio em uso — o da
-   Vercel durante a aprovação e o oficial depois). Sem isso o Supabase manda a
-   pessoa para a Site URL e o link não abre a tela de senha nova.
+   `https://admin.valedosolimoveis.com.br/auth/confirmar` (e, para testar no
+   computador, `http://admin.localhost:3000/auth/confirmar`). O link sempre
+   volta para o endereço do painel onde o pedido foi feito. Sem isso o
+   Supabase manda a pessoa para a Site URL e o link não abre a tela de senha
+   nova.
 2. **Authentication › Emails › SMTP Settings**: o envio padrão do Supabase só
    entrega para membros da organização e tem limite de poucos e-mails por hora.
    Para a equipe receber, configure um SMTP próprio (Resend, Gmail/Workspace…).
@@ -99,9 +104,82 @@ outro.
 | Regiões e tipos de imóvel | sim | sim (sem excluir) |
 | Configurações do site | sim | **não** |
 
-O bloqueio acontece em três camadas: `proxy.ts` barra `/admin` sem sessão,
+O bloqueio acontece em três camadas: `proxy.ts` barra o painel sem sessão,
 cada página chama `requireStaff()` ou `requireAdmin()`, e a RLS decide no banco.
 Nenhuma delas confia no frontend.
+
+---
+
+## Painel administrativo
+
+O painel é separado do site público pelo **hostname**, no mesmo projeto Next.js,
+na mesma Vercel e no mesmo Supabase:
+
+| Endereço | O que abre |
+|---|---|
+| `https://valedosolimoveis.com.br/` (ou o domínio público em uso) | só o site público |
+| `https://admin.valedosolimoveis.com.br/` | só o painel |
+
+O site público não tem nenhum link para o painel, e `/admin` nele responde 404,
+como qualquer endereço inexistente.
+
+No painel, os endereços não têm o prefixo `/admin`:
+
+| Endereço no painel | Tela |
+|---|---|
+| `/` | login (ou início, para quem já entrou) |
+| `/login`, `/esqueci-senha`, `/nova-senha` | acesso e senha |
+| `/dashboard` | início |
+| `/imoveis`, `/imoveis/novo`, `/imoveis/<id>` | imóveis |
+| `/leads` | contatos |
+| `/regioes`, `/tipos-imovel` | regiões e tipos de imóvel |
+| `/configuracoes` | configurações do site (só admin) |
+
+Como funciona (arquivos):
+
+- `lib/admin-host.ts` — a regra de host (primeiro rótulo `admin`) e os caminhos
+  do painel. É a única fonte dessa regra; o matcher do `proxy.ts` e o
+  `headers()` do `next.config.ts` repetem o mesmo padrão `admin\..+` porque
+  lá o valor precisa ser literal.
+- `proxy.ts` — no host `admin.*`, reescreve `/dashboard` → `/admin/dashboard`
+  (as telas continuam em `app/admin`), renova a sessão do Supabase e barra quem
+  não entrou; endereços antigos `/admin/...` são redirecionados para a versão
+  sem prefixo. Em qualquer outro host, `/admin` responde 404. O proxy não roda
+  nas páginas públicas.
+- `app/admin/layout.tsx` — repete a trava de host no servidor: nenhuma tela do
+  painel é renderizada fora do `admin.*`.
+- Nada do painel é indexado: `robots.txt` próprio (`Disallow: /`),
+  `<meta name="robots" content="noindex, nofollow">` e cabeçalho
+  `X-Robots-Tag: noindex, nofollow` em todas as respostas do `admin.*`.
+
+Os links "Ver o site" e "ver no site" do painel apontam para
+`NEXT_PUBLIC_SITE_URL`.
+
+### No computador
+
+Com `npm run dev`, abra <http://admin.localhost:3000>. Chrome, Edge e Firefox
+resolvem `*.localhost` sozinhos. Se o navegador não abrir (Safari, por
+exemplo), acrescente ao arquivo de hosts (`/etc/hosts` no macOS/Linux,
+`C:\Windows\System32\drivers\etc\hosts` no Windows):
+
+```
+127.0.0.1 admin.localhost
+```
+
+O site público continua em <http://localhost:3000>.
+
+### Domínio na Vercel
+
+1. Vercel › projeto › **Settings › Domains** › adicionar
+   `admin.valedosolimoveis.com.br` (ambiente Production).
+2. No DNS do domínio `valedosolimoveis.com.br`, criar o registro que a Vercel
+   indicar para o subdomínio — normalmente `CNAME admin → cname.vercel-dns.com`.
+3. Supabase › Authentication › URL Configuration › Redirect URLs: incluir
+   `https://admin.valedosolimoveis.com.br/auth/confirmar`.
+
+Enquanto o subdomínio não estiver apontado, o painel fica inacessível em
+produção (o `/admin` do domínio público não existe mais). Faça os passos acima
+**antes** de publicar esta versão em produção.
 
 ---
 
@@ -219,7 +297,7 @@ depois é armada.
 ```
 app/
   (site)/          páginas públicas (Home, imóveis, regiões, institucional)
-  admin/
+  admin/           painel — servido em admin.* sem o prefixo /admin (proxy.ts)
     login/         entrada
     esqueci-senha/ pedido do link de senha nova
     auth/confirmar retorno do link do e-mail (vira sessão)

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { listAdminProperties } from "@/lib/queries/admin";
 import { storageUrl } from "@/lib/supabase/public";
-import { PROPERTY_STATUSES, STATUS_LABEL, STORAGE_BUCKETS } from "@/lib/site";
+import { PROPERTY_STATUSES, SITE, STATUS_LABEL, STORAGE_BUCKETS } from "@/lib/site";
 import { formatDate, formatPrice } from "@/lib/format";
 import { buildQuery, cn, firstParam } from "@/lib/utils";
 
@@ -26,7 +26,7 @@ export default async function AdminPropertiesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireStaff("/admin/imoveis");
+  await requireStaff("/imoveis");
   const params = await searchParams;
 
   const search = firstParam(params.busca);
@@ -45,7 +45,7 @@ export default async function AdminPropertiesPage({
             {result.total} {result.total === 1 ? "imóvel" : "imóveis"} no cadastro
           </p>
         </div>
-        <ButtonLink href="/admin/imoveis/novo">+ Novo imóvel</ButtonLink>
+        <ButtonLink href="/imoveis/novo">+ Novo imóvel</ButtonLink>
       </header>
 
       {firstParam(params.excluido) ? (
@@ -101,7 +101,7 @@ export default async function AdminPropertiesPage({
         </button>
 
         {search || state || status ? (
-          <Link href="/admin/imoveis" className="h-11 px-3 text-center text-sm leading-[2.75rem] text-ink-soft hover:text-ink">
+          <Link href="/imoveis" className="h-11 px-3 text-center text-sm leading-[2.75rem] text-ink-soft hover:text-ink">
             Limpar
           </Link>
         ) : null}
@@ -116,7 +116,7 @@ export default async function AdminPropertiesPage({
               ? "Tente outra busca ou limpe os filtros."
               : "Cadastre o primeiro imóvel para ele aparecer no site."
           }
-          action={<ButtonLink href="/admin/imoveis/novo">Cadastrar imóvel</ButtonLink>}
+          action={<ButtonLink href="/imoveis/novo">Cadastrar imóvel</ButtonLink>}
         />
       ) : (
         <>
@@ -128,7 +128,7 @@ export default async function AdminPropertiesPage({
 
               return (
                 <li key={property.id} className="overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface">
-                  <Link href={`/admin/imoveis/${property.id}`} className="flex gap-3 p-3 active:bg-canvas">
+                  <Link href={`/imoveis/${property.id}`} className="flex gap-3 p-3 active:bg-canvas">
                     <div className="relative size-20 shrink-0 overflow-hidden rounded-[var(--radius-xs)] bg-surface-alt">
                       {cover ? <Image src={cover} alt="" fill sizes="80px" className="object-cover" /> : null}
                     </div>
@@ -167,7 +167,7 @@ export default async function AdminPropertiesPage({
                       </button>
                     </form>
                     <Link
-                      href={`/admin/imoveis/${property.id}`}
+                      href={`/imoveis/${property.id}`}
                       className="grid h-11 place-items-center text-ink-soft active:bg-surface-alt"
                     >
                       Editar e fotos
@@ -206,7 +206,7 @@ export default async function AdminPropertiesPage({
                           </div>
                           <div className="min-w-0">
                             <Link
-                              href={`/admin/imoveis/${property.id}`}
+                              href={`/imoveis/${property.id}`}
                               className="block truncate font-medium text-ink hover:text-primary"
                             >
                               {property.title}
@@ -272,7 +272,7 @@ export default async function AdminPropertiesPage({
                           </form>
 
                           <Link
-                            href={`/admin/imoveis/${property.id}`}
+                            href={`/imoveis/${property.id}`}
                             className="whitespace-nowrap rounded-[var(--radius-xs)] px-2.5 py-1.5 text-xs text-ink-soft transition-colors hover:bg-surface-alt hover:text-ink"
                           >
                             Editar
@@ -280,7 +280,7 @@ export default async function AdminPropertiesPage({
 
                           {property.publication_state === "published" ? (
                             <a
-                              href={`/imoveis/${property.slug}`}
+                              href={`${SITE.url}/imoveis/${property.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="whitespace-nowrap rounded-[var(--radius-xs)] px-2.5 py-1.5 text-xs text-ink-soft transition-colors hover:bg-surface-alt hover:text-ink"
@@ -302,7 +302,7 @@ export default async function AdminPropertiesPage({
             page={result.page}
             pageCount={result.pageCount}
             buildHref={(target) =>
-              `/admin/imoveis${buildQuery({ busca: search, estado: state, status, pagina: target > 1 ? target : undefined })}`
+              `/imoveis${buildQuery({ busca: search, estado: state, status, pagina: target > 1 ? target : undefined })}`
             }
           />
         </>

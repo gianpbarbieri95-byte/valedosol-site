@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { getAdminSession, requireStaff } from "@/lib/auth";
 import { listLeads } from "@/lib/queries/admin";
-import { LEAD_STATUSES, LEAD_STATUS_LABEL, type LeadStatus } from "@/lib/site";
+import { LEAD_STATUSES, LEAD_STATUS_LABEL, SITE, type LeadStatus } from "@/lib/site";
 import { formatDateTime, phoneHref, whatsappUrl } from "@/lib/format";
 import { buildQuery, cn, firstParam } from "@/lib/utils";
 
@@ -33,7 +33,7 @@ export default async function AdminLeadsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireStaff("/admin/leads");
+  await requireStaff("/leads");
   const [params, session] = await Promise.all([searchParams, getAdminSession()]);
 
   const status = firstParam(params.status);
@@ -56,7 +56,7 @@ export default async function AdminLeadsPage({
           (option) => (
             <Link
               key={option.value || "todos"}
-              href={`/admin/leads${buildQuery({ status: option.value || undefined, origem: source })}`}
+              href={`/leads${buildQuery({ status: option.value || undefined, origem: source })}`}
               aria-current={(status ?? "") === option.value ? "true" : undefined}
               className={cn(
                 "rounded-[var(--radius-sm)] border px-3 py-1.5 text-[0.8125rem] transition-colors",
@@ -169,7 +169,7 @@ export default async function AdminLeadsPage({
                   {lead.property ? (
                     <p className="mt-3 text-sm text-ink-soft">
                       Imóvel:{" "}
-                      <Link href={`/imoveis/${lead.property.slug}`} className="text-primary underline-offset-4 hover:underline">
+                      <Link href={`${SITE.url}/imoveis/${lead.property.slug}`} className="text-primary underline-offset-4 hover:underline">
                         {lead.property.code} — {lead.property.title}
                       </Link>
                     </p>
@@ -225,7 +225,7 @@ export default async function AdminLeadsPage({
             page={result.page}
             pageCount={result.pageCount}
             buildHref={(target) =>
-              `/admin/leads${buildQuery({ status, origem: source, pagina: target > 1 ? target : undefined })}`
+              `/leads${buildQuery({ status, origem: source, pagina: target > 1 ? target : undefined })}`
             }
           />
         </>

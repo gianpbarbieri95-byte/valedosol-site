@@ -19,10 +19,10 @@ export default async function DashboardPage({
   ]);
 
   const cards = [
-    { label: "Imóveis publicados", value: stats.published, href: "/admin/imoveis?estado=published" },
-    { label: "Rascunhos", value: stats.drafts, href: "/admin/imoveis?estado=draft" },
-    { label: "Em destaque", value: stats.featured, href: "/admin/imoveis" },
-    { label: "Contatos novos", value: stats.leadsNew, href: "/admin/leads?status=novo", highlight: true },
+    { label: "Imóveis publicados", value: stats.published, href: "/imoveis?estado=published" },
+    { label: "Rascunhos", value: stats.drafts, href: "/imoveis?estado=draft" },
+    { label: "Em destaque", value: stats.featured, href: "/imoveis" },
+    { label: "Contatos novos", value: stats.leadsNew, href: "/leads?status=novo", highlight: true },
   ];
 
   const statusEntries = (Object.keys(stats.byStatus) as PropertyStatus[]).filter(
@@ -59,7 +59,7 @@ export default async function DashboardPage({
           </p>
         </div>
 
-        <ButtonLink href="/admin/imoveis/novo">+ Novo imóvel</ButtonLink>
+        <ButtonLink href="/imoveis/novo">+ Novo imóvel</ButtonLink>
       </header>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -88,7 +88,7 @@ export default async function DashboardPage({
             {statusEntries.map((status) => (
               <Link
                 key={status}
-                href={`/admin/imoveis?status=${status}`}
+                href={`/imoveis?status=${status}`}
                 className="bg-surface px-5 py-4 transition-colors hover:bg-surface-alt"
               >
                 <p className="text-xs uppercase tracking-[0.1em] text-muted">{STATUS_LABEL[status]}</p>
@@ -103,11 +103,11 @@ export default async function DashboardPage({
         <h2 className="text-lg">Atalhos</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { href: "/admin/imoveis/novo", label: "Cadastrar imóvel" },
-            { href: "/admin/imoveis", label: "Ver imóveis" },
-            { href: "/admin/leads", label: "Ver contatos" },
+            { href: "/imoveis/novo", label: "Cadastrar imóvel" },
+            { href: "/imoveis", label: "Ver imóveis" },
+            { href: "/leads", label: "Ver contatos" },
             ...(session.profile.role === "admin"
-              ? [{ href: "/admin/configuracoes", label: "Configurações" }]
+              ? [{ href: "/configuracoes", label: "Configurações" }]
               : []),
           ].map((shortcut) => (
             <Link

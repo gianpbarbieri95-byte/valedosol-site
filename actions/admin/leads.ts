@@ -8,7 +8,7 @@ import { requireAdmin, requireStaff } from "@/lib/auth";
 import { LEAD_STATUSES } from "@/lib/site";
 
 export async function updateLeadStatus(formData: FormData): Promise<void> {
-  await requireStaff("/admin/leads");
+  await requireStaff("/leads");
 
   const parsed = z
     .object({ id: z.string().uuid(), status: z.enum(LEAD_STATUSES) })
@@ -16,7 +16,7 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
 
   if (!parsed.success) return;
 
-  const session = await requireStaff("/admin/leads");
+  const session = await requireStaff("/leads");
   const supabase = await createClient();
 
   await supabase
@@ -33,7 +33,7 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
 }
 
 export async function saveLeadNotes(formData: FormData): Promise<void> {
-  await requireStaff("/admin/leads");
+  await requireStaff("/leads");
 
   const parsed = z
     .object({ id: z.string().uuid(), notes: z.string().max(4000) })
@@ -48,7 +48,7 @@ export async function saveLeadNotes(formData: FormData): Promise<void> {
 }
 
 export async function deleteLead(formData: FormData): Promise<void> {
-  await requireAdmin("/admin/leads");
+  await requireAdmin("/leads");
 
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return;
@@ -73,7 +73,7 @@ export async function deleteLead(formData: FormData): Promise<void> {
  * Vale uma hora e só é gerado para quem já está autenticado como equipe.
  */
 export async function getAttachmentUrl(path: string): Promise<string | null> {
-  await requireStaff("/admin/leads");
+  await requireStaff("/leads");
 
   const parsed = z.string().min(1).max(400).safeParse(path);
   if (!parsed.success) return null;

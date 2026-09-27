@@ -34,6 +34,19 @@ const nextConfig: NextConfig = {
     qualities: [70, 80, 85, 90],
   },
 
+  async headers() {
+    return [
+      {
+        // Painel (admin.valedosolimoveis.com.br): nada ali entra em índice de
+        // busca, nem as respostas que não são HTML. Mesma regra de host de
+        // lib/admin-host.ts; o site público não recebe este cabeçalho.
+        source: "/:path*",
+        has: [{ type: "host", value: "admin\\..+" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
+  },
+
   async redirects() {
     return [
       // URLs do site antigo em WordPress. As páginas de imóvel mantêm o

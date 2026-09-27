@@ -20,7 +20,7 @@ function formToObject(formData: FormData): Record<string, string> {
 /* ------------------------------------------------------------- regiões */
 
 export async function saveRegion(_previous: FormState, formData: FormData): Promise<FormState> {
-  await requireStaff("/admin/regioes");
+  await requireStaff("/regioes");
 
   const parsed = regionSchema.safeParse(formToObject(formData));
   if (!parsed.success) {
@@ -51,7 +51,7 @@ export async function saveRegion(_previous: FormState, formData: FormData): Prom
 }
 
 export async function deleteRegion(formData: FormData): Promise<void> {
-  await requireAdmin("/admin/regioes");
+  await requireAdmin("/regioes");
 
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return;
@@ -74,7 +74,7 @@ export async function deleteRegion(formData: FormData): Promise<void> {
 /* ------------------------------------------------------ tipos de imóvel */
 
 export async function savePropertyType(_previous: FormState, formData: FormData): Promise<FormState> {
-  await requireStaff("/admin/tipos-imovel");
+  await requireStaff("/tipos-imovel");
 
   const parsed = propertyTypeSchema.safeParse(formToObject(formData));
   if (!parsed.success) {
@@ -110,7 +110,7 @@ export async function savePropertyType(_previous: FormState, formData: FormData)
  * imóvel perca a classificação.
  */
 export async function deletePropertyType(formData: FormData): Promise<void> {
-  await requireAdmin("/admin/tipos-imovel");
+  await requireAdmin("/tipos-imovel");
 
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return;
@@ -138,7 +138,7 @@ const SETTING_KEYS = ["contact", "social", "hero", "about", "seo", "analytics"] 
  * remontados em jsonb por chave.
  */
 export async function saveSettings(_previous: FormState, formData: FormData): Promise<FormState> {
-  const session = await requireAdmin("/admin/configuracoes");
+  const session = await requireAdmin("/configuracoes");
 
   const grouped: Record<string, Record<string, string>> = {};
 
