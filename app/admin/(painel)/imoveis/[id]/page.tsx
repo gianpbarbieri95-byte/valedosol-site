@@ -5,6 +5,7 @@ import { getAdminSession, requireStaff } from "@/lib/auth";
 import { getAdminProperty, listAdminPropertyTypes, listAdminRegions } from "@/lib/queries/admin";
 import { deleteProperty } from "@/actions/admin/properties";
 import { formatDateTime } from "@/lib/format";
+import { SITE } from "@/lib/site";
 
 import { PropertyForm } from "@/components/admin/property-form";
 import { PropertyImages } from "@/components/admin/property-images";
@@ -33,7 +34,7 @@ export default async function EditPropertyPage({
   return (
     <div>
       <nav aria-label="Você está em" className="text-[0.8125rem] text-muted">
-        <Link href="/admin/imoveis" className="hover:text-ink">
+        <Link href="/imoveis" className="hover:text-ink">
           Imóveis
         </Link>
         <span aria-hidden> / </span>
@@ -49,7 +50,7 @@ export default async function EditPropertyPage({
               <>
                 {" · "}
                 <a
-                  href={`/imoveis/${property.slug}`}
+                  href={`${SITE.url}/imoveis/${property.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary underline-offset-4 hover:underline"

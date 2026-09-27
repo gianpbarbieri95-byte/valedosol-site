@@ -12,16 +12,16 @@ export const dynamic = "force-dynamic";
 
 /**
  * Criar senha nova. Chega-se aqui pelo link do e-mail (a sessão já foi
- * aberta em /admin/auth/confirmar) ou pelo menu do painel, para trocar.
+ * aberta em /auth/confirmar) ou pelo menu do painel, para trocar.
  */
 export default async function NewPasswordPage() {
-  const session = await requireStaff("/admin/nova-senha");
+  const session = await requireStaff("/nova-senha");
 
   return (
     <AuthCard
       title="Criar senha nova"
       description={`Conta: ${session.email}. Depois de salvar, é esta a senha para entrar no painel.`}
-      back={{ href: "/admin/dashboard", label: "Ir para o painel" }}
+      back={{ href: "/dashboard", label: "Ir para o painel" }}
     >
       <NewPasswordForm email={session.email} />
     </AuthCard>

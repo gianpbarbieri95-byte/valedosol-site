@@ -208,10 +208,6 @@ export function Footer({
                 Nexora IA &amp; Automação
               </a>
             </p>
-            <span aria-hidden className="h-3 w-px bg-line" />
-            <Link href="/admin/login" className="transition-colors hover:text-ink-soft">
-              Área restrita
-            </Link>
           </div>
         </div>
       </div>

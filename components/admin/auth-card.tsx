@@ -21,7 +21,7 @@ export function AuthCard({
   return (
     <main className="flex min-h-dvh flex-col bg-canvas px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8">
       <div className="mx-auto flex w-full max-w-[26rem] items-center justify-between gap-4">
-        <Link href="/" className="inline-flex rounded-[var(--radius-md)] bg-white p-1.5 shadow-float">
+        <Link href={SITE.url} className="inline-flex rounded-[var(--radius-md)] bg-white p-1.5 shadow-float">
           <Image src="/brand/logo.png" alt={SITE.name} width={250} height={249} unoptimized priority className="size-12" />
         </Link>
         <Link

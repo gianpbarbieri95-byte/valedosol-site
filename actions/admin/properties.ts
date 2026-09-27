@@ -124,7 +124,7 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
 
   revalidateProperty(data.slug);
   revalidatePath("/admin/imoveis");
-  redirect(`/admin/imoveis/${data.id}?criado=1`);
+  redirect(`/imoveis/${data.id}?criado=1`);
 }
 
 /** Traduz erro do Postgres em frase que o corretor entende. */
@@ -193,7 +193,7 @@ export async function deleteProperty(formData: FormData): Promise<void> {
 
   revalidateProperty(data?.slug);
   revalidatePath("/admin/imoveis");
-  redirect("/admin/imoveis?excluido=1");
+  redirect("/imoveis?excluido=1");
 }
 
 /* --------------------------------------------------------------- imagens */

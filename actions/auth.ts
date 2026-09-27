@@ -10,6 +10,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/public";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { requireStaff } from "@/lib/auth";
 import { SITE } from "@/lib/site";
+import { requestOrigin, safeAdminPath } from "@/lib/admin-host";
 import type { FormState } from "@/lib/validations/lead";
 
 const credentialsSchema = z.object({
@@ -92,8 +93,7 @@ export async function signIn(_previous: FormState, formData: FormData): Promise<
     };
   }
 
-  const destination =
-    parsed.data.next && parsed.data.next.startsWith("/admin") ? parsed.data.next : "/admin/dashboard";
+  const destination = safeAdminPath(parsed.data.next);
 
   revalidatePath("/admin", "layout");
   redirect(destination);
@@ -103,7 +103,7 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/admin", "layout");
-  redirect("/admin/login");
+  redirect("/login");
 }
 
 /* --------------------------------------------------------- senha esquecida */
@@ -111,19 +111,6 @@ export async function signOut() {
 const resetRequestSchema = z.object({
   email: z.string().trim().email("Informe um e-mail válido"),
 });
-
-/**
- * Endereço do próprio site que recebeu o pedido. O link do e-mail precisa
- * voltar para o mesmo domínio (o da Vercel durante a aprovação, o oficial
- * depois) — e o Supabase só aceita os que estão na lista de Redirect URLs.
- */
-function requestOrigin(requestHeaders: Headers): string {
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  if (!host) return SITE.url;
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
-  return `${protocol}://${host}`;
-}
 
 /**
  * Envia o link para criar uma senha nova.
@@ -152,8 +139,11 @@ export async function requestPasswordReset(_previous: FormState, formData: FormD
   }
 
   const supabase = await createClient();
+  // O link do e-mail volta para o mesmo painel que recebeu o pedido
+  // (admin.valedosolimoveis.com.br, ou admin.localhost no desenvolvimento) —
+  // e o Supabase só aceita os endereços da lista de Redirect URLs.
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${requestOrigin(requestHeaders)}/admin/auth/confirmar?next=/admin/nova-senha`,
+    redirectTo: `${requestOrigin(requestHeaders) ?? SITE.url}/auth/confirmar?next=/nova-senha`,
   });
 
   if (error) {
@@ -184,7 +174,7 @@ const newPasswordSchema = z
 
 /** Grava a senha nova de quem está logado (pelo link do e-mail ou pelo painel). */
 export async function updatePassword(_previous: FormState, formData: FormData): Promise<FormState> {
-  await requireStaff("/admin/nova-senha");
+  await requireStaff("/nova-senha");
 
   const parsed = newPasswordSchema.safeParse({
     password: formData.get("password"),
@@ -217,5 +207,5 @@ export async function updatePassword(_previous: FormState, formData: FormData): 
   }
 
   revalidatePath("/admin", "layout");
-  redirect("/admin/dashboard?senha=alterada");
+  redirect("/dashboard?senha=alterada");
 }

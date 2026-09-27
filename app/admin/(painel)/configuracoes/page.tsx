@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
   // Área de administrador: editor não entra (a RLS de site_settings também barra).
-  await requireAdmin("/admin/configuracoes");
+  await requireAdmin("/configuracoes");
   const settings = await getSettings();
 
   return (

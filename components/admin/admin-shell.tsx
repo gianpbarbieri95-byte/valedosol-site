@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "@/actions/auth";
+import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { CloseIcon, MenuIcon } from "@/components/ui/icons";
 import type { UserRole } from "@/types/database";
@@ -17,12 +18,12 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { href: "/admin/dashboard", label: "Início" },
-  { href: "/admin/imoveis", label: "Imóveis" },
-  { href: "/admin/leads", label: "Contatos" },
-  { href: "/admin/regioes", label: "Regiões" },
-  { href: "/admin/tipos-imovel", label: "Tipos de imóvel" },
-  { href: "/admin/configuracoes", label: "Configurações", roles: ["admin"] },
+  { href: "/dashboard", label: "Início" },
+  { href: "/imoveis", label: "Imóveis" },
+  { href: "/leads", label: "Contatos" },
+  { href: "/regioes", label: "Regiões" },
+  { href: "/tipos-imovel", label: "Tipos de imóvel" },
+  { href: "/configuracoes", label: "Configurações", roles: ["admin"] },
 ];
 
 /**
@@ -73,15 +74,15 @@ export function AdminShell({
     <div className="min-h-screen bg-canvas">
       {/* Topo no celular */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-surface px-4 py-3 lg:hidden">
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <Image src="/brand/logo.png" alt="" width={250} height={249} className="h-8 w-auto" />
           <span className="text-sm font-medium">Painel</span>
         </Link>
         <div className="flex items-center gap-1.5">
           {/* Cadastrar é o que mais se faz no celular: fica sempre a um toque. */}
-          {pathname !== "/admin/imoveis/novo" ? (
+          {pathname !== "/imoveis/novo" ? (
             <Link
-              href="/admin/imoveis/novo"
+              href="/imoveis/novo"
               onClick={() => setMenuOpen(false)}
               className="inline-flex h-10 items-center rounded-[var(--radius-sm)] bg-primary px-3.5 text-[0.8125rem] font-medium text-white transition-colors hover:bg-primary-hover"
             >
@@ -107,14 +108,14 @@ export function AdminShell({
             <p className="truncate text-sm font-medium text-ink">{name}</p>
             <p className="truncate text-xs text-muted">
               {email} ·{" "}
-              <Link href="/admin/nova-senha" onClick={() => setMenuOpen(false)} className="text-primary">
+              <Link href="/nova-senha" onClick={() => setMenuOpen(false)} className="text-primary">
                 trocar senha
               </Link>
             </p>
             <div className="mt-3 flex gap-2">
               <SignOutButton className="h-11 w-full" />
               <Link
-                href="/"
+                href={SITE.url}
                 className="inline-flex h-11 flex-1 items-center justify-center rounded-[var(--radius-sm)] border border-line text-[0.8125rem] text-ink-soft"
               >
                 Ver o site
@@ -128,7 +129,7 @@ export function AdminShell({
         {/* Barra lateral no desktop */}
         <aside className="hidden w-64 shrink-0 border-r border-line bg-surface lg:flex lg:min-h-screen lg:flex-col">
           <div className="border-b border-line px-5 py-5">
-            <Link href="/" className="flex items-center gap-2.5">
+            <Link href={SITE.url} className="flex items-center gap-2.5">
               <Image src="/brand/logo.png" alt="" width={250} height={249} className="h-10 w-auto" />
               <span className="text-[0.8125rem] leading-tight text-ink-soft">
                 Vale do Sol
@@ -148,11 +149,11 @@ export function AdminShell({
             </p>
             <SignOutButton className="mt-3 w-full" />
             <div className="mt-2 flex justify-center gap-3 text-xs text-muted">
-              <Link href="/admin/nova-senha" className="transition-colors hover:text-ink-soft">
+              <Link href="/nova-senha" className="transition-colors hover:text-ink-soft">
                 Trocar senha
               </Link>
               <span aria-hidden>·</span>
-              <Link href="/" className="transition-colors hover:text-ink-soft">
+              <Link href={SITE.url} className="transition-colors hover:text-ink-soft">
                 Ver o site
               </Link>
             </div>

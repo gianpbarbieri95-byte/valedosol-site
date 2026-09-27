@@ -63,7 +63,7 @@ export default async function LoginPage({
         <div className="flex h-full flex-col px-5 pb-14 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 lg:px-14 lg:pb-12 lg:pt-12 xl:px-20">
           <div className="flex items-center justify-between gap-4">
             <Link
-              href="/"
+              href={SITE.url}
               className="inline-flex rounded-[var(--radius-md)] bg-white p-1.5 shadow-float transition-transform duration-300 hover:-translate-y-0.5"
             >
               <Image
@@ -77,7 +77,7 @@ export default async function LoginPage({
               />
             </Link>
             <Link
-              href="/"
+              href={SITE.url}
               className="inline-flex h-10 items-center gap-1.5 rounded-[var(--radius-sm)] px-3 text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-white/75 transition-colors hover:bg-white/10 hover:text-white"
             >
               <ChevronLeftIcon className="size-4" />
@@ -126,7 +126,7 @@ export default async function LoginPage({
               className="mt-6 rounded-[var(--radius-sm)] border border-gold/30 bg-gold-soft px-4 py-3 text-sm leading-relaxed text-[#7a5a10]"
             >
               O link para criar a senha nova venceu, já foi usado ou foi aberto em outro navegador.{" "}
-              <Link href="/admin/esqueci-senha" className="font-medium underline underline-offset-4">
+              <Link href="/esqueci-senha" className="font-medium underline underline-offset-4">
                 Peça um link novo
               </Link>{" "}
               e abra-o neste mesmo aparelho.
