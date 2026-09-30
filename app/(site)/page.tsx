@@ -40,21 +40,26 @@ import { Shortcuts } from "@/components/home/shortcuts";
 
 // Tudo o que aparece escrito no filme, na ordem, para quem usa leitor de tela.
 const FILM_TRANSCRIPT = [
-  "Arujá, SP. Desde 1975.",
-  "Mais de 50 anos de história em Arujá.",
-  "Estância São Domingos. Condomínio Arujá 5. Condomínio Arujá Hills. Condomínio Arujazinho III.",
-  "Centro, Arujá: Av. Antônio Afonso de Lima, 704.",
-  "Fundada em 1975 por Leonardo Barbieri. Hoje, a segunda geração: Maria e Franco Barbieri.",
-  "Desde 1975, fazendo parte da história de Arujá. Vale do Sol Imóveis, CRECI J-14.578.",
+  "Vale do Sol Imóveis. Em Arujá desde 1975.",
+  "Centro, Arujá-SP. Conhecimento local. Atendimento próximo. Av. Antônio Afonso de Lima, 704.",
+  "Condomínio Arujá 5. Estância São Domingos. Condomínio Arujá Hills III. Imóveis para morar, investir ou recomeçar.",
+  "Uma história de família. 1975: Leonardo Barbieri. Hoje: Maria e Franco Barbieri.",
+  "Compra, venda e locação. Casas, terrenos, chácaras e condomínios, mais galpões e áreas comerciais.",
+  "Seu próximo imóvel com quem conhece Arujá.",
+  "WhatsApp (11) 99987-6642. Telefone (11) 4655-3399. valedosolimoveis.com.br. Av. Antônio Afonso de Lima, 704, Centro, Arujá-SP. CRECI J-14.578.",
 ];
 
-// Os arquivos do filme são os mesmos de sempre — nada aqui os altera.
+// Institucional v2 (30/09/2026), gerado em Desktop/valedosol-videos/sol-sobre-aruja
+// (build-v2.mjs), formato 16x9-hero: todo texto na faixa de cima, porque na hero o
+// título do site ocupa o terço de baixo. O mesmo corte serve à janela (720p), à hero
+// larga e ao visor de tela cheia (1080p). O fim dissolve no primeiro quadro, então o
+// loop não tem salto.
 const FILM = {
-  src: "/video/sol-sobre-aruja-720.mp4?v=2",
-  fullSrc: "/video/sol-sobre-aruja.mp4?v=2",
-  poster: "/video/sol-sobre-aruja-poster.jpg",
+  src: "/video/institucional-v2-hero-720.mp4",
+  fullSrc: "/video/institucional-v2-hero.mp4",
+  poster: "/video/institucional-v2-hero-poster.jpg",
   transcript: FILM_TRANSCRIPT,
-  duration: 32,
+  duration: 37,
 };
 
 // Conteúdo muda quando o corretor publica um imóvel; o revalidate cobre
@@ -236,7 +241,7 @@ export default async function HomePage() {
     legalName: SITE.legalName,
     url: SITE.url,
     logo: `${SITE.url}/brand/logo.png`,
-    image: `${SITE.url}/video/sol-sobre-aruja-poster.jpg`,
+    image: `${SITE.url}/video/institucional-v2-hero-poster.jpg`,
     description: `Imobiliária em ${PRIMARY_CITY} desde ${SITE.foundedYear}: casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região.`,
     foundingDate: String(SITE.foundedYear),
     founder: { "@type": "Person", name: "Leonardo Barbieri" },

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/icons";
 
 /**
- * O filme institucional ("O sol sobre Arujá"), mudo e em loop, em dois usos:
+ * O filme institucional (v2), mudo e em loop, em dois usos:
  *
  * - `BrandFilm`: a janela da hero. Abre com o pôster (quadro do título,
  *   servido pelo next/image para contar como LCP rápido) e só depois baixa a
