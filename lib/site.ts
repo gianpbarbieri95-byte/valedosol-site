@@ -7,7 +7,10 @@
 export const SITE = {
   name: "Vale do Sol Imóveis",
   legalName: "Vale do Sol Empreendimentos Imobiliários S/C Ltda",
-  creci: "CRECI 38.124-F",
+  /** Registro da imobiliária e do corretor responsável — o site mostra os dois. */
+  creciCompany: "J-14.578",
+  creciBroker: "38.124-F",
+  creci: "CRECI J-14.578 · CRECI 38.124-F",
   foundedYear: 1975,
   locale: "pt-BR",
   /** Sem barra no fim. Definido em produção por NEXT_PUBLIC_SITE_URL. */

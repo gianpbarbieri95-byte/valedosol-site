@@ -46,7 +46,7 @@ const FILM_TRANSCRIPT = [
   "Uma história de família. 1975: Leonardo Barbieri. Hoje: Maria e Franco Barbieri.",
   "Compra, venda e locação. Casas, terrenos, chácaras e condomínios, mais galpões e áreas comerciais.",
   "Seu próximo imóvel com quem conhece Arujá.",
-  "WhatsApp (11) 99987-6642. Telefone (11) 4655-3399. valedosolimoveis.com.br. Av. Antônio Afonso de Lima, 704, Centro, Arujá-SP. CRECI 38.124-F.",
+  "WhatsApp (11) 99987-6642. Telefone (11) 4655-3399. valedosolimoveis.com.br. Av. Antônio Afonso de Lima, 704, Centro, Arujá-SP. CRECI J-14.578 e CRECI 38.124-F.",
 ];
 
 // Institucional v2 (30/09/2026), gerado em Desktop/valedosol-videos/sol-sobre-aruja
@@ -69,7 +69,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   // O título padrão (layout) já é "Vale do Sol Imóveis — Imóveis em Arujá desde 1975".
   description:
-    "Imobiliária em Arujá desde 1975. Casas, terrenos, imóveis de alto padrão em condomínio, chácaras e imóveis comerciais à venda em Arujá e região. CRECI 38.124-F.",
+    "Imobiliária em Arujá desde 1975. Casas, terrenos, imóveis de alto padrão em condomínio, chácaras e imóveis comerciais à venda em Arujá e região. CRECI J-14.578 e CRECI 38.124-F.",
   alternates: { canonical: "/" },
 };
 
@@ -215,7 +215,7 @@ export default async function HomePage() {
           },
         ]
       : []),
-    { value: SITE.creci.replace("CRECI ", ""), label: "CRECI" },
+    { value: SITE.creciCompany, label: `CRECI · corretor ${SITE.creciBroker}` },
   ];
 
   // Último parágrafo do fechamento institucional ("São décadas conhecendo
@@ -256,7 +256,7 @@ export default async function HomePage() {
       addressCountry: "BR",
     },
     areaServed: { "@type": "City", name: PRIMARY_CITY },
-    identifier: SITE.creci,
+    identifier: `CRECI ${SITE.creciCompany}`,
     sameAs: [social.facebook, social.instagram].filter(Boolean),
   };
 

@@ -275,8 +275,9 @@ export function Header({ contact }: { contact: ContactSettings }) {
             </div>
             <div className="mt-8 flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
               {tel ? <a href={tel} className="tabular">{contact.phone}</a> : null}
-              <p className="label-caps text-[0.625rem] text-white/40">
-                {SITE.creci} · Arujá desde {SITE.foundedYear}
+              <p className="label-caps text-[0.625rem] leading-relaxed text-white/40">
+                <span className="block">{SITE.creci}</span>
+                <span className="block">Arujá desde {SITE.foundedYear}</span>
               </p>
             </div>
           </div>

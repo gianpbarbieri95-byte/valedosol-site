@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS: SiteSettingsMap = {
   seo: {
     title: "Vale do Sol Imóveis — Imóveis em Arujá desde 1975",
     description:
-      "Casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região. Tradição em Arujá desde 1975. CRECI 38.124-F.",
+      "Casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região. Tradição em Arujá desde 1975. CRECI J-14.578 e CRECI 38.124-F.",
   },
   analytics: {
     ga_measurement_id: "",

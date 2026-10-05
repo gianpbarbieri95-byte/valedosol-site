@@ -77,8 +77,11 @@ export function Footer({
             Desde {SITE.foundedYear}, a Vale do Sol ajuda famílias e empresas a encontrar imóveis em
             Arujá e região.
           </p>
-          <p className="mt-5 text-xs uppercase tracking-[0.14em] text-ink-soft">
-            {SITE.creci} <span aria-hidden className="mx-1.5 text-line-strong">·</span> Desde {SITE.foundedYear}
+          {/* Um registro por linha: juntos com "Desde 1975" quebravam no meio. */}
+          <p className="mt-5 space-y-1 text-xs uppercase tracking-[0.14em] text-ink-soft">
+            <span className="block">CRECI {SITE.creciCompany}</span>
+            <span className="block">Corretor CRECI {SITE.creciBroker}</span>
+            <span className="block">Desde {SITE.foundedYear}</span>
           </p>
         </div>
 
