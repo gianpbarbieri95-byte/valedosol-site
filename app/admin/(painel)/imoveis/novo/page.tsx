@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
-import { getCodeSeries, listAdminPropertyTypes, listAdminRegions } from "@/lib/queries/admin";
+import { getHighestCode, listAdminPropertyTypes, listAdminRegions } from "@/lib/queries/admin";
 import { PropertyForm } from "@/components/admin/property-form";
 import { getPropertyCrmData } from "@/lib/queries/property-crm";
 
@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
   await requireStaff("/imoveis/novo");
-  const [types, regions, codeSeries] = await Promise.all([
+  const [types, regions, highestCode] = await Promise.all([
     listAdminPropertyTypes(),
     listAdminRegions(),
-    getCodeSeries(),
+    getHighestCode(),
   ]);
   const crm = await getPropertyCrmData(null, types);
 
@@ -31,7 +31,7 @@ export default async function NewPropertyPage() {
       </p>
 
       <div className="mt-8">
-        <PropertyForm types={types} regions={regions} codeSeries={codeSeries} crm={crm} />
+        <PropertyForm types={types} regions={regions} highestCode={highestCode} crm={crm} />
       </div>
     </div>
   );

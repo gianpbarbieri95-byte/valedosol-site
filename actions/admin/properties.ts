@@ -9,7 +9,7 @@ import { requireAdmin, requireStaff } from "@/lib/auth";
 import { propertySchema, coordinatesAreConsistent } from "@/lib/validations/property";
 import { fieldErrors, type FormState } from "@/lib/validations/lead";
 import { MAX_PROPERTY_PHOTOS, MAX_PROPERTY_VIDEOS, STORAGE_BUCKETS } from "@/lib/site";
-import { codePrefix, highestBySeries, nextPropertyCode } from "@/lib/property-code";
+import { highestCode, nextPropertyCode } from "@/lib/property-code";
 import { PORTAL_IDS } from "@/lib/portals/definitions";
 
 /**
@@ -107,21 +107,10 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
   }
 
   // Cadastro: o código é sempre do sistema, nunca do formulário.
-  let typeSlug: string | null = null;
-  if (values.property_type_id) {
-    const { data: type } = await supabase
-      .from("property_types")
-      .select("slug")
-      .eq("id", values.property_type_id)
-      .maybeSingle();
-    typeSlug = type?.slug ?? null;
-  }
-
   const { data: existing, error: codesError } = await supabase.from("properties").select("code");
   if (codesError) return { status: "error", message: friendlyError(codesError.message) };
 
-  const prefix = codePrefix(values.purpose, typeSlug);
-  const highest = highestBySeries((existing ?? []).map((row) => row.code));
+  const highest = highestCode((existing ?? []).map((row) => row.code));
 
   // Dois cadastros ao mesmo tempo podem disputar o mesmo número: a coluna é
   // única, então quem perder tenta o número seguinte.
@@ -130,7 +119,7 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
   for (let attempt = 0; attempt < 5; attempt++) {
     ({ data, error } = await supabase
       .from("properties")
-      .insert({ ...payload, code: nextPropertyCode(prefix, highest, attempt), created_by: session.userId })
+      .insert({ ...payload, code: nextPropertyCode(highest, attempt), created_by: session.userId })
       .select("id, slug")
       .single());
     if (!error || !error.message.includes("properties_code_key")) break;

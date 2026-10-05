@@ -8,7 +8,7 @@ import { slugify } from "@/lib/format";
 import { formatDescription } from "@/lib/description";
 import { cn } from "@/lib/utils";
 import { DescriptionBlocks } from "@/components/property/description-blocks";
-import { codePrefix, nextPropertyCode } from "@/lib/property-code";
+import { nextPropertyCode } from "@/lib/property-code";
 import { COMMERCIAL_TYPE_SLUGS, PROPERTY_STATUSES, PUBLICATION_STATES, STATUS_LABEL } from "@/lib/site";
 import { Field, Input, Select, Textarea } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
@@ -83,7 +83,7 @@ export function PropertyForm({
   property,
   types,
   regions,
-  codeSeries,
+  highestCode,
   crm,
   before,
   beforeSteps = [],
@@ -91,8 +91,8 @@ export function PropertyForm({
   property?: Property | null;
   types: PropertyType[];
   regions: Region[];
-  /** Maior número de cada série de código — só no cadastro, para a prévia. */
-  codeSeries?: Record<string, number>;
+  /** Maior código já usado — só no cadastro, para a prévia. */
+  highestCode?: number;
   /** Presente quando o CRM está instalado: libera proprietários e portais. */
   crm?: PropertyCrmData | null;
   /** Blocos com formulário próprio (as fotos), mostrados antes das etapas. */
@@ -126,8 +126,7 @@ export function PropertyForm({
   const lastIntentRef = useRef<string | null>(null);
 
   // Prévia do código que o sistema vai gerar ao salvar um imóvel novo.
-  const typeSlug = types.find((type) => type.id === typeId)?.slug ?? null;
-  const codePreview = nextPropertyCode(codePrefix(purpose, typeSlug), new Map(Object.entries(codeSeries ?? {})));
+  const codePreview = nextPropertyCode(highestCode ?? 0);
   const isNew = !property?.id;
 
   /* Campos não controlados que as ajudas (CEP, localização) preenchem. */
@@ -412,15 +411,15 @@ export function PropertyForm({
                   label="Código"
                   htmlFor="p-codigo"
                   error={state.errors?.code}
-                  hint="Gerado pelo sistema. Altere só para corrigir um código antigo."
+                  hint="Gerado pelo sistema, só números. Altere só para corrigir."
                 >
-                  <Input id="p-codigo" name="code" defaultValue={property.code} />
+                  <Input id="p-codigo" name="code" inputMode="numeric" defaultValue={property.code} />
                 </Field>
               ) : (
                 <Field
                   label="Código"
                   htmlFor="p-codigo"
-                  hint="Gerado automaticamente ao salvar, pela finalidade e pelo tipo."
+                  hint="Gerado automaticamente ao salvar, em sequência."
                 >
                   <Input id="p-codigo" value={codePreview} readOnly aria-readonly className="bg-surface-alt text-ink-soft" />
                 </Field>

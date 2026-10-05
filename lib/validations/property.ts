@@ -74,7 +74,9 @@ export const propertySchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use apenas letras minúsculas, números e hífens"),
   // Gerado pelo sistema no cadastro (lib/property-code.ts). Na edição pode
   // ser corrigido à mão; vazio mantém o código atual.
-  code: optionalText.pipe(z.string().max(30, "Código muito longo").nullable()),
+  code: optionalText.pipe(
+    z.string().regex(/^\d{1,10}$/, "O código tem só números (ex.: 0040)").nullable()
+  ),
 
   purpose: z.enum(PROPERTY_PURPOSES),
   property_type_id: optionalText.pipe(z.string().uuid("Selecione um tipo válido").nullable()),

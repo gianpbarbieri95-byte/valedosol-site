@@ -17,8 +17,8 @@ export const DEFAULT_SETTINGS: SiteSettingsMap = {
     phone: "(11) 4655-3399",
     phone_secondary: "(11) 99987-6642",
     whatsapp: "5511999876642",
-    email: "contato@valedosolimoveis.com.br",
-    email_secondary: "franco@valedosolimoveis.com.br",
+    email: "franco@valedosolimoveis.com.br",
+    email_secondary: "",
     address: "Avenida Antônio Afonso de Lima, 704",
     district: "Centro",
     city: "Arujá",
@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS: SiteSettingsMap = {
   seo: {
     title: "Vale do Sol Imóveis — Imóveis em Arujá desde 1975",
     description:
-      "Casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região. Tradição em Arujá desde 1975. CRECI J-14.578.",
+      "Casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região. Tradição em Arujá desde 1975. CRECI 38.124-F.",
   },
   analytics: {
     ga_measurement_id: "",

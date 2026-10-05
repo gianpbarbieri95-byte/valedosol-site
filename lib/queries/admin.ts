@@ -1,5 +1,5 @@
 import "server-only";
-import { highestBySeries } from "@/lib/property-code";
+import { highestCode } from "@/lib/property-code";
 
 import { createClient } from "@/lib/supabase/server";
 import { STALE_PROPERTY_DAYS } from "@/lib/crm";
@@ -178,12 +178,12 @@ export async function listAdminRegions() {
   return data ?? [];
 }
 
-/** Maior número já usado em cada série de código (VRC, VRB, VCh...). */
-export async function getCodeSeries(): Promise<Record<string, number>> {
+/** Maior código numérico já usado — base da prévia do próximo código. */
+export async function getHighestCode(): Promise<number> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("properties").select("code");
   if (error) throw new Error(`Falha ao ler os códigos: ${error.message}`);
-  return Object.fromEntries(highestBySeries((data ?? []).map((row) => row.code)));
+  return highestCode((data ?? []).map((row) => row.code));
 }
 
 export async function listAdminPropertyTypes() {
