@@ -19,6 +19,9 @@ const supabaseOrigin = (() => {
 
 const nextConfig: NextConfig = {
   images: {
+    // Fotos redimensionadas pelo Supabase, não pela Vercel (ver lib/image-loader.ts).
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
     remotePatterns: supabaseOrigin
       ? [
           {
