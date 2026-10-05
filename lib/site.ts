@@ -83,4 +83,14 @@ export const STORAGE_BUCKETS = {
   property: "property-images",
   site: "site-images",
   region: "region-images",
+  video: "property-videos",
 } as const;
+
+/** Limites de mídia por imóvel — o banco confere de novo (migration 0006). */
+export const MAX_PROPERTY_PHOTOS = 35;
+export const MAX_PROPERTY_VIDEOS = 3;
+/** 50 MB: teto do bucket property-videos (plano grátis do Supabase). */
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+
+/** Tipos cadastrados que já nascem marcados como comerciais no formulário. */
+export const COMMERCIAL_TYPE_SLUGS = ["comercial", "galpao-industrial"];

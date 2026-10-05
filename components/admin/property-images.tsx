@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
 import { storageUrl } from "@/lib/supabase/env";
-import { STORAGE_BUCKETS } from "@/lib/site";
+import { MAX_PROPERTY_PHOTOS, STORAGE_BUCKETS } from "@/lib/site";
 import { slugify } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { compressImage } from "@/lib/image-compress";
@@ -65,10 +65,21 @@ export function PropertyImages({
     ? (order.map((id) => images.find((image) => image.id === id)).filter(Boolean) as PropertyImage[])
     : images;
 
-  async function upload(files: File[]) {
-    if (uploading || !files.length) return;
+  const room = Math.max(0, MAX_PROPERTY_PHOTOS - images.length);
+  const full = room === 0;
+
+  async function upload(chosen: File[]) {
+    if (uploading || !chosen.length) return;
     setError(null);
     setNotice(null);
+
+    // Limite de fotos por imóvel: sobe as primeiras que cabem e avisa do resto.
+    if (full) {
+      setError(`Este imóvel já tem ${MAX_PROPERTY_PHOTOS} fotos, o limite. Remova alguma para enviar outra.`);
+      return;
+    }
+    const files = chosen.slice(0, room);
+    const skipped = chosen.length - files.length;
     setUploading(true);
     setPhase("preparing");
     setProgress({ done: 0, total: files.length });
@@ -125,7 +136,13 @@ export function PropertyImages({
     if (uploaded.length) {
       const result = await registerPropertyImages(propertyId, uploaded);
       if (result.status === "error") failures.push(result.message ?? "Falha ao salvar as fotos.");
-      else setNotice(`${uploaded.length} ${uploaded.length === 1 ? "foto enviada" : "fotos enviadas"}.`);
+      else
+        setNotice(
+          `${uploaded.length} ${uploaded.length === 1 ? "foto enviada" : "fotos enviadas"}.` +
+            (skipped
+              ? ` ${skipped} ${skipped === 1 ? "ficou" : "ficaram"} de fora: o limite é de ${MAX_PROPERTY_PHOTOS} fotos por imóvel.`
+              : "")
+        );
     }
 
     if (failures.length) {
@@ -174,7 +191,7 @@ export function PropertyImages({
           <p className="mt-1 text-sm text-ink-soft">
             {images.length === 0
               ? "Nenhuma foto ainda."
-              : `${images.length} ${images.length === 1 ? "foto" : "fotos"}. A capa é a primeira que aparece no site.`}
+              : `${images.length} de ${MAX_PROPERTY_PHOTOS} fotos. A capa é a primeira que aparece no site.`}
           </p>
         </div>
 
@@ -212,7 +229,7 @@ export function PropertyImages({
           <button
             type="button"
             onClick={() => cameraRef.current?.click()}
-            disabled={uploading}
+            disabled={uploading || full}
             className={cn(pickerClass, "hidden bg-primary text-white hover:bg-primary-hover pointer-coarse:inline-flex")}
           >
             <CameraIcon className="size-5" />
@@ -221,7 +238,7 @@ export function PropertyImages({
           <button
             type="button"
             onClick={() => galleryRef.current?.click()}
-            disabled={uploading}
+            disabled={uploading || full}
             className={cn(
               pickerClass,
               "inline-flex border border-line-strong bg-surface text-ink hover:border-primary hover:text-primary"
@@ -233,8 +250,15 @@ export function PropertyImages({
         </div>
 
         <p className="mt-3 text-xs leading-relaxed text-muted">
-          <span className="pointer-coarse:hidden">Ou arraste as fotos para cá. </span>
-          Pode escolher várias de uma vez — elas são reduzidas automaticamente antes de enviar.
+          {full ? (
+            `Limite de ${MAX_PROPERTY_PHOTOS} fotos atingido. Remova alguma para enviar outra.`
+          ) : (
+            <>
+              <span className="pointer-coarse:hidden">Ou arraste as fotos para cá. </span>
+              Pode escolher várias de uma vez (até {MAX_PROPERTY_PHOTOS} por imóvel) — elas são reduzidas
+              automaticamente antes de enviar.
+            </>
+          )}
         </p>
 
         <input

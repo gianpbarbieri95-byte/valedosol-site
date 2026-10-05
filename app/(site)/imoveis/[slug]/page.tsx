@@ -102,6 +102,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     alt: image.alt_text || `${property.title} — foto ${index + 1}`,
   })).filter((image) => image.url);
 
+  const videos = (property.videos ?? [])
+    .map((video) => storageUrl(STORAGE_BUCKETS.video, video.storage_path))
+    .filter((url): url is string => Boolean(url));
+
   const location = formatLocation(property);
   const price = formatPrice(property.price, {
     purpose: property.purpose,
@@ -123,8 +127,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
   const specs = [
     { value: formatArea(property.area_total), label: "Terreno" },
     { value: formatArea(property.area_built), label: "Construídos" },
-    { value: formatNumber(property.bedrooms), label: property.bedrooms === 1 ? "Dormitório" : "Dormitórios" },
-    { value: formatNumber(property.suites), label: property.suites === 1 ? "Suíte" : "Suítes" },
+    // Comercial: salas no lugar de dormitórios e suítes.
+    ...(property.is_commercial
+      ? [{ value: formatNumber(property.rooms), label: property.rooms === 1 ? "Sala" : "Salas" }]
+      : [
+          { value: formatNumber(property.bedrooms), label: property.bedrooms === 1 ? "Dormitório" : "Dormitórios" },
+          { value: formatNumber(property.suites), label: property.suites === 1 ? "Suíte" : "Suítes" },
+        ]),
     { value: formatNumber(property.parking_spaces), label: property.parking_spaces === 1 ? "Vaga" : "Vagas" },
     { value: formatNumber(property.bathrooms), label: property.bathrooms === 1 ? "Banheiro" : "Banheiros" },
     { value: property.code, label: "Código" },
@@ -159,6 +168,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     { id: "ambientes", label: "Ambientes", show: Boolean(property.highlights?.length) },
     { id: "localizacao", label: "Localização", show: Boolean(location) },
     { id: "galeria", label: "Galeria", show: images.length > 1 },
+    { id: "videos", label: videos.length === 1 ? "Vídeo" : "Vídeos", show: videos.length > 0 },
     { id: "interesse", label: "Contato", show: true },
   ].filter((section) => section.show);
 
@@ -184,7 +194,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     ...(property.area_total
       ? { floorSize: { "@type": "QuantitativeValue", value: property.area_total, unitCode: "MTK" } }
       : {}),
-    ...(property.bedrooms ? { numberOfRooms: property.bedrooms } : {}),
+    ...(property.is_commercial
+      ? property.rooms
+        ? { numberOfRooms: property.rooms }
+        : {}
+      : property.bedrooms
+        ? { numberOfRooms: property.bedrooms }
+        : {}),
     ...(property.price && !property.price_on_request
       ? {
           offers: {
@@ -390,6 +406,29 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                 </div>
                 <div className="mt-8">
                   <PropertyPhotoGrid images={images} title={property.title} />
+                </div>
+              </section>
+            ) : null}
+
+            {videos.length ? (
+              <section id="videos" aria-labelledby="videos-titulo">
+                <p className="eyebrow">{videos.length === 1 ? "Vídeo" : "Vídeos"}</p>
+                <h2 id="videos-titulo" className="mt-4 text-title">
+                  {videos.length === 1 ? "Conheça o imóvel em vídeo" : "O imóvel em vídeo"}
+                </h2>
+                <div className="mt-8 grid gap-4">
+                  {videos.map((url, index) => (
+                    // Só baixa o vídeo quando a pessoa toca no play; #t=0.1 mostra o 1º quadro.
+                    <video
+                      key={url}
+                      src={`${url}#t=0.1`}
+                      controls
+                      preload="metadata"
+                      playsInline
+                      aria-label={`${property.title} — vídeo ${index + 1}`}
+                      className="aspect-video w-full border border-line bg-black"
+                    />
+                  ))}
                 </div>
               </section>
             ) : null}

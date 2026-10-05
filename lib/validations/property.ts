@@ -100,6 +100,8 @@ export const propertySchema = z.object({
   suites: optionalInt,
   bathrooms: optionalInt,
   parking_spaces: optionalInt,
+  is_commercial: checkbox,
+  rooms: optionalInt,
 
   description: optionalText,
   /** Uma característica por linha no textarea. */

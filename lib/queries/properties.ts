@@ -13,7 +13,7 @@ import type {
 const CARD_COLUMNS = `
   id, title, slug, code, purpose, status, price, price_on_request,
   city, neighborhood, area_total, area_built,
-  bedrooms, bathrooms, parking_spaces, is_featured,
+  bedrooms, bathrooms, parking_spaces, is_commercial, rooms, is_featured,
   property_type:property_types(name, slug),
   images:property_images(storage_path, alt_text, is_cover, sort_order)
 `;
@@ -22,7 +22,8 @@ const DETAIL_COLUMNS = `
   *,
   property_type:property_types(id, name, slug),
   region:regions(id, name, slug, city),
-  images:property_images(*)
+  images:property_images(*),
+  videos:property_videos(*)
 `;
 
 export interface PropertyFilters {
@@ -266,6 +267,7 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyWithRelat
   property.images = [...(property.images ?? [])].sort(
     (a, b) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order
   );
+  property.videos = [...(property.videos ?? [])].sort((a, b) => a.sort_order - b.sort_order);
 
   return property;
 }

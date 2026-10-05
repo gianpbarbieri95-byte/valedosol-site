@@ -9,7 +9,7 @@ import { formatDescription } from "@/lib/description";
 import { cn } from "@/lib/utils";
 import { DescriptionBlocks } from "@/components/property/description-blocks";
 import { codePrefix, nextPropertyCode } from "@/lib/property-code";
-import { PROPERTY_STATUSES, PUBLICATION_STATES, STATUS_LABEL } from "@/lib/site";
+import { COMMERCIAL_TYPE_SLUGS, PROPERTY_STATUSES, PUBLICATION_STATES, STATUS_LABEL } from "@/lib/site";
 import { Field, Input, Select, Textarea } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
 import { PinIcon } from "@/components/ui/icons";
@@ -117,6 +117,13 @@ export function PropertyForm({
   const [ownerIds, setOwnerIds] = useState<string[]>(crm?.ownerIds ?? []);
   const [ownerFilter, setOwnerFilter] = useState("");
   const [activeStep, setActiveStep] = useState<string>(beforeSteps[0]?.id ?? "negociacao");
+  const [isCommercial, setIsCommercial] = useState(property?.is_commercial ?? false);
+  const [publication, setPublication] = useState<(typeof PUBLICATION_STATES)[number]>(
+    property?.publication_state ?? "draft"
+  );
+  // Qual botão fez o último envio: "Publicar" só vira "Publicado" no campo
+  // Estado depois que o servidor confirmar.
+  const lastIntentRef = useRef<string | null>(null);
 
   // Prévia do código que o sistema vai gerar ao salvar um imóvel novo.
   const typeSlug = types.find((type) => type.id === typeId)?.slug ?? null;
@@ -177,6 +184,7 @@ export function PropertyForm({
   // Erro de validação: leva a pessoa direto ao primeiro campo com problema,
   // em vez de deixá-la procurando numa página longa (no celular, sobretudo).
   useEffect(() => {
+    if (state.status === "success" && lastIntentRef.current === "publish") setPublication("published");
     if (state.status !== "error") return;
     dirtyRef.current = true;
 
@@ -239,7 +247,9 @@ export function PropertyForm({
     };
   }, [stepIds]);
 
-  const submitLabel = isNew ? "Cadastrar e enviar fotos" : "Salvar alterações";
+  const submitLabel = isNew ? "Salvar rascunho e enviar fotos" : "Salvar alterações";
+  const publishLabel = isNew ? "Cadastrar e publicar" : "Publicar imóvel";
+  const showPublish = publication !== "published";
   const clientsById = new Map((crm?.clients ?? []).map((client) => [client.id, client]));
   const ownerOptions = (crm?.clients ?? []).filter(
     (client) =>
@@ -276,9 +286,30 @@ export function PropertyForm({
         </nav>
 
         <div className="mt-4 hidden space-y-3 lg:block">
-          <Button type="submit" form="property-form" size="md" disabled={pending} aria-busy={pending} className="w-full">
+          <Button
+            type="submit"
+            form="property-form"
+            size="md"
+            variant={showPublish ? "outline" : "primary"}
+            disabled={pending}
+            aria-busy={pending}
+            className="w-full"
+          >
             {pending ? "Salvando…" : submitLabel}
           </Button>
+          {showPublish ? (
+            <Button
+              type="submit"
+              form="property-form"
+              name="intent"
+              value="publish"
+              size="md"
+              disabled={pending}
+              className="w-full"
+            >
+              {publishLabel}
+            </Button>
+          ) : null}
           <FormMessage state={state} />
           {isNew ? <p className="text-xs leading-relaxed text-muted">Ao cadastrar, você vai direto para a tela de fotos.</p> : null}
         </div>
@@ -297,7 +328,10 @@ export function PropertyForm({
           // validação apagava tudo o que tinha sido digitado.
           onSubmit={(event) => {
             event.preventDefault();
-            const formData = new FormData(event.currentTarget);
+            // O submitter leva junto o intent do botão "Publicar".
+            const submitter = (event.nativeEvent as SubmitEvent).submitter;
+            const formData = new FormData(event.currentTarget, submitter);
+            lastIntentRef.current = submitter?.getAttribute("value") === "publish" ? "publish" : null;
             dirtyRef.current = false;
             startTransition(() => action(formData));
           }}
@@ -345,7 +379,12 @@ export function PropertyForm({
                   id="p-tipo"
                   name="property_type_id"
                   value={typeId}
-                  onChange={(event) => setTypeId(event.target.value)}
+                  onChange={(event) => {
+                    setTypeId(event.target.value);
+                    // Tipo comercial já marca "Imóvel comercial"; dá para desmarcar.
+                    const slug = types.find((type) => type.id === event.target.value)?.slug ?? "";
+                    setIsCommercial(COMMERCIAL_TYPE_SLUGS.includes(slug));
+                  }}
                 >
                   <option value="">Sem tipo definido</option>
                   {types.map((type) => (
@@ -563,13 +602,34 @@ export function PropertyForm({
 
           <Section id="composicao" title="Composição e medidas">
 
-            <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-4 sm:gap-5">
-              {[
-                { name: "bedrooms", label: "Dormitórios", value: property?.bedrooms },
-                { name: "suites", label: "Suítes", value: property?.suites },
-                { name: "bathrooms", label: "Banheiros", value: property?.bathrooms },
-                { name: "parking_spaces", label: "Vagas", value: property?.parking_spaces },
-              ].map((field) => (
+            <label className={checkboxRow}>
+              <input
+                type="checkbox"
+                name="is_commercial"
+                checked={isCommercial}
+                onChange={(event) => setIsCommercial(event.target.checked)}
+                className={checkboxInput}
+              />
+              <span>
+                Imóvel comercial{" "}
+                <span className="text-ink-soft">— pede salas no lugar de dormitórios e suítes</span>
+              </span>
+            </label>
+
+            <div className={cn("grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-5", isCommercial ? "sm:grid-cols-3" : "sm:grid-cols-4")}>
+              {(isCommercial
+                ? [
+                    { name: "rooms", label: "Salas", value: property?.rooms },
+                    { name: "bathrooms", label: "Banheiros", value: property?.bathrooms },
+                    { name: "parking_spaces", label: "Vagas", value: property?.parking_spaces },
+                  ]
+                : [
+                    { name: "bedrooms", label: "Dormitórios", value: property?.bedrooms },
+                    { name: "suites", label: "Suítes", value: property?.suites },
+                    { name: "bathrooms", label: "Banheiros", value: property?.bathrooms },
+                    { name: "parking_spaces", label: "Vagas", value: property?.parking_spaces },
+                  ]
+              ).map((field) => (
                 <Field key={field.name} label={field.label} htmlFor={`p-${field.name}`} error={state.errors?.[field.name]}>
                   <NumberStepper
                     id={`p-${field.name}`}
@@ -727,7 +787,12 @@ export function PropertyForm({
 
           <Section id="divulgacao" title={crm ? "Publicação e portais" : "Publicação"}>
               <Field label="Estado" htmlFor="p-estado" required>
-                <Select id="p-estado" name="publication_state" defaultValue={property?.publication_state ?? "draft"}>
+                <Select
+                  id="p-estado"
+                  name="publication_state"
+                  value={publication}
+                  onChange={(event) => setPublication(event.target.value as (typeof PUBLICATION_STATES)[number])}
+                >
                   {PUBLICATION_STATES.map((value) => (
                     <option key={value} value={value}>
                       {PUBLICATION_LABEL[value]}
@@ -784,6 +849,22 @@ export function PropertyForm({
               </div>
             ) : null}
 
+            {showPublish ? (
+              <div className="flex flex-col gap-3 rounded-[var(--radius-sm)] border border-primary/25 bg-primary-soft p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-ink">
+                  <span className="font-medium">Pronto para ir ao ar?</span>{" "}
+                  <span className="text-ink-soft">
+                    {isNew
+                      ? "Cadastre já publicado — as fotos e os vídeos entram na tela seguinte."
+                      : "Salva as alterações e coloca o imóvel no site agora."}
+                  </span>
+                </p>
+                <Button type="submit" name="intent" value="publish" size="md" disabled={pending} className="shrink-0">
+                  {pending ? "Salvando…" : publishLabel}
+                </Button>
+              </div>
+            ) : null}
+
             <div className="lg:hidden">
               <FormMessage state={state} />
             </div>
@@ -828,9 +909,23 @@ export function PropertyForm({
               {state.message}
             </p>
           ) : null}
-          <Button type="submit" size="lg" disabled={pending} aria-busy={pending} className="w-full">
-            {pending ? "Salvando…" : submitLabel}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              size="lg"
+              variant={showPublish ? "outline" : "primary"}
+              disabled={pending}
+              aria-busy={pending}
+              className="min-w-0 flex-1 px-3"
+            >
+              {pending ? "Salvando…" : showPublish ? (isNew ? "Salvar rascunho" : "Salvar") : submitLabel}
+            </Button>
+            {showPublish ? (
+              <Button type="submit" name="intent" value="publish" size="lg" disabled={pending} className="min-w-0 flex-1 px-3">
+                {isNew ? "Publicar" : publishLabel}
+              </Button>
+            ) : null}
+          </div>
         </div>
         </form>
       </div>

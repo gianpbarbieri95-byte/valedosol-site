@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { propertySchema, coordinatesAreConsistent } from "@/lib/validations/property";
 import { fieldErrors, type FormState } from "@/lib/validations/lead";
-import { STORAGE_BUCKETS } from "@/lib/site";
+import { MAX_PROPERTY_PHOTOS, MAX_PROPERTY_VIDEOS, STORAGE_BUCKETS } from "@/lib/site";
 import { codePrefix, highestBySeries, nextPropertyCode } from "@/lib/property-code";
 import { PORTAL_IDS } from "@/lib/portals/definitions";
 
@@ -39,7 +39,11 @@ function revalidateProperty(slug?: string | null) {
 export async function saveProperty(_previous: FormState, formData: FormData): Promise<FormState> {
   const session = await requireStaff();
 
-  const parsed = propertySchema.safeParse(formToObject(formData));
+  const fields = formToObject(formData);
+  // Botão "Publicar": salva e já tira do rascunho, sem mexer no campo Estado.
+  if (fields.intent === "publish") fields.publication_state = "published";
+
+  const parsed = propertySchema.safeParse(fields);
   if (!parsed.success) {
     return { status: "error", message: "Confira os campos destacados.", errors: fieldErrors(parsed.error) };
   }
@@ -69,7 +73,13 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
     ...values,
     // O preço some quando é sob consulta, para não vazar um número antigo.
     price: values.price_on_request ? null : values.price,
+    // Comercial guarda salas; residencial, dormitórios e suítes. O que não
+    // vale para o tipo escolhido é limpo para não aparecer no site.
+    bedrooms: values.is_commercial ? null : values.bedrooms,
+    suites: values.is_commercial ? null : values.suites,
+    rooms: values.is_commercial ? values.rooms : null,
   };
+  const published = payload.publication_state === "published";
 
   if (id) {
     // Na edição o código só muda se alguém corrigir de propósito.
@@ -93,7 +103,7 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
     if (crmProblem) {
       return { status: "error", message: `Imóvel salvo, mas não foi possível atualizar ${crmProblem}. Confira e salve de novo.` };
     }
-    return { status: "success", message: "Imóvel salvo." };
+    return { status: "success", message: fields.intent === "publish" ? "Imóvel publicado — já aparece no site." : "Imóvel salvo." };
   }
 
   // Cadastro: o código é sempre do sistema, nunca do formulário.
@@ -132,7 +142,7 @@ export async function saveProperty(_previous: FormState, formData: FormData): Pr
 
   revalidateProperty(data.slug);
   revalidatePath("/admin/imoveis");
-  redirect(`/imoveis/${data.id}?criado=1${crmProblem ? `&aviso=${crmProblem}` : ""}`);
+  redirect(`/imoveis/${data.id}?criado=${published ? "publicado" : "1"}${crmProblem ? `&aviso=${crmProblem}` : ""}`);
 }
 
 /**
@@ -193,6 +203,9 @@ function friendlyError(message: string): string {
   if (message.includes("properties_slug_key")) {
     return "Já existe um imóvel com esse endereço de página. Mude o campo 'endereço da página'.";
   }
+  if (message.includes("media_limit")) {
+    return `Limite atingido: ${message.replace(/^.*media_limit:\s*/, "")}.`;
+  }
   if (message.includes("row-level security")) {
     return "Sua conta não tem permissão para esta ação.";
   }
@@ -247,6 +260,15 @@ export async function deleteProperty(formData: FormData): Promise<void> {
     await supabase.storage.from(STORAGE_BUCKETS.property).remove(images.map((image) => image.storage_path));
   }
 
+  const { data: videos } = await supabase
+    .from("property_videos")
+    .select("storage_path")
+    .eq("property_id", id.data);
+
+  if (videos?.length) {
+    await supabase.storage.from(STORAGE_BUCKETS.video).remove(videos.map((video) => video.storage_path));
+  }
+
   const { data } = await supabase.from("properties").delete().eq("id", id.data).select("slug").maybeSingle();
 
   revalidateProperty(data?.slug);
@@ -284,6 +306,23 @@ export async function registerPropertyImages(propertyId: string, paths: string[]
   const hasImages = Boolean(existing?.length);
   const nextOrder = (existing?.[0]?.sort_order ?? -1) + 1;
 
+  const { count } = await supabase
+    .from("property_images")
+    .select("id", { count: "exact", head: true })
+    .eq("property_id", propertyId);
+  const room = MAX_PROPERTY_PHOTOS - (count ?? 0);
+  if (parsed.data.paths.length > room) {
+    // As que passaram do limite já estão no Storage: tira de lá também.
+    await supabase.storage.from(STORAGE_BUCKETS.property).remove(parsed.data.paths);
+    return {
+      status: "error",
+      message:
+        room > 0
+          ? `Cada imóvel aceita até ${MAX_PROPERTY_PHOTOS} fotos — dá para enviar só mais ${room}.`
+          : `Este imóvel já tem ${MAX_PROPERTY_PHOTOS} fotos, o limite. Remova alguma para enviar outra.`,
+    };
+  }
+
   const { error } = await supabase.from("property_images").insert(
     parsed.data.paths.map((path, index) => ({
       property_id: propertyId,
@@ -294,7 +333,7 @@ export async function registerPropertyImages(propertyId: string, paths: string[]
     }))
   );
 
-  if (error) return { status: "error", message: `Falha ao salvar as fotos: ${error.message}` };
+  if (error) return { status: "error", message: `Falha ao salvar as fotos: ${friendlyError(error.message)}` };
 
   revalidatePath(`/admin/imoveis/${propertyId}`);
   return { status: "success", message: "Fotos enviadas." };
@@ -399,4 +438,87 @@ export async function reorderPropertyImages(propertyId: string, orderedIds: stri
   revalidateProperty(data?.slug);
   revalidatePath(`/admin/imoveis/${propertyId}`);
   return { status: "success", message: "Ordem salva." };
+}
+
+/* ---------------------------------------------------------------- vídeos */
+
+const videoPathSchema = z.string().min(1).max(400);
+
+/**
+ * Registra os vídeos que o navegador acabou de enviar ao Storage — mesmo
+ * caminho das fotos: o arquivo vai direto ao Supabase, só o caminho passa aqui.
+ */
+export async function registerPropertyVideos(propertyId: string, paths: string[]): Promise<FormState> {
+  await requireStaff();
+
+  const parsed = z
+    .object({ property_id: z.string().uuid(), paths: z.array(videoPathSchema).max(MAX_PROPERTY_VIDEOS) })
+    .safeParse({ property_id: propertyId, paths });
+  if (!parsed.success) return { status: "error", message: "Arquivos inválidos." };
+
+  const supabase = await createClient();
+
+  const { data: existing } = await supabase
+    .from("property_videos")
+    .select("sort_order")
+    .eq("property_id", propertyId)
+    .order("sort_order", { ascending: false });
+
+  const room = MAX_PROPERTY_VIDEOS - (existing?.length ?? 0);
+  if (parsed.data.paths.length > room) {
+    await supabase.storage.from(STORAGE_BUCKETS.video).remove(parsed.data.paths);
+    return {
+      status: "error",
+      message:
+        room > 0
+          ? `Cada imóvel aceita até ${MAX_PROPERTY_VIDEOS} vídeos — dá para enviar só mais ${room}.`
+          : `Este imóvel já tem ${MAX_PROPERTY_VIDEOS} vídeos, o limite. Remova algum para enviar outro.`,
+    };
+  }
+
+  const nextOrder = (existing?.[0]?.sort_order ?? -1) + 1;
+  const { error } = await supabase.from("property_videos").insert(
+    parsed.data.paths.map((path, index) => ({
+      property_id: propertyId,
+      storage_path: path,
+      sort_order: nextOrder + index,
+    }))
+  );
+
+  if (error) return { status: "error", message: `Falha ao salvar os vídeos: ${friendlyError(error.message)}` };
+
+  const { data } = await supabase.from("properties").select("slug").eq("id", propertyId).maybeSingle();
+  revalidateProperty(data?.slug);
+  revalidatePath(`/admin/imoveis/${propertyId}`);
+  return { status: "success", message: "Vídeos enviados." };
+}
+
+export async function deletePropertyVideo(formData: FormData): Promise<void> {
+  await requireStaff();
+
+  const parsed = z
+    .object({ id: z.string().uuid(), property_id: z.string().uuid() })
+    .safeParse({ id: formData.get("id"), property_id: formData.get("property_id") });
+
+  if (!parsed.success) return;
+
+  const supabase = await createClient();
+
+  const { data: video } = await supabase
+    .from("property_videos")
+    .select("storage_path")
+    .eq("id", parsed.data.id)
+    .maybeSingle();
+
+  await supabase.from("property_videos").delete().eq("id", parsed.data.id);
+  if (video?.storage_path) await supabase.storage.from(STORAGE_BUCKETS.video).remove([video.storage_path]);
+
+  const { data } = await supabase
+    .from("properties")
+    .select("slug")
+    .eq("id", parsed.data.property_id)
+    .maybeSingle();
+
+  revalidateProperty(data?.slug);
+  revalidatePath(`/admin/imoveis/${parsed.data.property_id}`);
 }

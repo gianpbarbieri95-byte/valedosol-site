@@ -10,6 +10,7 @@ import { SITE } from "@/lib/site";
 import { PropertyForm } from "@/components/admin/property-form";
 import { getPropertyCrmData } from "@/lib/queries/property-crm";
 import { PropertyImages } from "@/components/admin/property-images";
+import { PropertyVideos } from "@/components/admin/property-videos";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 
 export const dynamic = "force-dynamic";
@@ -83,7 +84,9 @@ export default async function EditPropertyPage({
           role="status"
           className="mt-6 rounded-[var(--radius-sm)] border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary"
         >
-          Imóvel cadastrado. Agora envie as fotos e escolha a capa. Se ele ainda estiver como rascunho, mude a publicação para “Publicado” e salve.
+          {criado === "publicado"
+            ? "Imóvel cadastrado e publicado — já aparece no site. Agora envie as fotos e os vídeos e escolha a capa."
+            : "Imóvel cadastrado como rascunho. Envie as fotos e os vídeos, escolha a capa e, no fim da página, toque em “Publicar imóvel”."}
         </p>
       ) : null}
 
@@ -93,10 +96,11 @@ export default async function EditPropertyPage({
           types={types}
           regions={regions}
           crm={crm}
-          beforeSteps={[{ id: "fotos", label: "Fotos" }]}
+          beforeSteps={[{ id: "fotos", label: "Fotos e vídeos" }]}
           before={
-            <div id="fotos" className="scroll-mt-24">
+            <div id="fotos" className="grid scroll-mt-24 gap-5">
               <PropertyImages propertyId={property.id} propertyCode={property.code} images={property.images ?? []} />
+              <PropertyVideos propertyId={property.id} propertyCode={property.code} videos={property.videos ?? []} />
             </div>
           }
         />

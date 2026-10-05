@@ -46,12 +46,19 @@ export function PropertyCard({
   const cover = propertyCoverUrl(property);
   const area = formatArea(property.area_total ?? property.area_built);
   const bedrooms = formatNumber(property.bedrooms);
+  const rooms = formatNumber(property.rooms);
   const parking = formatNumber(property.parking_spaces);
 
   // No máximo três medidas, numa linha só: o resto está na página do imóvel.
   const features = [
     area ? { value: area, label: "" } : null,
-    bedrooms ? { value: bedrooms, label: property.bedrooms === 1 ? "dormitório" : "dormitórios" } : null,
+    property.is_commercial
+      ? rooms
+        ? { value: rooms, label: property.rooms === 1 ? "sala" : "salas" }
+        : null
+      : bedrooms
+        ? { value: bedrooms, label: property.bedrooms === 1 ? "dormitório" : "dormitórios" }
+        : null,
     parking ? { value: parking, label: property.parking_spaces === 1 ? "vaga" : "vagas" } : null,
   ].filter(Boolean) as { value: string; label: string }[];
 

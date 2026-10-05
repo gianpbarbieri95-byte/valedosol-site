@@ -56,6 +56,14 @@ export interface PropertyImage {
   created_at: string;
 }
 
+export interface PropertyVideo {
+  id: string;
+  property_id: string;
+  storage_path: string;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -85,6 +93,9 @@ export interface Property {
   suites: number | null;
   bathrooms: number | null;
   parking_spaces: number | null;
+  /** Imóvel comercial: mostra salas (rooms) no lugar de dormitórios e suítes. */
+  is_commercial: boolean;
+  rooms: number | null;
 
   description: string | null;
   highlights: string[];
@@ -111,6 +122,7 @@ export interface PropertyWithRelations extends Property {
   property_type: Pick<PropertyType, "id" | "name" | "slug"> | null;
   region: Pick<Region, "id" | "name" | "slug" | "city"> | null;
   images: PropertyImage[];
+  videos: PropertyVideo[];
 }
 
 /** Versão enxuta usada nos cards de listagem. */
@@ -130,6 +142,8 @@ export interface PropertyCardData {
   bedrooms: number | null;
   bathrooms: number | null;
   parking_spaces: number | null;
+  is_commercial: boolean;
+  rooms: number | null;
   is_featured: boolean;
   property_type: Pick<PropertyType, "name" | "slug"> | null;
   images: Pick<PropertyImage, "storage_path" | "alt_text" | "is_cover" | "sort_order">[];

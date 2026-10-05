@@ -3,7 +3,7 @@ import { highestBySeries } from "@/lib/property-code";
 
 import { createClient } from "@/lib/supabase/server";
 import { STALE_PROPERTY_DAYS } from "@/lib/crm";
-import type { Lead, Property, PropertyImage, PropertyStatus } from "@/types/database";
+import type { Lead, Property, PropertyImage, PropertyStatus, PropertyVideo } from "@/types/database";
 
 /** Situações em que o imóvel ainda está no mercado. */
 const ACTIVE_STATUSES: PropertyStatus[] = ["disponivel", "reservado"];
@@ -119,17 +119,18 @@ export async function getAdminProperty(id: string) {
 
   const { data, error } = await supabase
     .from("properties")
-    .select("*, images:property_images(*)")
+    .select("*, images:property_images(*), videos:property_videos(*)")
     .eq("id", id)
     .maybeSingle();
 
   if (error) throw new Error(`Falha ao carregar o imóvel: ${error.message}`);
   if (!data) return null;
 
-  const property = data as unknown as Property & { images: PropertyImage[] };
+  const property = data as unknown as Property & { images: PropertyImage[]; videos: PropertyVideo[] };
   property.images = [...(property.images ?? [])].sort(
     (a, b) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order
   );
+  property.videos = [...(property.videos ?? [])].sort((a, b) => a.sort_order - b.sort_order);
 
   return property;
 }
