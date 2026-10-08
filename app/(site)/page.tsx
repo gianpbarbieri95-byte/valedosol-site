@@ -17,7 +17,6 @@ import {
 import {
   getPriceRange,
   getPropertyExtras,
-  getPropertyCounts,
   getRegionCovers,
   getShowcaseProperties,
   searchProperties,
@@ -82,7 +81,6 @@ export default async function HomePage() {
     neighborhoods,
     regions,
     priceRange,
-    counts,
     regionCovers,
     profileResults,
     shortcutTotals,
@@ -95,7 +93,6 @@ export default async function HomePage() {
     getNeighborhoods(),
     getRegions(),
     getPriceRange(),
-    getPropertyCounts(),
     getRegionCovers(),
     Promise.all(
       PATH_PROFILES.map((profile) =>
@@ -200,21 +197,9 @@ export default async function HomePage() {
     .filter(Boolean)
     .join(" · ");
 
-  // Só entra aqui o que é verificável: a data de fundação, a contagem real
-  // de imóveis publicados e o registro no CRECI.
+  // Só entra aqui o que é verificável: a data de fundação e o registro no CRECI.
   const trust = [
     { value: `${yearsOfHistory} anos`, label: "de história" },
-    ...(counts.total > 0
-      ? [
-          {
-            value: String(counts.total),
-            label:
-              counts.total === 1
-                ? "imóvel selecionado"
-                : "imóveis selecionados",
-          },
-        ]
-      : []),
     { value: SITE.creciCompany, label: `CRECI · corretor ${SITE.creciBroker}` },
   ];
 
@@ -355,13 +340,13 @@ export default async function HomePage() {
       </section>
 
       {/* ------------------------------------------------ Faixa de credibilidade */}
-      {/* Só o verificável: a fundação, o acervo publicado e o CRECI. */}
+      {/* Só o verificável: a fundação e o CRECI. */}
       <section
         aria-label="A Vale do Sol em números"
         className="border-b border-line"
       >
         <div className="container-site flex flex-col gap-8 py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:pb-12 lg:pt-[calc(2.75rem+3.5rem)]">
-          <dl className="grid grid-cols-3 lg:flex lg:gap-0">
+          <dl className="grid grid-cols-2 lg:flex lg:gap-0">
             {trust.map((item, index) => (
               <div
                 key={item.label}
@@ -402,7 +387,6 @@ export default async function HomePage() {
 
       <FeaturedProperties
         properties={showcase}
-        total={counts.total}
         ledes={ledes}
       />
 

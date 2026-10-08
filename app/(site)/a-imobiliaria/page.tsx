@@ -4,7 +4,6 @@ import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { getSettings } from "@/lib/queries/settings";
-import { getPropertyCounts } from "@/lib/queries/properties";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
@@ -42,7 +41,7 @@ function segmentos(texto: string): { title: string; text: string }[] {
 }
 
 export default async function AboutPage() {
-  const [settings, counts] = await Promise.all([getSettings(), getPropertyCounts()]);
+  const settings = await getSettings();
   const { about } = settings;
   const years = new Date().getFullYear() - SITE.foundedYear;
 
@@ -80,19 +79,15 @@ export default async function AboutPage() {
         ) : null}
       </div>
 
-      {/* O número de colunas acompanha quantos indicadores existem de fato:
-          sem imóveis publicados, o bloco tem duas colunas em vez de deixar
-          uma célula vazia no meio da seção. */}
       <div
         className={cn(
           "mt-16 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-line bg-line",
-          counts.total ? "sm:grid-cols-3" : "sm:grid-cols-2"
+          "sm:grid-cols-2"
         )}
       >
         {[
           { value: years, label: "anos em Arujá" },
           { value: 2, label: "gerações da família Barbieri" },
-          ...(counts.total ? [{ value: counts.total, label: "imóveis publicados hoje" }] : []),
         ].map((item) => (
           <div key={item.label} className="bg-surface px-6 py-8">
             <p className="font-display text-[2.5rem] leading-none text-primary tabular">{item.value}</p>

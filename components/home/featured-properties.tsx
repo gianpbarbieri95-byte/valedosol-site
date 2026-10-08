@@ -12,11 +12,9 @@ import type { PropertyCardData } from "@/types/database";
  */
 export function FeaturedProperties({
   properties,
-  total,
   ledes,
 }: {
   properties: PropertyCardData[];
-  total: number;
   /** Linha de apresentação por id — só com o que foi cadastrado. */
   ledes: Map<string, string | null>;
 }) {
@@ -33,7 +31,7 @@ export function FeaturedProperties({
           description="Uma seleção do acervo da Vale do Sol em Arujá e região."
           action={
             <Link href="/imoveis" className="link-line text-ink">
-              {total > 0 ? `Ver os ${total} imóveis` : "Ver todos os imóveis"}
+              Ver todos os imóveis
               <ArrowRightIcon className="size-3.5" />
             </Link>
           }
