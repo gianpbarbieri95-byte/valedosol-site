@@ -75,7 +75,7 @@ export const propertySchema = z.object({
   // Gerado pelo sistema no cadastro (lib/property-code.ts). Na edição pode
   // ser corrigido à mão; vazio mantém o código atual.
   code: optionalText.pipe(
-    z.string().regex(/^\d{1,10}$/, "O código tem só números (ex.: 0040)").nullable()
+    z.string().regex(/^\d{1,10}$/, "O código tem só números (ex.: 40)").nullable()
   ),
 
   purpose: z.enum(PROPERTY_PURPOSES),
