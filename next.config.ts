@@ -63,6 +63,12 @@ const nextConfig: NextConfig = {
       { source: "/tipo-de-imovel/:slug", destination: "/imoveis?tipo=:slug", permanent: true },
       { source: "/situacao/:slug", destination: "/imoveis?status=:slug", permanent: true },
       { source: "/corretores", destination: "/a-imobiliaria", permanent: true },
+
+      // O e-mail continua na Hostinger (cPanel); o domínio raiz está na Vercel.
+      // Os atalhos que existiam no servidor antigo passam a apontar para lá.
+      // Temporários (307) para não ficarem presos no cache do navegador.
+      { source: "/webmail", destination: "https://webmail.valedosolimoveis.com.br", permanent: false },
+      { source: "/cpanel", destination: "https://cpanel.valedosolimoveis.com.br", permanent: false },
     ];
   },
 };
