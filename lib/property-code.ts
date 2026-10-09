@@ -1,9 +1,10 @@
 /**
  * Código do imóvel — gerado pelo sistema, nunca digitado.
  *
- * Desde 05/10/2026 é só número; desde 08/10/2026 sem zeros à esquerda: 1, 2… 39, 40 (pedido do Gian).
- * O acervo foi renumerado pela ordem de cadastro (1 a 39); os códigos
- * antigos com letras (VRC029, VCh005…) estão em data/codigos-antigos-2026-10-05.csv.
+ * Desde 05/10/2026 é só número; desde 09/10/2026 na casa da centena: 101, 102… 140, e os novos
+ * seguem 141, 142… (pedido do Gian). O acervo foi renumerado pela ordem de cadastro; o de-para
+ * 1–40 → 101–140 está em data/codigos-antes-da-centena-2026-10-09.csv e os códigos antigos com
+ * letras (VRC029, VCh005…) em data/codigos-antigos-2026-10-05.csv.
  */
 
 /** Maior código numérico já usado. Ignora qualquer código que não seja só número. */
