@@ -19,7 +19,7 @@ export function SellPropertyForm({
   const pathname = usePathname();
 
   if (state.status === "success") {
-    return <FormMessage state={state} />;
+    return <FormMessage state={state} event="sell_request_submit" />;
   }
 
   return (

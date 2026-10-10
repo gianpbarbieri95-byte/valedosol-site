@@ -13,7 +13,11 @@ type TrackedEvent =
   | "whatsapp_click"
   | "lead_submit"
   | "favorite_property"
-  | "contact_submit";
+  | "contact_submit"
+  | "sell_request_submit"
+  | "property_interest_submit"
+  | "phone_click"
+  | "filter_apply";
 
 declare global {
   interface Window {

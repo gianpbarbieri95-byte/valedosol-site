@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/footer";
 import { getSettings } from "@/lib/queries/settings";
 import { getRegions } from "@/lib/queries/taxonomies";
 import { Analytics } from "@/components/analytics";
+import { ClickTracker } from "@/components/click-tracker";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         regions={regions.map((region) => ({ slug: region.slug, name: region.name }))}
       />
       <Analytics />
+      <ClickTracker />
       <VercelAnalytics />
     </div>
   );

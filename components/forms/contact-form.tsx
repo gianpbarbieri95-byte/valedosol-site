@@ -22,7 +22,7 @@ export function ContactForm() {
   const pathname = usePathname();
 
   if (state.status === "success") {
-    return <FormMessage state={state} />;
+    return <FormMessage state={state} event="contact_submit" />;
   }
 
   return (

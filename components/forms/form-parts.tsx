@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { CheckIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/track";
 import type { FormState } from "@/lib/validations/lead";
 
 /** Botão que sabe sozinho quando o formulário está sendo enviado. */
@@ -26,7 +28,21 @@ export function SubmitButton({
 }
 
 /** Retorno do envio, anunciado também para leitores de tela. */
-export function FormMessage({ state, className }: { state: FormState; className?: string }) {
+export function FormMessage({
+  state,
+  className,
+  event,
+}: {
+  state: FormState;
+  className?: string;
+  /** Evento de medição disparado uma vez quando o envio dá certo. Sem dados pessoais. */
+  event?: Parameters<typeof track>[0];
+}) {
+  const succeeded = state.status === "success";
+  useEffect(() => {
+    if (succeeded && event) track(event);
+  }, [succeeded, event]);
+
   if (state.status === "idle" || !state.message) return null;
 
   const isSuccess = state.status === "success";

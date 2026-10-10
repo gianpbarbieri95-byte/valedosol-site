@@ -7,6 +7,7 @@ import { Input, Label, Select } from "@/components/ui/primitives";
 import { CloseIcon, SearchIcon } from "@/components/ui/icons";
 import { PARAM } from "@/lib/validations/filters";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/track";
 import type { PropertyFilters as Filters } from "@/lib/queries/properties";
 
 interface Option {
@@ -53,7 +54,12 @@ export function PropertyFilters({
   }, [open]);
 
   const form = (
-    <form action="/imoveis" method="get" className="flex h-full flex-col">
+    <form
+      action="/imoveis"
+      method="get"
+      className="flex h-full flex-col"
+      onSubmit={() => track("filter_apply")}
+    >
       {/* O caminho escolhido na home (morar/investir/espaço) sobrevive aos filtros */}
       {filters.profile ? <input type="hidden" name={PARAM.profile} value={filters.profile} /> : null}
       <div className="flex-1 space-y-6 overflow-y-auto">
