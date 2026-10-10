@@ -43,8 +43,8 @@ export function PropertyCard({
   /** Linha de apresentação (ver propertyLede) — só nas versões de vitrine. */
   lede?: string | null;
   /**
-   * "editorial" é o card padrão do site. "spec" traz o valor em selo ao lado
-   * do título e as medidas com ícone em colunas (ignora `size` e `lede`).
+   * "editorial" é o card padrão do site. "spec" traz o valor em selo
+   * abaixo do título e as medidas com ícone em colunas (ignora `size` e `lede`).
    */
   variant?: "editorial" | "spec";
 }) {
@@ -123,19 +123,17 @@ export function PropertyCard({
         </div>
 
         <div className="flex flex-1 flex-col p-5 sm:p-6">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              {meta ? <p className="label-caps truncate text-[0.625rem] text-gold">{meta}</p> : null}
-              <h3 className="mt-1.5 line-clamp-2 text-pretty text-[1.5rem] leading-[1.08] text-ink">
-                <Link
-                  href={`/imoveis/${property.slug}`}
-                  className="after:absolute after:inset-0 after:z-[5] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-primary"
-                >
-                  {property.title}
-                </Link>
-              </h3>
-            </div>
-            <p className="font-display shrink-0 rounded-[var(--radius-xs)] bg-primary-soft px-3 py-2 text-[1.2rem] leading-none text-primary tabular">
+          <div className="mb-5">
+            {meta ? <p className="label-caps truncate text-[0.625rem] text-gold">{meta}</p> : null}
+            <h3 className="mt-1.5 line-clamp-2 text-pretty text-[1.5rem] leading-[1.08] text-ink">
+              <Link
+                href={`/imoveis/${property.slug}`}
+                className="after:absolute after:inset-0 after:z-[5] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-primary"
+              >
+                {property.title}
+              </Link>
+            </h3>
+            <p className="font-display mt-3 inline-block rounded-[var(--radius-xs)] bg-primary-soft px-3 py-2 text-[1.3rem] leading-none text-primary tabular">
               {formatPrice(property.price, {
                 purpose: property.purpose,
                 onRequest: property.price_on_request,
@@ -150,7 +148,7 @@ export function PropertyCard({
                 return (
                   <li
                     key={spec.label}
-                    className={cn("flex flex-col gap-1.5 px-3", index === 0 ? "pl-0" : "border-l border-line")}
+                    className={cn("flex flex-col gap-1.5 px-2.5", index === 0 ? "pl-0" : "border-l border-line")}
                   >
                     <SpecIcon className="size-5 text-primary" />
                     <span>

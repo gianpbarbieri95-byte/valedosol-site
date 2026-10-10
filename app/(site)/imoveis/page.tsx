@@ -137,6 +137,7 @@ export default async function PropertiesPage({
                     key={property.id}
                     property={property}
                     priority={index < 2}
+                    variant="spec"
                     sizes="(min-width: 1280px) 340px, (min-width: 640px) 45vw, 100vw"
                   />
                 ))}
