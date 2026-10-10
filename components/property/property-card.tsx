@@ -5,7 +5,7 @@ import { STORAGE_BUCKETS } from "@/lib/site";
 import { formatArea, formatNumber, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Badge, StatusBadge } from "@/components/ui/primitives";
-import { ArrowRightIcon, CameraIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, AreaIcon, BedIcon, CameraIcon, CarIcon, ExpandIcon } from "@/components/ui/icons";
 import { FavoriteButton } from "@/components/property/favorite-button";
 import type { PropertyCardData } from "@/types/database";
 
@@ -32,6 +32,7 @@ export function PropertyCard({
   size = "md",
   sizes = "(min-width: 1280px) 420px, (min-width: 768px) 45vw, 100vw",
   lede,
+  variant = "editorial",
 }: {
   property: PropertyCardData;
   priority?: boolean;
@@ -41,6 +42,11 @@ export function PropertyCard({
   sizes?: string;
   /** Linha de apresentação (ver propertyLede) — só nas versões de vitrine. */
   lede?: string | null;
+  /**
+   * "editorial" é o card padrão do site. "spec" traz o valor em selo ao lado
+   * do título e as medidas com ícone em colunas (ignora `size` e `lede`).
+   */
+  variant?: "editorial" | "spec";
 }) {
   const showcase = size !== "md";
   const cover = propertyCoverUrl(property);
@@ -64,6 +70,101 @@ export function PropertyCard({
 
   const place = property.neighborhood || property.city;
   const meta = [property.property_type?.name, place].filter(Boolean).join(" · ");
+
+  if (variant === "spec") {
+    // Medidas com ícone, em até três colunas (dormitórios/salas, vagas, área).
+    const specs = [
+      property.is_commercial
+        ? rooms
+          ? { icon: ExpandIcon, value: rooms, label: property.rooms === 1 ? "sala" : "salas" }
+          : null
+        : bedrooms
+          ? { icon: BedIcon, value: bedrooms, label: property.bedrooms === 1 ? "dormitório" : "dormitórios" }
+          : null,
+      parking ? { icon: CarIcon, value: parking, label: property.parking_spaces === 1 ? "vaga" : "vagas" } : null,
+      area ? { icon: AreaIcon, value: area.replace(/\s*m²$/, ""), label: "m²" } : null,
+    ].filter(Boolean) as { icon: typeof BedIcon; value: string; label: string }[];
+
+    return (
+      <article
+        className={cn(
+          "group relative flex flex-col rounded-[var(--radius-xs)] border border-line bg-surface transition-[box-shadow,transform] duration-500 ease-[var(--ease-premium)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[var(--shadow-lift)]",
+          className
+        )}
+      >
+        <div className={cn("relative overflow-hidden rounded-t-[var(--radius-xs)] bg-primary-deep", imageClassName)}>
+          {cover ? (
+            <Image
+              src={cover}
+              alt={property.images?.[0]?.alt_text || property.title}
+              fill
+              sizes={sizes}
+              priority={priority}
+              quality={80}
+              className="object-cover transition-[transform,filter] duration-700 ease-[var(--ease-premium)] group-hover:scale-[1.05] group-hover:brightness-90"
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center">
+              <p className="flex items-center gap-2 text-white/50">
+                <CameraIcon className="size-4" />
+                <span className="label-caps text-[0.625rem]">Fotos em breve</span>
+              </p>
+            </div>
+          )}
+
+          <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1.5">
+            {property.is_featured ? <Badge tone="gold">Destaque</Badge> : null}
+            <StatusBadge status={property.status} />
+          </div>
+
+          <div className="absolute right-3 top-3 z-10">
+            <FavoriteButton propertyId={property.id} title={property.title} />
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col p-5 sm:p-6">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              {meta ? <p className="label-caps truncate text-[0.625rem] text-gold">{meta}</p> : null}
+              <h3 className="mt-1.5 line-clamp-2 text-pretty text-[1.5rem] leading-[1.08] text-ink">
+                <Link
+                  href={`/imoveis/${property.slug}`}
+                  className="after:absolute after:inset-0 after:z-[5] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-primary"
+                >
+                  {property.title}
+                </Link>
+              </h3>
+            </div>
+            <p className="font-display shrink-0 rounded-[var(--radius-xs)] bg-primary-soft px-3 py-2 text-[1.2rem] leading-none text-primary tabular">
+              {formatPrice(property.price, {
+                purpose: property.purpose,
+                onRequest: property.price_on_request,
+              })}
+            </p>
+          </div>
+
+          {specs.length ? (
+            <ul className="mt-auto grid grid-flow-col auto-cols-fr border-t border-line pt-4 text-[0.8125rem] text-ink-soft">
+              {specs.map((spec, index) => {
+                const SpecIcon = spec.icon;
+                return (
+                  <li
+                    key={spec.label}
+                    className={cn("flex flex-col gap-1.5 px-3", index === 0 ? "pl-0" : "border-l border-line")}
+                  >
+                    <SpecIcon className="size-5 text-primary" />
+                    <span>
+                      <span className="tabular font-medium text-ink">{spec.value}</span> {spec.label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article className={cn("group relative flex flex-col", className)}>
