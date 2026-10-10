@@ -28,6 +28,7 @@ import { DescriptionBlocks } from "@/components/property/description-blocks";
 import { PropertyInterestForm } from "@/components/forms/property-interest-form";
 import { FavoriteButton } from "@/components/property/favorite-button";
 import { WhatsAppLeadButton } from "@/components/property/whatsapp-lead-button";
+import { FinancingSimulator } from "@/components/property/financing-simulator";
 import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadcrumb";
 import { Badge, SectionHeading, StatusBadge } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
@@ -67,7 +68,9 @@ export async function generateMetadata({
       160
     );
 
-  const cover = storageUrl(STORAGE_BUCKETS.property, property.images?.[0]?.storage_path);
+  // A foto marcada como capa; sem marcação, a primeira.
+  const coverImage = property.images?.find((image) => image.is_cover) ?? property.images?.[0];
+  const cover = storageUrl(STORAGE_BUCKETS.property, coverImage?.storage_path);
 
   return {
     title,
@@ -116,6 +119,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     settings.contact.whatsapp,
     propertyWhatsAppMessage({ code: property.code, title: property.title })
   );
+
+  // Só imóvel à venda com valor publicado ganha simulação de financiamento.
+  const canSimulate = property.purpose === "venda" && !property.price_on_request && (property.price ?? 0) > 0;
+
+  // Link de compartilhamento: abre o WhatsApp com o anúncio já escrito.
+  const shareUrl = `https://wa.me/?text=${encodeURIComponent(
+    `${property.title} — ${price}
+${SITE.url}/imoveis/${property.slug}`
+  )}`;
 
   const crumbs: Crumb[] = [
     { label: "Imóveis", href: "/imoveis" },
@@ -166,6 +178,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     { id: "sobre", label: "Sobre", show: paragraphs.length > 0 },
     { id: "caracteristicas", label: "Características", show: details.length > 0 },
     { id: "ambientes", label: "Ambientes", show: Boolean(property.highlights?.length) },
+    { id: "financiamento", label: "Financiamento", show: canSimulate },
     { id: "localizacao", label: "Localização", show: Boolean(location) },
     { id: "galeria", label: "Galeria", show: images.length > 1 },
     { id: "videos", label: videos.length === 1 ? "Vídeo" : "Vídeos", show: videos.length > 0 },
@@ -246,6 +259,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
             {lede ? (
               <p className="mt-5 max-w-2xl text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">{lede}</p>
             ) : null}
+
+            <a
+              href={shareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-line mt-6 inline-flex items-center gap-2 text-[0.6875rem] text-ink-soft hover:text-ink"
+            >
+              <WhatsAppIcon className="size-4" />
+              Compartilhar no WhatsApp
+            </a>
 
           </div>
 
@@ -347,6 +370,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                     </li>
                   ))}
                 </ul>
+              </section>
+            ) : null}
+
+            {canSimulate ? (
+              <section id="financiamento" aria-labelledby="financiamento-titulo">
+                <p className="eyebrow">Financiamento</p>
+                <h2 id="financiamento-titulo" className="mt-4 text-title">Simule a parcela</h2>
+                <FinancingSimulator price={property.price as number} className="mt-8" />
               </section>
             ) : null}
 
@@ -490,9 +521,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
         {related.length ? (
           <section className="mt-28 border-t border-line pt-20">
             <SectionHeading eyebrow="Do mesmo acervo" title="Talvez você também goste." />
-            <div className="mt-12 grid gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((item) => (
-                <PropertyCard key={item.id} property={item} />
+                <PropertyCard key={item.id} property={item} variant="spec" />
               ))}
             </div>
           </section>

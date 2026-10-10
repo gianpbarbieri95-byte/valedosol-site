@@ -88,7 +88,7 @@ export function PropertyCard({
     return (
       <article
         className={cn(
-          "group relative flex flex-col rounded-[var(--radius-xs)] border border-line bg-surface transition-[box-shadow,transform] duration-500 ease-[var(--ease-premium)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[var(--shadow-lift)]",
+          "group relative flex min-w-0 flex-col rounded-[var(--radius-xs)] border border-line bg-surface transition-[box-shadow,transform] duration-500 ease-[var(--ease-premium)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[var(--shadow-lift)]",
           className
         )}
       >
@@ -165,7 +165,7 @@ export function PropertyCard({
   }
 
   return (
-    <article className={cn("group relative flex flex-col", className)}>
+    <article className={cn("group relative flex min-w-0 flex-col", className)}>
       <div className={cn("relative overflow-hidden rounded-[var(--radius-xs)] bg-primary-deep", imageClassName)}>
         {cover ? (
           <Image
