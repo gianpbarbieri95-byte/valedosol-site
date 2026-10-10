@@ -87,7 +87,7 @@ export default async function HomePage() {
     rentTotal,
   ] = await Promise.all([
     getSettings(),
-    getShowcaseProperties(3),
+    getShowcaseProperties(6),
     getPropertyTypes(),
     getCities(),
     getNeighborhoods(),
@@ -110,7 +110,7 @@ export default async function HomePage() {
     ),
   ]);
 
-  // A vitrine abre pelo imóvel de maior valor entre os três: é o que melhor
+  // A vitrine abre pelo imóvel de maior valor entre os da vitrine: é o que melhor
   // representa o padrão do acervo. Preço sob consulta fica por último.
   const showcase = [...featured].sort(
     (a, b) => (b.price ?? 0) - (a.price ?? 0),

@@ -18,7 +18,9 @@ export function FeaturedProperties({
   /** Linha de apresentação por id — só com o que foi cadastrado. */
   ledes: Map<string, string | null>;
 }) {
-  const [lead, ...rest] = properties;
+  const [lead, ...others] = properties;
+  const rest = others.slice(0, 2);
+  const more = others.slice(2);
   if (!lead) return null;
 
   return (
@@ -64,6 +66,20 @@ export function FeaturedProperties({
                 lede={ledes.get(property.id)}
                 imageClassName="aspect-[4/3]"
                 sizes={index === 0 ? "(min-width: 768px) 58vw, 100vw" : "(min-width: 768px) 42vw, 100vw"}
+              />
+            </Reveal>
+          ))}
+        </div>
+      ) : null}
+
+      {more.length ? (
+        <div className="mt-16 grid gap-x-8 gap-y-14 sm:grid-cols-2 md:mt-24 lg:grid-cols-3">
+          {more.map((property, index) => (
+            <Reveal key={property.id} delay={index * 80}>
+              <PropertyCard
+                property={property}
+                imageClassName="aspect-[4/3]"
+                lede={ledes.get(property.id)}
               />
             </Reveal>
           ))}
