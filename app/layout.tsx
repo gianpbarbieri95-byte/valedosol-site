@@ -1,21 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Poppins, Roboto } from "next/font/google";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
-const inter = Inter({
+// Mesmo par do site da Issa Materiais: Roboto no texto, Poppins nos títulos.
+const roboto = Roboto({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto",
   display: "swap",
 });
 
-// Serifa editorial dos títulos. Cormorant Garamond (e não "Cormorant") por
-// ter algarismos alinhados: preços e anos não dançam na linha.
-const cormorant = Cormorant_Garamond({
+const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
-  variable: "--font-cormorant",
+  variable: "--font-poppins",
   display: "swap",
 });
 
@@ -52,7 +52,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${cormorant.variable}`}>
+    <html lang="pt-BR" className={`${roboto.variable} ${poppins.variable}`}>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

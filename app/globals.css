@@ -57,8 +57,8 @@
   --color-warning: #8a6410;
 
   /* Tipografia */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-sans: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), var(--font-roboto), ui-sans-serif, sans-serif;
 
   /* Escala editorial fluida — acompanha a viewport sem media query */
   --text-hero: clamp(2.9rem, 1.5rem + 5.4vw, 6rem);
