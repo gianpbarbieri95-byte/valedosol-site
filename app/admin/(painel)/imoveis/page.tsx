@@ -13,6 +13,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Badge, EmptyState, Input, Select } from "@/components/ui/primitives";
 import { Pagination } from "@/components/ui/pagination";
 import { setPublicationState } from "@/actions/admin/properties";
+import { CloseDealButton } from "@/components/admin/close-deal-button";
 
 export const dynamic = "force-dynamic";
 
@@ -286,6 +287,8 @@ export default async function AdminPropertiesPage({
                               {property.publication_state === "published" ? "Despublicar" : "Publicar"}
                             </button>
                           </form>
+
+                          <CloseDealButton id={property.id} status={property.status} purpose={property.purpose} />
 
                           <Link
                             href={`/imoveis/${property.id}`}

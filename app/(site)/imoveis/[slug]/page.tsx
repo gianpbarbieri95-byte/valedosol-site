@@ -30,7 +30,7 @@ import { FavoriteButton } from "@/components/property/favorite-button";
 import { WhatsAppLeadButton } from "@/components/property/whatsapp-lead-button";
 import { FinancingSimulator } from "@/components/property/financing-simulator";
 import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadcrumb";
-import { Badge, SectionHeading, StatusBadge } from "@/components/ui/primitives";
+import { Badge, ClosedRibbon, SectionHeading, StatusBadge } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
 import { ArrowRightIcon, PinIcon, WhatsAppIcon } from "@/components/ui/icons";
 
@@ -285,7 +285,10 @@ ${SITE.url}/imoveis/${property.slug}`
 
         {/* A galeria é a protagonista, na largura inteira. */}
         <div className="mt-8 md:mt-10">
-          <PropertyGallery images={images} title={property.title} />
+          <div className="relative">
+            <PropertyGallery images={images} title={property.title} />
+            <ClosedRibbon status={property.status} />
+          </div>
         </div>
 
         {specs.length ? (

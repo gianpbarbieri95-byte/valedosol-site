@@ -12,6 +12,7 @@ import { getPropertyCrmData } from "@/lib/queries/property-crm";
 import { PropertyImages } from "@/components/admin/property-images";
 import { PropertyVideos } from "@/components/admin/property-videos";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
+import { CloseDealButton } from "@/components/admin/close-deal-button";
 
 export const dynamic = "force-dynamic";
 
@@ -65,12 +66,20 @@ export default async function EditPropertyPage({
           </p>
         </div>
 
-        {session?.profile.role === "admin" ? (
-          <form action={deleteProperty}>
-            <input type="hidden" name="id" value={property.id} />
-            <DeletePropertyButton title={property.title} />
-          </form>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <CloseDealButton
+            id={property.id}
+            status={property.status}
+            purpose={property.purpose}
+            className="px-4 py-2.5 text-sm"
+          />
+          {session?.profile.role === "admin" ? (
+            <form action={deleteProperty}>
+              <input type="hidden" name="id" value={property.id} />
+              <DeletePropertyButton title={property.title} />
+            </form>
+          ) : null}
+        </div>
       </header>
 
       {aviso ? (
@@ -92,6 +101,7 @@ export default async function EditPropertyPage({
 
       <div className="mt-8">
         <PropertyForm
+          key={property.status}
           property={property}
           types={types}
           regions={regions}

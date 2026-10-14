@@ -37,6 +37,19 @@ export function Badge({
   );
 }
 
+/** Faixa diagonal "Vendido"/"Alugado" sobre a foto. O pai precisa ser `relative`. */
+export function ClosedRibbon({ status }: { status: PropertyStatus }) {
+  if (status !== "vendido" && status !== "alugado") return null;
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] grid place-items-center overflow-hidden">
+      <span className="label-caps w-[160%] -rotate-[14deg] bg-danger/90 py-2.5 text-center text-[0.875rem] tracking-[0.35em] text-white shadow-[0_6px_20px_rgba(0,0,0,0.25)]">
+        {STATUS_LABEL[status]}
+      </span>
+    </div>
+  );
+}
+
 /** Situação do imóvel. Disponível não vira selo: é o esperado, não notícia. */
 export function StatusBadge({ status }: { status: PropertyStatus }) {
   if (status === "disponivel") return null;

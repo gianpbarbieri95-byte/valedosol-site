@@ -226,6 +226,32 @@ export async function setPublicationState(formData: FormData): Promise<void> {
   revalidatePath(`/admin/imoveis/${parsed.data.id}`);
 }
 
+/** Botão rápido do painel: marca vendido/alugado ou devolve para disponível. */
+export async function setPropertyStatus(formData: FormData): Promise<void> {
+  await requireStaff();
+
+  const parsed = z
+    .object({
+      id: z.string().uuid(),
+      status: z.enum(["disponivel", "vendido", "alugado"]),
+    })
+    .safeParse({ id: formData.get("id"), status: formData.get("status") });
+
+  if (!parsed.success) return;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("properties")
+    .update({ status: parsed.data.status })
+    .eq("id", parsed.data.id)
+    .select("slug")
+    .maybeSingle();
+
+  revalidateProperty(data?.slug);
+  revalidatePath("/admin/imoveis");
+  revalidatePath(`/admin/imoveis/${parsed.data.id}`);
+}
+
 /**
  * Exclusão é ação de administrador e existe para casos de cadastro errado.
  * Imóvel vendido ou alugado se arquiva — o histórico tem valor.

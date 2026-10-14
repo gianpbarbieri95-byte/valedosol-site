@@ -4,7 +4,7 @@ import { storageUrl } from "@/lib/supabase/env";
 import { STORAGE_BUCKETS } from "@/lib/site";
 import { formatArea, formatNumber, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { Badge, StatusBadge } from "@/components/ui/primitives";
+import { Badge, ClosedRibbon, StatusBadge } from "@/components/ui/primitives";
 import { ArrowRightIcon, AreaIcon, BedIcon, CameraIcon, CarIcon, ExpandIcon } from "@/components/ui/icons";
 import { FavoriteButton } from "@/components/property/favorite-button";
 import type { PropertyCardData } from "@/types/database";
@@ -112,6 +112,8 @@ export function PropertyCard({
             </div>
           )}
 
+          <ClosedRibbon status={property.status} />
+
           <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1.5">
             {property.is_featured ? <Badge tone="gold">Destaque</Badge> : null}
             <StatusBadge status={property.status} />
@@ -191,6 +193,8 @@ export function PropertyCard({
           aria-hidden
           className="absolute inset-0 bg-[#06180e]/0 transition-colors duration-700 group-hover:bg-[#06180e]/6"
         />
+
+        <ClosedRibbon status={property.status} />
 
         <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1.5">
           {property.is_featured ? <Badge tone="gold">Destaque</Badge> : null}
