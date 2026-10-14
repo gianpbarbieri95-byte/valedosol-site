@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { PUBLIC_DATA_TAG } from "@/lib/supabase/public";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { propertySchema, coordinatesAreConsistent } from "@/lib/validations/property";
 import { fieldErrors, type FormState } from "@/lib/validations/lead";
@@ -29,6 +30,7 @@ function formToObject(formData: FormData): Record<string, string> {
 
 /** Republica as páginas afetadas para o site sair do ar desatualizado. */
 function revalidateProperty(slug?: string | null) {
+  updateTag(PUBLIC_DATA_TAG);
   revalidatePath("/");
   revalidatePath("/imoveis");
   revalidatePath("/regioes", "layout");

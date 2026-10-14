@@ -1,9 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { PUBLIC_DATA_TAG } from "@/lib/supabase/public";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { propertyTypeSchema, regionSchema } from "@/lib/validations/property";
 import { fieldErrors, type FormState } from "@/lib/validations/lead";
@@ -43,6 +44,7 @@ export async function saveRegion(_previous: FormState, formData: FormData): Prom
     };
   }
 
+  updateTag(PUBLIC_DATA_TAG);
   revalidatePath("/admin/regioes");
   revalidatePath("/regioes", "layout");
   revalidatePath("/");
@@ -67,6 +69,7 @@ export async function deleteRegion(formData: FormData): Promise<void> {
     await supabase.storage.from(STORAGE_BUCKETS.region).remove([region.image_path]);
   }
 
+  updateTag(PUBLIC_DATA_TAG);
   revalidatePath("/admin/regioes");
   revalidatePath("/regioes", "layout");
 }
@@ -97,6 +100,7 @@ export async function savePropertyType(_previous: FormState, formData: FormData)
     };
   }
 
+  updateTag(PUBLIC_DATA_TAG);
   revalidatePath("/admin/tipos-imovel");
   revalidatePath("/imoveis");
   revalidatePath("/");
@@ -122,6 +126,7 @@ export async function deletePropertyType(formData: FormData): Promise<void> {
     await supabase.from("property_types").update({ active: false }).eq("id", id.data);
   }
 
+  updateTag(PUBLIC_DATA_TAG);
   revalidatePath("/admin/tipos-imovel");
   revalidatePath("/imoveis");
 }
@@ -169,6 +174,7 @@ export async function saveSettings(_previous: FormState, formData: FormData): Pr
     if (error) return { status: "error", message: `Não foi possível salvar: ${error.message}` };
   }
 
+  updateTag(PUBLIC_DATA_TAG);
   revalidatePath("/", "layout");
   revalidatePath("/admin/configuracoes");
 
