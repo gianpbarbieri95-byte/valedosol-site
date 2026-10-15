@@ -108,6 +108,11 @@
     @media (min-width: 1024px) { font-size: 93.75%; }
   }
 
+  /* No toque, campo com menos de 16px faz o iPhone dar zoom ao focar. */
+  @media (pointer: coarse) {
+    input, select, textarea { font-size: max(16px, 1em) !important; }
+  }
+
   body {
     background-color: var(--color-canvas);
     color: var(--color-ink);

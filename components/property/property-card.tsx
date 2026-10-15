@@ -259,11 +259,11 @@ export function PropertyCard({
         </div>
 
         <div className={cn("mt-auto pt-5", size === "xl" && "md:col-span-5 md:pt-0")}>
-          <div className="flex items-end justify-between gap-4 border-t border-line pt-4">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-t border-line pt-4">
             <p
               className={cn(
                 "font-display leading-none text-primary tabular",
-                size === "xl" ? "text-[2.25rem]" : size === "lg" ? "text-[1.9rem]" : "text-[1.5rem]"
+                size === "xl" ? "text-[1.9rem] sm:text-[2.25rem]" : size === "lg" ? "text-[1.75rem] sm:text-[1.9rem]" : "text-[1.5rem]"
               )}
             >
               {formatPrice(property.price, {

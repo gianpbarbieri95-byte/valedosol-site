@@ -92,6 +92,8 @@ export function Header({ contact }: { contact: ContactSettings }) {
           "group/header fixed inset-x-0 top-0 z-50",
           "transition-[background-color,border-color,backdrop-filter] duration-700 ease-[var(--ease-premium)]",
           "border-b border-line bg-canvas/92 backdrop-blur-md",
+          // Rolando, uma sombra bem leve separa o cabeçalho do conteúdo.
+          "group-data-[scrolled=true]/header:shadow-[0_6px_24px_-12px_rgb(11_34_22/0.18)]",
           "hero:border-white/10 hero:bg-transparent hero:backdrop-blur-none"
         )}
       >
@@ -123,23 +125,43 @@ export function Header({ contact }: { contact: ContactSettings }) {
             />
           </Link>
 
-          <nav aria-label="Navegação principal" className="hidden items-center gap-1 lg:flex">
+          {/* Sobre o filme da home, os links ficam numa cápsula translúcida: leem
+              melhor sobre qualquer quadro e dão um leve destaque ao menu. */}
+          <nav
+            aria-label="Navegação principal"
+            className={cn(
+              "hidden items-center gap-0.5 rounded-full border border-transparent px-2 lg:flex",
+              "transition-[background-color,border-color] duration-700 ease-[var(--ease-premium)]",
+              "hero:border-white/15 hero:bg-black/20 hero:backdrop-blur-md"
+            )}
+          >
             {NAV.map((item) => {
               const active = isActive(item.href);
+              // O proprietário é o outro público do site: o link dele vem
+              // separado e em dourado, sem virar um segundo botão.
+              const owner = item.href === "/venda-seu-imovel";
               return (
+                <span key={item.href} className="contents">
+                  {owner ? (
+                    <span aria-hidden className="mx-1.5 h-4 w-px bg-line-strong hero:bg-white/25" />
+                  ) : null}
                 <Link
-                  key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   data-active={active ? "true" : undefined}
                   className={cn(
                     "link-sweep px-2.5 pb-3 xl:px-3.5 pt-2.5 text-[0.8125rem] tracking-[0.02em] transition-colors duration-300",
-                    active ? "text-ink" : "text-ink-soft hover:text-ink",
-                    "hero:text-white/80 hero:hover:text-white"
+                    owner
+                      ? "font-medium text-gold hover:text-gold-hover hero:text-gold-bright hero:hover:text-white"
+                      : cn(
+                          active ? "font-medium text-primary" : "text-ink-soft hover:text-ink",
+                          "hero:text-white/85 hero:hover:text-white"
+                        )
                   )}
                 >
                   {item.label}
                 </Link>
+                </span>
               );
             })}
           </nav>
@@ -174,7 +196,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
               variant="primary"
               className={cn(
                 "max-md:!hidden border border-transparent",
-                "hero:border-white/40 hero:bg-transparent hero:hover:border-white hero:hover:bg-white hero:hover:text-primary-deep"
+                "hero:bg-gold-bright hero:text-primary-deep hero:hover:bg-[#e2b654]"
               )}
             >
               Falar conosco
