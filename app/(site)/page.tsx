@@ -30,7 +30,6 @@ import { Reveal } from "@/components/ui/reveal";
 import { HeroFilm } from "@/components/brand-film";
 import { FeaturedProperties } from "@/components/home/featured-properties";
 import { SearchPaths } from "@/components/home/search-paths";
-import { HistorySection } from "@/components/home/history-section";
 import { AboutSection } from "@/components/home/about-section";
 import { LocalKnowledge } from "@/components/home/local-knowledge";
 import { CTASection } from "@/components/home/cta-section";
@@ -417,7 +416,7 @@ export default async function HomePage() {
                 </p>
               </Reveal>
             </div>
-            <Reveal className="mt-14 md:mt-20" delay={80}>
+            <Reveal className="mt-10 md:mt-14" delay={80}>
               <LocalKnowledge
                 places={places}
                 office={`Escritório no coração de Arujá: ${office}. ${SITE.creci}.`}
@@ -426,8 +425,6 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
-
-      <HistorySection />
 
       <AboutSection closing={closingLine} />
 

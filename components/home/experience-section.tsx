@@ -27,7 +27,7 @@ export function ExperienceSection() {
           </h2>
         </Reveal>
 
-        <ol className="mt-16 grid gap-y-12 md:mt-24 md:grid-cols-3 md:gap-x-12">
+        <ol className="mt-12 grid gap-y-12 md:mt-16 md:grid-cols-3 md:gap-x-12">
           {PILLARS.map((pillar, index) => (
             <Reveal as="li" key={pillar.title} delay={index * 120} className="border-t border-ink/80 pt-7">
               <p className="text-xs text-muted tabular">{String(index + 1).padStart(2, "0")}</p>

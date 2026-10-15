@@ -42,7 +42,7 @@ export function FeaturedProperties({
 
       {/* O protagonista em largura total; os dois de apoio embaixo, em
           larguras e alturas de partida diferentes — a assimetria é de propósito. */}
-      <Reveal className="mt-14 md:mt-20">
+      <Reveal className="mt-10 md:mt-14">
         <PropertyCard
           property={lead}
           size="xl"
@@ -53,12 +53,12 @@ export function FeaturedProperties({
       </Reveal>
 
       {rest.length ? (
-        <div className="mt-16 grid gap-x-12 gap-y-16 md:mt-24 md:grid-cols-12">
+        <div className="mt-12 grid gap-x-12 gap-y-16 md:mt-16 md:grid-cols-12">
           {rest.map((property, index) => (
             <Reveal
               key={property.id}
               delay={120 + index * 120}
-              className={index === 0 ? "md:col-span-7" : "md:col-span-5 md:mt-24"}
+              className={index === 0 ? "md:col-span-7" : "md:col-span-5 md:mt-16"}
             >
               <PropertyCard
                 property={property}
@@ -73,7 +73,7 @@ export function FeaturedProperties({
       ) : null}
 
       {more.length ? (
-        <div className="mt-16 grid gap-x-8 gap-y-14 sm:grid-cols-2 md:mt-24 lg:grid-cols-3">
+        <div className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
           {more.map((property, index) => (
             <Reveal key={property.id} delay={index * 80}>
               <PropertyCard

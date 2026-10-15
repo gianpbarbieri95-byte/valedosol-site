@@ -59,7 +59,7 @@ export function Footer({
     .join(", ");
 
   return (
-    <footer className="mt-24 border-t border-line bg-surface [main:has(#cta-final)+&]:mt-0 [main:has(#cta-final)+&]:border-t-0">
+    <footer className="mt-16 border-t border-line bg-surface [main:has(#cta-final)+&]:mt-0 [main:has(#cta-final)+&]:border-t-0">
       {/* Fio dourado do logo fechando o corpo da página */}
       <div aria-hidden className="h-px bg-gradient-to-r from-transparent via-gold/45 to-transparent" />
 

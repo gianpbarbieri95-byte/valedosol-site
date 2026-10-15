@@ -522,7 +522,7 @@ ${SITE.url}/imoveis/${property.slug}`
         </div>
 
         {related.length ? (
-          <section className="mt-28 border-t border-line pt-20">
+          <section className="mt-20 border-t border-line pt-14">
             <SectionHeading eyebrow="Do mesmo acervo" title="Talvez você também goste." />
             <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((item) => (

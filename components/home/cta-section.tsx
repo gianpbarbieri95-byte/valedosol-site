@@ -19,7 +19,7 @@ export function CTASection({ whatsapp, image }: { whatsapp: string | null; image
           <div className="absolute inset-0 bg-[#04140b]/78" />
         </div>
       ) : null}
-      <div className="container-site py-28 md:py-44">
+      <div className="container-site py-20 md:py-28">
         <Reveal className="mx-auto max-w-3xl text-center">
           <p className="label-caps text-[0.6875rem] text-gold-bright">Atendimento personalizado</p>
           <h2 id="cta-final" className="mt-6 text-balance text-hero text-white">

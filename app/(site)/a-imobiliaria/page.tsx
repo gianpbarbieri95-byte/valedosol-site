@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { ArrowRightIcon } from "@/components/ui/icons";
+import { HistorySection } from "@/components/home/history-section";
 
 export const revalidate = 3600;
 
@@ -50,7 +51,8 @@ export default async function AboutPage() {
   const fechamento = paragrafos(about.closing ?? "");
 
   return (
-    <div className="container-site py-10 md:py-14">
+    <>
+    <div className="container-site pb-12 pt-10 md:pb-14 md:pt-14">
       <Breadcrumb items={[{ label: "A imobiliária" }]} />
 
       <header className="mt-8 max-w-3xl">
@@ -81,7 +83,7 @@ export default async function AboutPage() {
 
       <div
         className={cn(
-          "mt-16 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-line bg-line",
+          "mt-12 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-line bg-line",
           "sm:grid-cols-2"
         )}
       >
@@ -95,10 +97,15 @@ export default async function AboutPage() {
           </div>
         ))}
       </div>
+    </div>
 
+    {/* A cronologia ocupa a largura toda, como era na home. */}
+    <HistorySection />
+
+    <div className="container-site pb-10 md:pb-14">
       {/* ------------------------------------------------------ Nossa atuação */}
       {atuacao.length ? (
-        <section className="mt-20">
+        <section className="pt-14">
           <Reveal className="max-w-2xl">
             <p className="eyebrow">O que fazemos</p>
             <h2 className="mt-3 text-display">Nossa atuação</h2>
@@ -124,7 +131,7 @@ export default async function AboutPage() {
       ) : null}
 
       {/* -------------------------------------------- Missão, visão e valores */}
-      <section className="mt-20 grid gap-6 md:grid-cols-3">
+      <section className="mt-14 grid gap-6 md:grid-cols-3">
         {[
           { title: "Missão", text: about.mission },
           { title: "Visão", text: about.vision },
@@ -145,7 +152,7 @@ export default async function AboutPage() {
 
       {/* ---------------------------------------- Uma história que continua */}
       {fechamento.length ? (
-        <section className="mt-20 border-t border-line pt-16">
+        <section className="mt-14 border-t border-line pt-16">
           <Reveal className="mx-auto max-w-3xl text-center">
             <p className="eyebrow eyebrow-plain justify-center">Uma história que continua</p>
             <div className="mt-5 space-y-5">
@@ -170,7 +177,7 @@ export default async function AboutPage() {
         </section>
       ) : null}
 
-      <section className="mt-20 rounded-[var(--radius-md)] bg-primary px-7 py-12 md:px-12 md:py-16">
+      <section className="mt-14 rounded-[var(--radius-md)] bg-primary px-7 py-12 md:px-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-12 md:items-center">
           <div className="md:col-span-8">
             <h2 className="text-balance text-3xl text-white md:text-[2.25rem]">
@@ -196,5 +203,6 @@ export default async function AboutPage() {
         </Link>
       </p>
     </div>
+    </>
   );
 }

@@ -166,16 +166,16 @@
 
   /* Seção de respiro largo — os grandes momentos da home */
   .section-xl {
-    padding-block: clamp(5.5rem, 3rem + 9vw, 11rem);
+    padding-block: clamp(4rem, 2.5rem + 5vw, 7rem);
   }
 
   /* Ritmo vertical único para as seções longas */
   .section {
-    padding-block: clamp(4.5rem, 3rem + 6vw, 8rem);
+    padding-block: clamp(3.5rem, 2.5rem + 4vw, 5.5rem);
   }
 
   .section-tight {
-    padding-block: clamp(3rem, 2rem + 4vw, 5.5rem);
+    padding-block: clamp(2.5rem, 1.75rem + 3vw, 4rem);
   }
 
   /* Linha fina de título de seção, aberta por um traço dourado */

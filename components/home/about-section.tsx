@@ -53,7 +53,7 @@ export function AboutSection({ closing }: { closing: string | null }) {
         </Reveal>
       </div>
 
-      <ul className="mt-16 grid gap-y-12 md:grid-cols-3 md:gap-x-12 lg:mt-24">
+      <ul className="mt-12 grid gap-y-12 md:grid-cols-3 md:gap-x-12 lg:mt-16">
         {PEOPLE.map((person, index) => (
           <Reveal
             as="li"

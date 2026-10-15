@@ -83,7 +83,7 @@ export function HistorySection() {
               as="li"
               key={step.title}
               delay={60}
-              className="relative pb-14 pl-10 last:pb-0 md:pb-20 md:pl-14"
+              className="relative pb-10 pl-10 last:pb-0 md:pb-14 md:pl-14"
             >
               <span
                 aria-hidden
