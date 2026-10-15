@@ -293,7 +293,7 @@ export default async function HomePage() {
                   {SITE.foundedYear}
                 </p>
                 <h1
-                  className="rise-in mt-5 max-w-[22ch] text-balance font-display text-[clamp(2.4rem,1.3rem+3vw,4.5rem)] leading-[1.02] tracking-[-0.02em] text-white"
+                  className="rise-in mt-5 max-w-[22ch] text-balance font-display text-[clamp(2.1rem,1.2rem+2.4vw,3.6rem)] leading-[1.02] tracking-[-0.02em] text-white"
                   style={{ animationDelay: "90ms" }}
                 >
                   {headline.map((line, index) => (

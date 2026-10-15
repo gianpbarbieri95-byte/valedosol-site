@@ -61,15 +61,15 @@
   --font-display: var(--font-poppins), var(--font-roboto), ui-sans-serif, sans-serif;
 
   /* Escala editorial fluida — acompanha a viewport sem media query */
-  --text-hero: clamp(2.9rem, 1.5rem + 5.4vw, 6rem);
+  --text-hero: clamp(2.3rem, 1.4rem + 3.4vw, 4.25rem);
   --text-hero--line-height: 0.98;
   --text-hero--letter-spacing: -0.02em;
 
-  --text-display: clamp(2.3rem, 1.5rem + 2.8vw, 3.9rem);
+  --text-display: clamp(1.9rem, 1.35rem + 1.9vw, 3rem);
   --text-display--line-height: 1.04;
   --text-display--letter-spacing: -0.015em;
 
-  --text-title: clamp(1.75rem, 1.4rem + 1.1vw, 2.4rem);
+  --text-title: clamp(1.45rem, 1.2rem + 0.8vw, 1.95rem);
   --text-title--line-height: 1.12;
   --text-title--letter-spacing: -0.01em;
 
@@ -104,6 +104,8 @@
     scroll-behavior: smooth;
     /* O header fixo não pode cobrir o alvo de uma âncora */
     scroll-padding-top: 7rem;
+    /* No computador o site inteiro (tudo em rem) fica um pouco menor: 15px de base. */
+    @media (min-width: 1024px) { font-size: 93.75%; }
   }
 
   body {
@@ -161,7 +163,7 @@
   }
 
   @media (min-width: 1280px) {
-    .container-site { padding-inline: 4rem; max-width: 90rem; }
+    .container-site { padding-inline: 4rem; max-width: 80rem; }
   }
 
   /* Seção de respiro largo — os grandes momentos da home */
