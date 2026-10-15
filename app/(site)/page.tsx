@@ -428,7 +428,13 @@ export default async function HomePage() {
 
       <AboutSection closing={closingLine} />
 
-      <SellSection specialties={about.specialties ?? null} years={yearsOfHistory} />
+      <SellSection
+        years={yearsOfHistory}
+        whatsapp={whatsappUrl(
+          contact.whatsapp,
+          "Olá, quero anunciar meu imóvel com a Vale do Sol Imóveis.",
+        )}
+      />
 
       <CTASection
         whatsapp={whatsappUrl(
