@@ -33,10 +33,13 @@ export async function generateMetadata({
   const title = `Imóveis ${parts.join(" ")}`.trim();
   const hasFilters = countActiveFilters(filters) > 0;
 
+  const page = filters.page && filters.page > 1 ? filters.page : null;
+  const baseTitle = hasFilters ? title : "Imóveis à venda em Arujá e região";
+
   return {
-    title: hasFilters ? title : "Imóveis em Arujá e região",
+    title: page ? `${baseTitle} — página ${page}` : baseTitle,
     description:
-      "Casas, terrenos, condomínios, chácaras e imóveis comerciais disponíveis na Vale do Sol Imóveis.",
+      "Casas, terrenos, condomínios, chácaras e imóveis comerciais à venda e para alugar em Arujá e região. Veja fotos, valores e fale com a Vale do Sol Imóveis.",
     alternates: { canonical: `/imoveis${filtersToQuery(filters)}` },
     // Combinação de filtros gera muita URL parecida: só a listagem limpa e
     // a paginação entram no índice.

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SITE } from "@/lib/site";
+import { ORG_ID, WEBSITE_ID } from "@/lib/seo";
 import { getSettings } from "@/lib/queries/settings";
 import { phoneHref, whatsappUrl } from "@/lib/format";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -11,9 +12,9 @@ import { ClockIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/compone
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Contato",
+  title: "Contato e endereço da imobiliária em Arujá",
   description:
-    "Fale com a Vale do Sol Imóveis. Avenida Antônio Afonso de Lima, 704 — Centro, Arujá — SP.",
+    "Fale com a Vale do Sol Imóveis: Avenida Antônio Afonso de Lima, 704, Centro, Arujá-SP. Telefone (11) 4655-3399 e WhatsApp. Imobiliária em Arujá desde 1975.",
   alternates: { canonical: "/contato" },
 };
 
@@ -38,24 +39,16 @@ export default async function ContactPage() {
       ? { lat, lng }
       : null;
 
+  // A empresa em si (endereço, telefone, CRECI) está no grafo do layout; esta
+  // página só diz que é a de contato dela.
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "RealEstateAgent",
-    name: SITE.name,
-    legalName: SITE.legalName,
-    url: SITE.url,
-    telephone: contact.phone,
-    email: contact.email,
-    foundingDate: String(SITE.foundedYear),
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: contact.address,
-      addressLocality: contact.city,
-      addressRegion: contact.state,
-      postalCode: contact.zip,
-      addressCountry: "BR",
-    },
-    areaServed: "Arujá e região, São Paulo",
+    "@type": "ContactPage",
+    url: `${SITE.url}/contato`,
+    name: "Contato — Vale do Sol Imóveis",
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": ORG_ID },
+    mainEntity: { "@id": ORG_ID },
   };
 
   const channels = [

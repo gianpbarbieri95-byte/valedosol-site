@@ -9,6 +9,7 @@ import {
 import { getSettings } from "@/lib/queries/settings";
 import { storageUrl } from "@/lib/supabase/public";
 import { SITE, STATUS_LABEL, STORAGE_BUCKETS } from "@/lib/site";
+import { ORG_ID, WEBSITE_ID } from "@/lib/seo";
 import {
   formatArea,
   formatLocation,
@@ -185,12 +186,19 @@ ${SITE.url}/imoveis/${property.slug}`
     { id: "interesse", label: "Contato", show: true },
   ].filter((section) => section.show);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Residence",
+  const typeSlug = property.property_type?.slug ?? "";
+  const residenceType = typeSlug.startsWith("apartamento")
+    ? "Apartment"
+    : typeSlug.startsWith("casa")
+      ? "House"
+      : "Residence";
+  const pageUrl = `${SITE.url}/imoveis/${property.slug}`;
+
+  const residence = {
+    "@type": residenceType,
     name: property.title,
     description: descriptionPlainText(property.description) || undefined,
-    url: `${SITE.url}/imoveis/${property.slug}`,
+    url: pageUrl,
     identifier: property.code,
     image: images.slice(0, 6).map((image) => image.url),
     address: {
@@ -220,6 +228,8 @@ ${SITE.url}/imoveis/${property.slug}`
             "@type": "Offer",
             price: property.price,
             priceCurrency: "BRL",
+            url: pageUrl,
+            seller: { "@id": ORG_ID },
             availability:
               property.status === "disponivel"
                 ? "https://schema.org/InStock"
@@ -227,6 +237,24 @@ ${SITE.url}/imoveis/${property.slug}`
           },
         }
       : {}),
+  };
+
+  // O anúncio em si (data de publicação, quem anuncia) envolve o imóvel.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "@id": `${pageUrl}#anuncio`,
+    url: pageUrl,
+    name: property.title,
+    inLanguage: "pt-BR",
+    datePosted: property.published_at || undefined,
+    dateModified: property.updated_at || undefined,
+    isPartOf: { "@id": WEBSITE_ID },
+    provider: { "@id": ORG_ID },
+    primaryImageOfPage: images[0]?.url
+      ? { "@type": "ImageObject", url: images[0].url }
+      : undefined,
+    mainEntity: residence,
   };
 
   return (

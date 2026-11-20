@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { getSettings } from "@/lib/queries/settings";
 import { getRegions } from "@/lib/queries/taxonomies";
+import { siteGraph } from "@/lib/seo";
 import { Analytics } from "@/components/analytics";
 import { ClickTracker } from "@/components/click-tracker";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
@@ -11,6 +12,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Empresa e site: um grafo só para todas as páginas apontarem. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(siteGraph(settings.contact, settings.social)) }}
+      />
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-[var(--radius-sm)] focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-white"

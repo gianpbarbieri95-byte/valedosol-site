@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins, Roboto } from "next/font/google";
 import { SITE } from "@/lib/site";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
 // Mesmo par do site da Issa Materiais: Roboto no texto, Poppins nos títulos.
@@ -35,8 +36,11 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     siteName: SITE.name,
     url: SITE.url,
+    images: [DEFAULT_OG_IMAGE],
   },
-  twitter: { card: "summary_large_image" },
+  // Imagem padrão de compartilhamento: páginas com foto própria (imóveis)
+  // sobrescrevem. Sem isto, link no WhatsApp e resposta de IA saem sem imagem.
+  twitter: { card: "summary_large_image", images: [DEFAULT_OG_IMAGE.url] },
   robots: SITE.noindex
     ? { index: false, follow: false }
     : { index: true, follow: true },

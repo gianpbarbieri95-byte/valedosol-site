@@ -6,6 +6,7 @@ import { getRegionBySlug, getRegions } from "@/lib/queries/taxonomies";
 import { searchProperties } from "@/lib/queries/properties";
 import { storageUrl } from "@/lib/supabase/public";
 import { SITE, STORAGE_BUCKETS } from "@/lib/site";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { filtersToQuery, parseFilters, type SearchParams } from "@/lib/validations/filters";
 
 import { Breadcrumb, breadcrumbJsonLd, type Crumb } from "@/components/ui/breadcrumb";
@@ -34,6 +35,7 @@ export async function generateMetadata({
     return { title: "Região não encontrada", robots: { index: false, follow: false } };
   }
 
+  const regionImage = storageUrl(STORAGE_BUCKETS.region, region.image_path);
   const title = region.seo_title || `Imóveis em ${region.name}, ${region.city}`;
   const description =
     region.seo_description ||
@@ -44,7 +46,14 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: `/regioes/${region.slug}` },
-    openGraph: { title, description, url: `${SITE.url}/regioes/${region.slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `${SITE.url}/regioes/${region.slug}`,
+      images: regionImage ? [{ url: regionImage, alt: region.name }] : [DEFAULT_OG_IMAGE],
+    },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

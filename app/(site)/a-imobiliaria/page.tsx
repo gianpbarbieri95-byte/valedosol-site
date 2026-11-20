@@ -13,9 +13,9 @@ import { HistorySection } from "@/components/home/history-section";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "A imobiliária",
+  title: "Imobiliária em Arujá desde 1975: nossa história",
   description:
-    "Fundada em 1975 em Arujá por Leonardo Barbieri, a Vale do Sol é conduzida hoje pela segunda geração da família Barbieri.",
+    "Fundada em 1975 em Arujá por Leonardo Barbieri, a Vale do Sol Imóveis é conduzida hoje pela segunda geração da família Barbieri. CRECI J-14.578.",
   alternates: { canonical: "/a-imobiliaria" },
 };
 

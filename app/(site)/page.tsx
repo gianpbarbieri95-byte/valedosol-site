@@ -65,7 +65,8 @@ const FILM = {
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  // O título padrão (layout) já é "Vale do Sol Imóveis — Imóveis em Arujá desde 1975".
+  // Título com a busca principal na frente ("imobiliária em Arujá").
+  title: { absolute: "Imobiliária em Arujá desde 1975 | Vale do Sol Imóveis" },
   description:
     "Imobiliária em Arujá desde 1975. Casas, terrenos, imóveis de alto padrão em condomínio, chácaras e imóveis comerciais à venda em Arujá e região. CRECI J-14.578 e CRECI 38.124-F.",
   alternates: { canonical: "/" },
@@ -216,39 +217,25 @@ export default async function HomePage() {
   // O título vem do painel; cada frase ganha a sua linha.
   const headline = hero.title.split(/(?<=[.!?])\s+/).filter(Boolean);
 
-  // Dados estruturados da imobiliária: só o que está cadastrado no painel.
-  const organizationLd = {
+  // Os dados estruturados da imobiliária e do site saem do layout público
+  // (lib/seo.ts → siteGraph); aqui só a lista da vitrine.
+  const showcaseLd = {
     "@context": "https://schema.org",
-    "@type": "RealEstateAgent",
-    "@id": `${SITE.url}/#imobiliaria`,
-    name: SITE.name,
-    legalName: SITE.legalName,
-    url: SITE.url,
-    logo: `${SITE.url}/brand/logo.png`,
-    image: `${SITE.url}/video/institucional-v2-hero-poster.jpg`,
-    description: `Imobiliária em ${PRIMARY_CITY} desde ${SITE.foundedYear}: casas, terrenos, condomínios, chácaras e imóveis comerciais em Arujá e região.`,
-    foundingDate: String(SITE.foundedYear),
-    founder: { "@type": "Person", name: "Leonardo Barbieri" },
-    telephone: contact.phone || undefined,
-    email: contact.email || undefined,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: contact.address,
-      addressLocality: contact.city,
-      addressRegion: contact.state,
-      postalCode: contact.zip,
-      addressCountry: "BR",
-    },
-    areaServed: { "@type": "City", name: PRIMARY_CITY },
-    identifier: `CRECI ${SITE.creciCompany}`,
-    sameAs: [social.facebook, social.instagram].filter(Boolean),
+    "@type": "ItemList",
+    name: "Imóveis em destaque em Arujá",
+    itemListElement: showcase.map((property, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE.url}/imoveis/${property.slug}`,
+      name: property.title,
+    })),
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(showcaseLd) }}
       />
 
       {/* ------------------------------------------------------------ Abertura */}
@@ -285,17 +272,16 @@ export default async function HomePage() {
           <div className="container-site relative z-10 pb-10 pt-8 lg:mt-auto lg:pb-0 lg:pt-0">
             <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-12 lg:pb-16">
               <div className="lg:col-span-8">
-                <p
-                  className="rise-in label-caps text-[0.6875rem] text-gold-bright"
-                  style={{ animationDelay: "40ms" }}
-                >
-                  {PRIMARY_CITY} <span aria-hidden className="mx-2 text-white/40">·</span> Desde{" "}
-                  {SITE.foundedYear}
-                </p>
                 <h1
-                  className="rise-in mt-5 max-w-[22ch] text-balance font-display text-[clamp(2.1rem,1.2rem+2.4vw,3.6rem)] leading-[1.02] tracking-[-0.02em] text-white"
+                  className="rise-in max-w-[22ch] text-balance font-display text-[clamp(2.1rem,1.2rem+2.4vw,3.6rem)] leading-[1.02] tracking-[-0.02em] text-white"
                   style={{ animationDelay: "90ms" }}
                 >
+                  {/* A palavra-chave do negócio fica dentro do H1, na mesma linha
+                      de antes (era um parágrafo solto acima do título). */}
+                  <span className="label-caps mb-5 block font-sans text-[0.6875rem] font-normal not-italic leading-normal tracking-[0.18em] text-gold-bright">
+                    Imobiliária em {PRIMARY_CITY}{" "}
+                    <span aria-hidden className="mx-2 text-white/40">·</span> Desde {SITE.foundedYear}
+                  </span>
                   {headline.map((line, index) => (
                     <span
                       key={line}
