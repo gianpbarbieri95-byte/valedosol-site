@@ -12,7 +12,7 @@ import { WhatsAppIcon } from "@/components/ui/icons";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Venda seu imóvel",
+  title: "Venda ou alugue seu imóvel em Arujá",
   description:
     "Quer vender ou alugar seu imóvel em Arujá? Envie os dados para a Vale do Sol Imóveis, imobiliária que atua na cidade desde 1975.",
   alternates: { canonical: "/venda-seu-imovel" },

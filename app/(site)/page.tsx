@@ -68,7 +68,7 @@ export const metadata: Metadata = {
   // Título com a busca principal na frente ("imobiliária em Arujá").
   title: { absolute: "Imobiliária em Arujá desde 1975 | Vale do Sol Imóveis" },
   description:
-    "Imobiliária em Arujá desde 1975. Casas, terrenos, imóveis de alto padrão em condomínio, chácaras e imóveis comerciais à venda em Arujá e região. CRECI J-14.578 e CRECI 38.124-F.",
+    "Imobiliária em Arujá desde 1975: casas, terrenos, chácaras, imóveis em condomínio e comerciais à venda e para alugar. Atendimento no Centro e pelo WhatsApp.",
   alternates: { canonical: "/" },
 };
 

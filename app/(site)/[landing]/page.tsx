@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { searchProperties } from "@/lib/queries/properties";
 import { getSettings } from "@/lib/queries/settings";
-import { whatsappUrl } from "@/lib/format";
+import { formatPrice, whatsappUrl } from "@/lib/format";
 import { PRIMARY_CITY, SITE } from "@/lib/site";
 import { DEFAULT_OG_IMAGE, LANDINGS, ORG_ID, faqJsonLd, getLanding } from "@/lib/seo";
 import { parseFilters, type SearchParams } from "@/lib/validations/filters";
@@ -42,7 +42,9 @@ async function load(slug: string, rawSearch: SearchParams) {
     page,
     pageSize: 12,
   });
-  return { landing, result };
+  // Faixa de preço do acervo inteiro desta página (são poucas dezenas de imóveis).
+  const all = (page ?? 1) > 1 ? null : await searchProperties({ ...landing.filters, city: PRIMARY_CITY, page: 1, pageSize: 200 });
+  return { landing, result, range: all ? priceRange(all.items) : null };
 }
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -77,7 +79,7 @@ export default async function LandingPage({ params, searchParams }: Props) {
   const data = await load(slug, await searchParams);
   if (!data) notFound();
 
-  const { landing, result } = data;
+  const { landing, result, range } = data;
   const { contact } = await getSettings();
   const whatsapp = whatsappUrl(
     contact.whatsapp,
@@ -131,6 +133,14 @@ export default async function LandingPage({ params, searchParams }: Props) {
               {paragraph}
             </p>
           ))}
+          {range ? (
+            <p className="mt-4 text-pretty text-[0.9375rem] leading-relaxed text-ink-soft">
+              Hoje a Vale do Sol tem {range.count} {range.count === 1 ? "imóvel" : "imóveis"} com preço publicado
+              nesta lista, de {formatPrice(range.min, { purpose: range.purpose })} a{" "}
+              {formatPrice(range.max, { purpose: range.purpose })}
+              .
+            </p>
+          ) : null}
           <p className="mt-4 text-sm text-ink-soft tabular">
             {result.total === 0
               ? "Nenhum imóvel publicado agora"
@@ -230,4 +240,13 @@ export default async function LandingPage({ params, searchParams }: Props) {
       </div>
     </>
   );
+}
+
+function priceRange(items: { price: number | null; price_on_request?: boolean | null; purpose: "venda" | "locacao" }[]) {
+  const purpose = items.some((item) => item.purpose === "venda") ? "venda" : "locacao";
+  const prices = items
+    .filter((item) => item.purpose === purpose && !item.price_on_request && Number(item.price) > 0)
+    .map((item) => Number(item.price));
+  if (prices.length < 2) return null;
+  return { purpose, count: prices.length, min: Math.min(...prices), max: Math.max(...prices) } as const;
 }

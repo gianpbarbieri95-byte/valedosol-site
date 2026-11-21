@@ -12,9 +12,9 @@ import { RegionCard } from "@/components/property/region-card";
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-  title: "Regiões de Arujá",
+  title: "Bairros e condomínios de Arujá com imóveis à venda",
   description:
-    "Bairros, condomínios e regiões de Arujá e cidades vizinhas onde a Vale do Sol Imóveis atua.",
+    "Imóveis à venda e para alugar por bairro e condomínio de Arujá: Centro, Arujá Hills, Arujazinho, Nova Arujá, Jordanópolis e região. Vale do Sol Imóveis.",
   alternates: { canonical: "/regioes" },
 };
 

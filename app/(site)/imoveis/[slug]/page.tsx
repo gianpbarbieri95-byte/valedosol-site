@@ -57,16 +57,44 @@ export async function generateMetadata({
   }
 
   const location = formatLocation(property);
-  const title = property.seo_title || `${property.title} — ${location}`;
+  // Sem repetir o bairro quando o título já o traz ("... Arujá Hills I e II — Arujá Hills I e II, Arujá").
+  const plain = (value: string) =>
+    value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const has = (part?: string | null) =>
+    !!part && plain(property.title).includes(plain(part).replace(/^(condominio|bairro)\s+/, ""));
+  const titleLocation = has(property.city)
+    ? null
+    : has(property.neighborhood)
+      ? property.city
+      : location;
+  const title = property.seo_title || [property.title, titleLocation].filter(Boolean).join(" — ");
+
+  // Fatos primeiro (o que a busca procura), depois o texto do anúncio.
+  const facts = [
+    `${property.property_type?.name ?? "Imóvel"} ${property.purpose === "locacao" ? "para alugar" : "à venda"}${
+      location ? ` em ${location}` : ""
+    }`,
+    property.is_commercial
+      ? property.rooms
+        ? `${property.rooms} ${property.rooms === 1 ? "sala" : "salas"}`
+        : null
+      : property.bedrooms
+        ? `${property.bedrooms} ${property.bedrooms === 1 ? "dormitório" : "dormitórios"}`
+        : null,
+    property.area_built || property.area_total
+      ? formatArea(property.area_built || property.area_total)
+      : null,
+    formatPrice(property.price, { purpose: property.purpose, onRequest: property.price_on_request }),
+  ]
+    .filter(Boolean)
+    .join(", ");
   const description =
     property.seo_description ||
     truncate(
-      descriptionPlainText(property.description) ||
-        `${property.property_type?.name ?? "Imóvel"} ${location ? `em ${location}` : ""} · ${formatPrice(
-          property.price,
-          { purpose: property.purpose, onRequest: property.price_on_request }
-        )} · Código ${property.code}.`,
-      160
+      [`${facts}.`, descriptionPlainText(property.description), `Código ${property.code}. Vale do Sol Imóveis, Arujá.`]
+        .filter(Boolean)
+        .join(" "),
+      158
     );
 
   // A foto marcada como capa; sem marcação, a primeira.
@@ -170,8 +198,8 @@ ${SITE.url}/imoveis/${property.slug}`
     { label: "Cidade", value: property.city },
     { label: "Bairro", value: property.neighborhood },
     { label: "Condomínio", value: property.condo_name },
-    { label: "Condomínio (mensal)", value: property.condo_fee ? formatPrice(property.condo_fee) : null },
-    { label: "IPTU", value: property.iptu ? formatPrice(property.iptu) : null },
+    { label: "Condomínio (mensal)", value: Number(property.condo_fee) >= 1 ? formatPrice(property.condo_fee) : null },
+    { label: "IPTU", value: Number(property.iptu) >= 1 ? formatPrice(property.iptu) : null },
     { label: "Mobiliado", value: property.is_furnished ? "Sim" : null },
   ].filter((item) => item.value);
 

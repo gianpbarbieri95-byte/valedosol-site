@@ -49,6 +49,21 @@ const nextConfig: NextConfig = {
         has: [{ type: "host", value: "admin\\..+" }],
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+      // Busca e links curtos do WordPress (?s=, ?p=, ?page_id=) caíam na home
+      // com 200: era por aí que o spam do site antigo entrava no índice.
+      ...["s", "p", "page_id"].map((key) => ({
+        source: "/",
+        has: [{ type: "query" as const, key }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+      })),
     ];
   },
 
@@ -60,8 +75,16 @@ const nextConfig: NextConfig = {
       { source: "/envie-seu-imovel", destination: "/venda-seu-imovel", permanent: true },
       { source: "/local/:city", destination: "/regioes/:city", permanent: true },
       { source: "/local/:city/:hood", destination: "/regioes/:hood", permanent: true },
-      { source: "/tipo-de-imovel/:slug", destination: "/imoveis?tipo=:slug", permanent: true },
-      { source: "/situacao/:slug", destination: "/imoveis?status=:slug", permanent: true },
+      // Categorias do WordPress → páginas indexáveis (as listagens com filtro são noindex).
+      { source: "/tipo-de-imovel/:slug(casa.*|sobrado.*|residencia.*)", destination: "/casas-a-venda-em-aruja", permanent: true },
+      { source: "/tipo-de-imovel/:slug(terreno.*|lote.*|area.*)", destination: "/terrenos-a-venda-em-aruja", permanent: true },
+      { source: "/tipo-de-imovel/:slug(chacara.*|sitio.*)", destination: "/chacaras-a-venda-em-aruja", permanent: true },
+      { source: "/tipo-de-imovel/:slug(comercial.*|sala.*|galpao.*|predio.*|loja.*)", destination: "/imoveis-comerciais-em-aruja", permanent: true },
+      { source: "/tipo-de-imovel/:slug", destination: "/imoveis", permanent: true },
+      { source: "/situacao/:slug(alug.*|loca.*)", destination: "/imoveis-para-alugar-em-aruja", permanent: true },
+      { source: "/situacao/:slug", destination: "/imoveis", permanent: true },
+      // Página de simulação do WordPress: o simulador agora fica em cada imóvel.
+      { source: "/simulacao", destination: "/imoveis", permanent: true },
       { source: "/corretores", destination: "/a-imobiliaria", permanent: true },
 
       // O e-mail continua na Hostinger (cPanel); o domínio raiz está na Vercel.
