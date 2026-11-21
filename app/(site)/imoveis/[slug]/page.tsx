@@ -292,7 +292,7 @@ ${SITE.url}/imoveis/${property.slug}`
               href={shareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="link-line mt-6 inline-flex items-center gap-2 text-[0.6875rem] text-ink-soft hover:text-ink"
+              className="link-line mt-6 inline-flex items-center gap-2 text-sm text-ink-soft hover:text-ink"
             >
               <WhatsAppIcon className="size-4" />
               Compartilhar no WhatsApp

@@ -6,7 +6,7 @@ type Variant = "primary" | "outline" | "ghost" | "gold" | "brass" | "danger" | "
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "group/btn inline-flex items-center justify-center gap-2.5 font-medium uppercase tracking-[0.12em] " +
+  "group/btn inline-flex items-center justify-center gap-2.5 font-semibold " +
   "transition-[background-color,color,border-color,box-shadow,transform] duration-300 " +
   "ease-[var(--ease-premium)] active:translate-y-px " +
   "disabled:pointer-events-none disabled:opacity-50 rounded-[var(--radius-sm)] " +
@@ -30,9 +30,9 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-10 px-4 text-[0.6875rem]",
-  md: "h-12 px-6 text-[0.71875rem]",
-  lg: "h-14 px-8 text-[0.75rem]",
+  sm: "h-10 px-4 text-[0.875rem]",
+  md: "h-12 px-6 text-[0.9375rem]",
+  lg: "h-14 px-8 text-base",
 };
 
 interface CommonProps {

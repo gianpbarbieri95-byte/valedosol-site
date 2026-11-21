@@ -26,18 +26,16 @@ export function SellSection({ years, whatsapp }: { years: number; whatsapp: stri
     <section aria-labelledby="vender" className="bg-canvas section">
       <div className="container-site">
         <div className="relative overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface shadow-card">
-          {/* Traço dourado no topo: o painel se lê como um "cartão" da imobiliária */}
-          <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gold" />
 
           <div className="grid lg:grid-cols-12">
             <Reveal className="p-7 sm:p-10 lg:col-span-7 lg:p-14">
               <p className="eyebrow">Para proprietários</p>
-              <h2 id="vender" className="mt-5 text-balance text-display">
-                Seu imóvel nas mãos de quem <em className="text-primary">conhece Arujá</em>.
+              <h2 id="vender" className="mt-3 text-balance text-display">
+                Quer vender ou alugar seu imóvel em Arujá?
               </h2>
               <p className="mt-5 max-w-lg text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
-                Quer vender ou alugar? Conte o que você tem. A Vale do Sol cuida do anúncio e do
-                atendimento a quem procura imóvel na cidade.
+                Conte o que você tem. A Vale do Sol cuida do anúncio e do atendimento a quem
+                procura imóvel na cidade.
               </p>
 
               <dl className="mt-8 grid gap-px overflow-hidden rounded-[var(--radius-sm)] border border-line bg-line sm:grid-cols-3">

@@ -21,13 +21,12 @@ export function CTASection({ whatsapp, image }: { whatsapp: string | null; image
       ) : null}
       <div className="container-site py-20 md:py-28">
         <Reveal className="mx-auto max-w-3xl text-center">
-          <p className="label-caps text-[0.6875rem] text-gold-bright">Atendimento personalizado</p>
-          <h2 id="cta-final" className="mt-6 text-balance text-hero text-white">
+          <h2 id="cta-final" className=" text-balance text-hero text-white">
             Está procurando um imóvel específico?
           </h2>
           <p className="mx-auto mt-8 max-w-xl text-pretty text-lg leading-relaxed text-white/80">
-            Conte o que você procura. Nossa equipe pode apresentar possibilidades disponíveis em Arujá
-            e região.
+            Diga o tipo, a região e o valor que você procura. A resposta vem pelo WhatsApp,
+            com o que a Vale do Sol tem no acervo.
           </p>
 
           <div className="mt-12 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">

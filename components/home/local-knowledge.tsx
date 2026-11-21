@@ -45,7 +45,6 @@ export function LocalKnowledge({
                   onFocus={() => place.image && setActive(place.slug)}
                   className="group flex items-center gap-5 py-5 md:py-6"
                 >
-                  <span className="hidden w-6 text-xs text-muted tabular sm:block">{String(index + 1).padStart(2, "0")}</span>
                   {/* No celular não há hover para conduzir a janela de foto:
                       cada linha leva a sua miniatura. */}
                   <span className="relative size-16 shrink-0 overflow-hidden rounded-[var(--radius-xs)] bg-surface-alt lg:hidden">
@@ -104,7 +103,7 @@ export function LocalKnowledge({
             <p className="font-display text-[2rem] leading-tight">
               {places.find((place) => place.slug === active)?.name}
             </p>
-            <Link href={`/regioes/${active}`} className="link-line shrink-0 text-[0.625rem] text-white">
+            <Link href={`/regioes/${active}`} className="link-line shrink-0 text-sm text-white">
               Explorar região
               <ArrowRightIcon className="size-3.5" />
             </Link>

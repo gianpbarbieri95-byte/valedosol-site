@@ -83,7 +83,7 @@ export function Footer({
             Arujá e região.
           </p>
           {/* Um registro por linha: juntos com "Desde 1975" quebravam no meio. */}
-          <p className="mt-5 space-y-1 text-xs uppercase tracking-[0.14em] text-ink-soft">
+          <p className="mt-5 space-y-1 text-[0.8125rem] text-ink-soft">
             <span className="block">CRECI {SITE.creciCompany}</span>
             <span className="block">Corretor CRECI {SITE.creciBroker}</span>
             <span className="block">Desde {SITE.foundedYear}</span>
@@ -96,7 +96,7 @@ export function Footer({
             aria-label={column.title}
             className={column.title === "Regiões" ? "md:col-span-3 lg:col-span-2" : "md:col-span-2"}
           >
-            <h2 className="mb-5 text-[0.6875rem] font-sans font-medium uppercase tracking-[0.16em] text-ink">
+            <h2 className="mb-5 text-sm font-sans font-semibold text-ink">
               {column.title}
             </h2>
             <ul className="space-y-2.5">
@@ -115,7 +115,7 @@ export function Footer({
         ))}
 
         <div className="col-span-2 md:col-span-5 lg:col-span-3">
-          <h2 className="mb-5 text-[0.6875rem] font-sans font-medium uppercase tracking-[0.16em] text-ink">
+          <h2 className="mb-5 text-sm font-sans font-semibold text-ink">
             Contato
           </h2>
           <ul className="space-y-3 text-sm text-ink-soft">
@@ -169,7 +169,7 @@ export function Footer({
 
           {social.facebook || social.instagram ? (
             <div className="mt-8">
-              <h2 className="mb-3 text-[0.6875rem] font-sans font-medium uppercase tracking-[0.16em] text-ink">
+              <h2 className="mb-3 text-sm font-sans font-semibold text-ink">
                 Redes sociais
               </h2>
               <div className="flex gap-4 text-sm">

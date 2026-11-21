@@ -33,10 +33,8 @@ export function AboutSection({ closing }: { closing: string | null }) {
     <section aria-labelledby="familia" className="container-site section-xl">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <Reveal className="lg:col-span-7">
-          <p className="eyebrow">A família Barbieri</p>
-          <h2 id="familia" className="mt-6 text-balance text-display">
-            Uma empresa que{" "}
-            <span className="italic text-primary">atravessou gerações.</span>
+          <h2 id="familia" className="text-balance text-display">
+            A família Barbieri, em Arujá desde 1975
           </h2>
         </Reveal>
 

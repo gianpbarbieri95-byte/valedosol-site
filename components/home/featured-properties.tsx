@@ -28,9 +28,8 @@ export function FeaturedProperties({
       <Reveal>
         <SectionHeading
           id="selecionados"
-          eyebrow="Imóveis em destaque"
-          title="Propriedades que merecem ser conhecidas."
-          description="Uma seleção do acervo da Vale do Sol em Arujá e região."
+          title="Imóveis em destaque"
+          description="Casas, terrenos e chácaras à venda e para alugar em Arujá e região."
           action={
             <Link href="/imoveis" className="link-line text-ink">
               Ver todos os imóveis

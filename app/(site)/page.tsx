@@ -278,7 +278,7 @@ export default async function HomePage() {
                 >
                   {/* A palavra-chave do negócio fica dentro do H1, na mesma linha
                       de antes (era um parágrafo solto acima do título). */}
-                  <span className="label-caps mb-5 block font-sans text-[0.6875rem] font-normal not-italic leading-normal tracking-[0.18em] text-gold-bright">
+                  <span className="mb-4 block font-sans text-[0.9375rem] font-semibold not-italic leading-normal tracking-normal text-gold-bright">
                     Imobiliária em {PRIMARY_CITY}{" "}
                     <span aria-hidden className="mx-2 text-white/40">·</span> Desde {SITE.foundedYear}
                   </span>
@@ -286,7 +286,7 @@ export default async function HomePage() {
                     <span
                       key={line}
                       className={
-                        index > 0 ? "block italic text-white/80" : "block"
+                        index > 0 ? "block text-white/80" : "block"
                       }
                     >
                       {line}
@@ -385,27 +385,23 @@ export default async function HomePage() {
           <div className="container-site">
             <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
               <Reveal className="lg:col-span-6">
-                <p className="eyebrow">Regiões de Arujá</p>
-                <h2 id="regiao" className="mt-6 text-balance text-hero">
-                  Conhecemos Arujá.
+                <h2 id="regiao" className="text-balance text-display">
+                  Bairros e condomínios de Arujá
                 </h2>
               </Reveal>
               <Reveal
                 className="self-end lg:col-span-5 lg:col-start-8"
                 delay={120}
               >
-                <p className="text-pretty font-display text-[clamp(1.5rem,1.2rem+1vw,2.1rem)] italic leading-snug text-primary">
-                  Conhecemos a região porque fazemos parte dela.
-                </p>
-                <p className="mt-4 text-pretty leading-relaxed text-ink-soft">
-                  Os bairros e condomínios onde a Vale do Sol tem imóveis hoje.
+                <p className="text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
+                  Onde a Vale do Sol tem imóveis anunciados hoje. Escolha um para ver a lista.
                 </p>
               </Reveal>
             </div>
             <Reveal className="mt-10 md:mt-14" delay={80}>
               <LocalKnowledge
                 places={places}
-                office={`Escritório no coração de Arujá: ${office}. ${SITE.creci}.`}
+                office={`Escritório: ${office}. ${SITE.creci}.`}
               />
             </Reveal>
           </div>

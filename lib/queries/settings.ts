@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS: SiteSettingsMap = {
     instagram: "",
   },
   hero: {
-    title: "Encontre o lugar para a sua próxima história.",
+    title: "Casas, terrenos e chácaras em Arujá.",
     subtitle: "Imóveis selecionados em Arujá e região.",
     image_path: "",
   },

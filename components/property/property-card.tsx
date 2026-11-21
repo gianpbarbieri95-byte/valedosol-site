@@ -276,7 +276,7 @@ export function PropertyCard({
             <span
               aria-hidden
               className={cn(
-                "link-line shrink-0 text-[0.625rem] text-ink",
+                "link-line shrink-0 text-sm text-ink",
                 !showcase &&
                   "transition-[opacity,transform] duration-500 ease-[var(--ease-premium)] [@media(hover:hover)]:-translate-x-1 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-x-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100"
               )}

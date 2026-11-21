@@ -26,9 +26,8 @@ export function SearchPaths({ paths }: { paths: SearchPath[] }) {
       <Reveal>
         <SectionHeading
           id="caminhos"
-          eyebrow="Por estilo de vida"
-          title="Encontre pelo seu estilo de vida."
-          description="Morar, investir ou ter mais espaço: três caminhos pelo acervo de hoje."
+          title="Morar, investir ou ter mais espaço"
+          description="O acervo de hoje separado pelo que você procura."
         />
       </Reveal>
 
@@ -60,8 +59,8 @@ export function SearchPaths({ paths }: { paths: SearchPath[] }) {
                 />
 
                 <div className="relative">
-                  <p className="label-caps text-[0.625rem] text-white/60 tabular">
-                    {String(index + 1).padStart(2, "0")} · {path.count}{" "}
+                  <p className="text-sm font-medium text-white/75 tabular">
+                    {path.count}{" "}
                     {path.count === 1 ? "imóvel" : "imóveis"}
                   </p>
                   <h3 className="mt-3 font-display text-[2.75rem] leading-none text-white md:text-[3.25rem]">
@@ -70,8 +69,8 @@ export function SearchPaths({ paths }: { paths: SearchPath[] }) {
                   <p className="mt-3 max-w-[18rem] text-pretty text-[0.9375rem] leading-relaxed text-white/80">
                     {definition.description}
                   </p>
-                  <span className="link-line mt-6 text-[0.625rem] text-white">
-                    Explorar
+                  <span className="link-line mt-6 text-sm text-white">
+                    Ver imóveis
                     <ArrowRightIcon className="size-3.5" />
                   </span>
                 </div>

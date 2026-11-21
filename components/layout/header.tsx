@@ -280,7 +280,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
                   href={whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-14 items-center justify-center gap-2.5 rounded-[var(--radius-sm)] bg-gold text-[0.75rem] font-medium uppercase tracking-[0.12em] text-white"
+                  className="inline-flex h-14 items-center justify-center gap-2.5 rounded-[var(--radius-sm)] bg-gold text-base font-semibold text-white"
                 >
                   <WhatsAppIcon />
                   Falar pelo WhatsApp
@@ -289,7 +289,7 @@ export function Header({ contact }: { contact: ContactSettings }) {
               <Link
                 href="/favoritos"
                 onClick={() => setMenuOpen(false)}
-                className="inline-flex h-14 items-center justify-center gap-2.5 rounded-[var(--radius-sm)] border border-white/25 text-[0.75rem] font-medium uppercase tracking-[0.12em]"
+                className="inline-flex h-14 items-center justify-center gap-2.5 rounded-[var(--radius-sm)] border border-white/25 text-base font-semibold"
               >
                 <HeartIcon className="size-4" />
                 Meus favoritos

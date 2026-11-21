@@ -59,13 +59,9 @@ export function HistorySection() {
         {/* O título acompanha a leitura no desktop enquanto a cronologia passa */}
         <div className="lg:col-span-5">
           <Reveal className="lg:sticky lg:top-36">
-            <p className="eyebrow">Nossa história</p>
-            <h2 id="historia" className="mt-6 text-hero">
-              Desde {SITE.foundedYear}.
+            <h2 id="historia" className="text-balance text-display">
+              Nossa história, de {SITE.foundedYear} até hoje
             </h2>
-            <p className="mt-6 max-w-md font-display text-[clamp(1.5rem,1.2rem+1vw,2.1rem)] italic leading-snug text-primary">
-              Uma história construída imóvel por imóvel.
-            </p>
             <p className="mt-6 max-w-sm text-pretty leading-relaxed text-ink-soft">
               {YEARS} anos acompanhando Arujá — da fundação por Leonardo Barbieri à segunda geração
               da família.
